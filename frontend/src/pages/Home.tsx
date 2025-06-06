@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
+import authService from '../services/auth.service';
 
 const Home = () => {
   const { isLoggedIn } = useAuth();
@@ -51,7 +52,7 @@ const Home = () => {
                   <Link to="/">
                     <img className="h-10 w-auto" src="/src/assets/favicon.svg" alt="Orquestra" />
                   </Link>
-                  <Link to="/" className="ml-3 text-2xl font-bold text-white">
+                  <Link to="/" className="ml-3 text-2xl font-bold text-white hover:text-yellow-500">
                     Orquestra
                   </Link>
                 </div>
@@ -72,7 +73,7 @@ const Home = () => {
                       variant="outline" 
                       size="sm"
                       href="/login"
-                      className="border-white text-white hover:bg-primary-dark hover:bg-opacity-50"
+                      className="border-white text-black hover:bg-primary-dark hover:bg-opacity-50 hover:text-white"
                     >
                       Entrar
                     </Button>
@@ -80,7 +81,7 @@ const Home = () => {
                       variant="primary" 
                       size="sm"
                       href="/register"
-                      className="bg-primary-light text-primary-darker hover:bg-primary-lighter"
+                      className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 hover:text-white hover:border-white"
                     >
                       Cadastrar
                     </Button>
@@ -143,10 +144,9 @@ const Home = () => {
                     Notificações
                   </Link>
                   <button 
-                    className="block text-white hover:text-primary-lighter transition-colors w-full text-left"
+                    className="block text-white hover:text-primary-lighter transition-colors w-full text-center hover:border-white bg-primary-white hover:text-white"
                     onClick={() => {
-                      // Adicionar lógica de logout aqui
-                      setIsSidebarOpen(false);
+                      authService.logout();
                     }}
                   >
                     Sair
@@ -163,7 +163,7 @@ const Home = () => {
                   </Link>
                   <Link 
                     to="/register" 
-                    className="block text-white hover:text-primary-lighter transition-colors"
+                    className="block text-white hover:text-primary-lighter hover:text-white transition-colors"
                     onClick={() => setIsSidebarOpen(false)}
                   >
                     Cadastrar
@@ -186,6 +186,7 @@ const Home = () => {
             <Button 
               size="lg"
               onClick={handleGetStarted}
+              className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 hover:text-white hover:border-white"
               leftIcon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
@@ -200,6 +201,7 @@ const Home = () => {
                 variant="outline" 
                 size="lg" 
                 href="/login"
+                className="border-white text-black hover:bg-primary-dark hover:bg-opacity-50 hover:text-white"
               >
                 Já tenho uma conta
               </Button>

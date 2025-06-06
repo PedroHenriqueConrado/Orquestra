@@ -76,6 +76,25 @@ class AuthController {
     }
   }
 
+  async getProfile(req, res) {
+    try {
+      const userId = req.user.id;
+      const user = await authService.getProfile(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+      }
+
+      // Remove informações sensíveis
+      const { password_hash, ...userProfile } = user;
+      
+      res.json(userProfile);
+    } catch (error) {
+      console.error('Erro ao obter perfil:', error);
+      res.status(500).json({ message: 'Erro ao obter perfil' });
+    }
+  }
+
   async updateProfile(req, res) {
     try {
       const { error } = updateProfileSchema.validate(req.body);

@@ -13,6 +13,7 @@ model User {
   email            String            @unique(map: "email") @db.VarChar(150)
   password_hash    String            @db.VarChar(255)
   role             Role              @default(developer)
+  profileImage     String?           @db.VarChar(255)
   created_at       DateTime          @default(now()) @db.DateTime(0)
   updated_at       DateTime          @default(now()) @updatedAt @db.DateTime(0)
   chatMessages     ChatMessage[]

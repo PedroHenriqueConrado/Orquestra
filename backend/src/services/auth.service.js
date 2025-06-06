@@ -74,19 +74,40 @@ class AuthService {
     };
   }
 
+  async getProfile(userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        profileImage: true,
+        created_at: true,
+        updated_at: true
+      }
+    });
+
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    return user;
+  }
+
   async updateProfile(userId, userData) {
     const user = await prisma.user.update({
       where: { id: userId },
       data: {
         name: userData.name,
-        profile_image: userData.profileImage
+        profileImage: userData.profileImage
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
-        profile_image: true,
+        profileImage: true,
         created_at: true
       }
     });
