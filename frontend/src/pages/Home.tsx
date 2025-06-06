@@ -62,7 +62,7 @@ const Home = () => {
                     variant="outline" 
                     size="sm"
                     href="/dashboard"
-                    className="border-white text-white hover:bg-primary-dark hover:bg-opacity-50"
+                    className="border-white text-black hover:bg-primary-dark hover:bg-opacity-50 hover:text-white"
                   >
                     Acessar Dashboard
                   </Button>
