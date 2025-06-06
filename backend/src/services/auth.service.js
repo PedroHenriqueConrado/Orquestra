@@ -4,7 +4,8 @@ const prisma = require('../prismaClient');
 
 // Configurações padrão para JWT se não estiverem definidas nas variáveis de ambiente
 const JWT_SECRET = process.env.JWT_SECRET || 'orquestra_desenvolvimento_seguro_2024';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+// Aumentando o tempo de expiração do token para 30 dias (720 horas)
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30d';
 
 class AuthService {
   async register(userData) {

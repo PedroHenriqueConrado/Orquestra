@@ -6,6 +6,10 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "debug": "node --inspect src/index.js",
+    "debug:break": "node --inspect-brk src/index.js",
+    "dev:debug": "nodemon --inspect src/index.js",
+    "dev:debug-env": "nodemon --inspect src/index.js --env-file=debug.env",
     "test": "jest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
@@ -28,6 +32,7 @@
     "multer": "^2.0.0",
     "nodemailer": "^7.0.3",
     "sharp": "^0.34.2",
+    "uuid": "^11.1.0",
     "winston": "^3.11.0",
     "zod": "^3.22.4"
   },

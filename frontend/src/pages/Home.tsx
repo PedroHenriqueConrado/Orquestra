@@ -405,35 +405,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="bg-primary">
-        <div className="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            <span className="block">Pronto para elevar seus projetos?</span>
-          </h2>
-          <p className="mt-4 text-lg leading-6 text-primary-lighter">
-            Junte-se a milhares de empresas que já transformaram sua gestão de projetos com o Orquestra.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <Button 
-              size="lg"
-              variant="success"
-              href="/register"
-            >
-              Comece sua avaliação gratuita
-            </Button>
-            <Button 
-              size="lg"
-              variant="outline"
-              href="/login"
-              className="bg-primary-dark border-white text-white hover:bg-primary"
-            >
-              Fazer login
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Footer */}
       <footer className="bg-gradient-to-r from-gray-900 to-primary-dark text-white border-t-4 border-primary">
         <div className="max-w-7xl mx-auto pt-12 pb-8 px-4 sm:px-6 lg:px-8">

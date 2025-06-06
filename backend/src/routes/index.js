@@ -5,6 +5,7 @@ const projectRoutes = require('./project.routes');
 const taskRoutes = require('./task.routes');
 const documentRoutes = require('./document.routes');
 const chatRoutes = require('./chat.routes');
+const directChatRoutes = require('./direct-chat.routes');
 const notificationRoutes = require('./notification.routes');
 const dashboardRoutes = require('./dashboard.routes');
 
@@ -34,6 +35,9 @@ router.use('/projects/:projectId/documents', documentRoutes);
 
 // Rotas de chat (aninhadas dentro de projetos)
 router.use('/projects/:projectId/chat', chatRoutes);
+
+// Rotas de chat direto entre usuários
+router.use('/direct-messages', directChatRoutes);
 
 // Rotas de notificações
 router.use('/notifications', notificationRoutes);

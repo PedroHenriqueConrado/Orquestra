@@ -10,10 +10,12 @@ router.use(authenticate);
 // Rotas básicas
 router.post('/', notificationController.create);
 router.get('/', notificationController.getUserNotifications);
+router.get('/unread/count', notificationController.getUnreadCount);
 router.get('/:notificationId', notificationController.getNotification);
 
 // Rotas que requerem ser dono da notificação
 router.put('/:notificationId/read', isNotificationOwner, notificationController.markAsRead);
+router.put('/read-all', notificationController.markAllAsRead);
 router.delete('/:notificationId', isNotificationOwner, notificationController.delete);
 
 module.exports = router; 

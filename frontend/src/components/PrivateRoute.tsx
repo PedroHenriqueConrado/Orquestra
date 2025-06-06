@@ -1,12 +1,14 @@
 import React from 'react';
+import type { ReactNode } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface PrivateRouteProps {
   redirectTo?: string;
+  children?: ReactNode;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ redirectTo = '/login' }) => {
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ redirectTo = '/login', children }) => {
   const { isLoggedIn, loading } = useAuth();
 
   // Se estiver carregando, mostra um indicador de carregamento
@@ -24,7 +26,8 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ redirectTo = '/login' }) =>
   }
 
   // Renderiza o conteúdo protegido
-  return <Outlet />;
+  // Se children for fornecido, renderiza-o, caso contrário, usa o Outlet
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default PrivateRoute; 

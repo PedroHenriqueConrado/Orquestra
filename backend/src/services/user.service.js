@@ -31,6 +31,20 @@ class UserService {
     return user;
   }
 
+  // Método para buscar usuário por ID sem lançar exceção
+  async getUserById(id) {
+    return await prisma.user.findUnique({
+      where: { id: Number(id) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        created_at: true
+      }
+    });
+  }
+
   async update(id, userData, currentUser) {
     // Verifica se o usuário existe
     const user = await prisma.user.findUnique({

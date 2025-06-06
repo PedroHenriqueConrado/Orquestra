@@ -1,62 +1,110 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const taskHistoryService = require('./task-history.service');
+const logger = require('../utils/logger');
+const notificationService = require('./notification.service');
 
 class TaskService {
     async createTask(data, projectId, creatorId) {
-        const task = await prisma.task.create({
-            data: {
-                title: data.title,
-                description: data.description,
-                status: data.status || 'pending',
-                priority: data.priority || 'medium',
-                due_date: data.dueDate ? new Date(data.dueDate) : null,
-                estimated_hours: data.estimatedHours,
-                project_id: Number(projectId),
-                assigned_to: data.assignedTo ? Number(data.assignedTo) : null,
-                parent_task_id: data.parentTaskId ? Number(data.parentTaskId) : null
-            },
-            include: {
-                assignedUser: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
-                    }
+        try {
+            logger.debug('TaskService.createTask: Iniciando criação', {
+                projectId,
+                creatorId,
+                data
+            });
+            
+            const task = await prisma.task.create({
+                data: {
+                    title: data.title,
+                    description: data.description,
+                    status: data.status || 'pending',
+                    priority: data.priority || 'medium',
+                    due_date: data.due_date ? new Date(data.due_date) : null,
+                    estimated_hours: data.estimated_hours,
+                    project_id: Number(projectId),
+                    assigned_to: data.assigned_to ? Number(data.assigned_to) : null,
+                    parent_task_id: data.parent_task_id ? Number(data.parent_task_id) : null
                 },
-                subTasks: {
-                    include: {
-                        assignedUser: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true
+                include: {
+                    assignedUser: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true
+                        }
+                    },
+                    subTasks: {
+                        include: {
+                            assignedUser: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true
+                                }
                             }
                         }
-                    }
-                },
-                parentTask: {
-                    select: {
-                        id: true,
-                        title: true
-                    }
-                },
-                tags: {
-                    include: {
-                        tag: true
+                    },
+                    parentTask: {
+                        select: {
+                            id: true,
+                            title: true
+                        }
+                    },
+                    tags: {
+                        include: {
+                            tag: true
+                        }
+                    },
+                    project: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
                     }
                 }
+            });
+
+            // Notificar o usuário se a tarefa for atribuída a alguém
+            if (task.assigned_to) {
+                try {
+                    await notificationService.notifyTaskAssignment(
+                        task.assigned_to,
+                        task.id,
+                        task.title,
+                        task.project.name
+                    );
+                    logger.debug('TaskService.createTask: Notificação de atribuição de tarefa criada', {
+                        taskId: task.id,
+                        assignedTo: task.assigned_to
+                    });
+                } catch (notifyError) {
+                    // Apenas logamos o erro, mas não interrompemos o fluxo principal
+                    logger.error('TaskService.createTask: Erro ao criar notificação', {
+                        error: notifyError.message,
+                        stack: notifyError.stack,
+                        taskId: task.id,
+                        assignedTo: task.assigned_to
+                    });
+                }
             }
-        });
 
-        // Record task creation in history
-        await taskHistoryService.recordChange(task.id, creatorId, {
-            status: { old: null, new: task.status },
-            priority: { old: null, new: task.priority },
-            assigned_to: { old: null, new: task.assigned_to }
-        });
+            logger.success('TaskService.createTask: Tarefa criada com sucesso', {
+                taskId: task.id,
+                projectId: task.project_id
+            });
 
-        return task;
+            // Record task creation in history
+            await taskHistoryService.recordChange(task.id, creatorId, {
+                status: { old: null, new: task.status },
+                priority: { old: null, new: task.priority },
+                assigned_to: { old: null, new: task.assigned_to }
+            });
+
+            return task;
+        } catch (error) {
+            logger.error('TaskService.createTask: Erro ao criar tarefa', error);
+            throw error; // Re-throw para ser tratado pelo controlador
+        }
     }
 
     async getAllProjectTasks(projectId, filters = {}) {
@@ -181,7 +229,15 @@ class TaskService {
     async updateTask(taskId, projectId, userId, data) {
         // Get current task state for history tracking
         const currentTask = await prisma.task.findUnique({
-            where: { id: Number(taskId) }
+            where: { id: Number(taskId) },
+            include: {
+                project: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            }
         });
 
         const changes = {};
@@ -242,9 +298,39 @@ class TaskService {
                             }
                         }
                     }
+                },
+                project: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
                 }
             }
         });
+
+        // Notificar sobre atribuição de tarefa se ela foi atribuída a alguém
+        if (changes.assigned_to && task.assigned_to) {
+            try {
+                await notificationService.notifyTaskAssignment(
+                    task.assigned_to,
+                    task.id,
+                    task.title,
+                    task.project.name
+                );
+                logger.debug('TaskService.updateTask: Notificação de atribuição de tarefa criada', {
+                    taskId: task.id,
+                    assignedTo: task.assigned_to
+                });
+            } catch (notifyError) {
+                // Apenas logamos o erro, mas não interrompemos o fluxo principal
+                logger.error('TaskService.updateTask: Erro ao criar notificação', {
+                    error: notifyError.message,
+                    stack: notifyError.stack,
+                    taskId: task.id,
+                    assignedTo: task.assigned_to
+                });
+            }
+        }
 
         // Record changes in history if any changes were made
         if (Object.keys(changes).length > 0) {

@@ -7,9 +7,13 @@ require('express-async-errors');
 
 const config = require('./config');
 const { errorHandler } = require('./middlewares/error.middleware');
+const requestIdMiddleware = require('./middlewares/request-id.middleware');
 const routes = require('./routes');
 
 const app = express();
+
+// Request ID para rastreamento de requisições
+app.use(requestIdMiddleware);
 
 // Middlewares de segurança
 app.use(helmet());
@@ -21,7 +25,19 @@ app.use(cors({
 
 // Logging
 if (config.app.env !== 'test') {
-    app.use(morgan(config.app.env === 'development' ? 'dev' : 'combined'));
+    // Formato personalizado para mostrar mais detalhes em desenvolvimento
+    if (config.app.env === 'development') {
+        app.use(morgan(':method :url :status :response-time ms - :res[content-length] - :req[content-type] - :req[authorization]'));
+        // Log de corpo da requisição em rotas específicas
+        app.use((req, res, next) => {
+            if (req.method === 'POST' || req.method === 'PUT') {
+                console.log('Corpo da requisição:', JSON.stringify(req.body, null, 2));
+            }
+            next();
+        });
+    } else {
+        app.use(morgan('combined'));
+    }
 }
 
 // Parse de JSON e uploads

@@ -1,17 +1,53 @@
 const taskService = require('../services/task.service');
 const { z } = require('zod');
+const logger = require('../utils/logger');
 
 const taskSchema = z.object({
     title: z.string().min(3).max(200),
-    description: z.string().optional(),
-    status: z.enum(['pending', 'in_progress', 'completed']).optional(),
-    priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
-    dueDate: z.string().datetime().optional(),
-    estimatedHours: z.number().min(0).optional(),
-    actualHours: z.number().min(0).optional(),
-    assignedTo: z.number().int().positive().optional(),
-    parentTaskId: z.number().int().positive().optional(),
-    tags: z.array(z.number()).optional()
+    description: z.string().optional().default(''),
+    status: z.enum(['pending', 'in_progress', 'completed']).optional().default('pending'),
+    priority: z.enum(['low', 'medium', 'high', 'urgent']).optional().default('medium'),
+    // Aceita string no formato YYYY-MM-DD e converte para formato ISO ou trata string vazia
+    dueDate: z.string()
+        .transform(val => {
+            // Se for string vazia, retorna undefined para que seja tratado como opcional
+            if (val === '') return undefined;
+            
+            // Se for apenas uma data (YYYY-MM-DD), adiciona o horário
+            if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+                return `${val}T00:00:00.000Z`;
+            }
+            return val;
+        })
+        .pipe(z.string().datetime().optional())
+        .optional(),
+    // Aceita número ou string numérica e converte para número, ou string vazia para null
+    estimatedHours: z.union([
+        z.number().min(0),
+        z.string().regex(/^\d+(\.\d+)?$/).transform(val => parseFloat(val)),
+        z.literal('').transform(() => undefined)
+    ]).optional(),
+    actualHours: z.union([
+        z.number().min(0),
+        z.string().regex(/^\d+(\.\d+)?$/).transform(val => parseFloat(val)),
+        z.literal('').transform(() => undefined)
+    ]).optional(),
+    // Aceita número ou string numérica e converte para número, ou string vazia para null
+    assignedTo: z.union([
+        z.number().int().positive(),
+        z.string().regex(/^\d+$/).transform(val => parseInt(val, 10)),
+        z.literal('').transform(() => undefined)
+    ]).optional(),
+    // Aceita número ou string numérica e converte para número, ou string vazia para null
+    parentTaskId: z.union([
+        z.number().int().positive(),
+        z.string().regex(/^\d+$/).transform(val => parseInt(val, 10)),
+        z.literal('').transform(() => undefined)
+    ]).optional(),
+    tags: z.array(z.union([
+        z.number().int().positive(),
+        z.string().regex(/^\d+$/).transform(val => parseInt(val, 10))
+    ])).optional().default([])
 });
 
 const updateTaskSchema = taskSchema.partial();
@@ -40,14 +76,53 @@ class TaskController {
 
     async create(req, res) {
         try {
-            const validatedData = taskSchema.parse(req.body);
-            const task = await this.taskService.createTask(validatedData, req.params.projectId, req.user.id);
-            res.status(201).json(task);
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                return res.status(400).json({ errors: error.errors });
+            logger.request(req, 'TaskController.create');
+            logger.debug('TaskController.create: Dados recebidos', {
+                body: req.body,
+                projectId: req.params.projectId
+            });
+            
+            try {
+                const validatedData = taskSchema.parse(req.body);
+                logger.debug('TaskController.create: Dados validados com sucesso', validatedData);
+                
+                // Converte camelCase para snake_case nos campos específicos para compatibilidade com o Prisma
+                const normalizedData = {
+                    ...validatedData,
+                    due_date: validatedData.dueDate,
+                    estimated_hours: validatedData.estimatedHours,
+                    actual_hours: validatedData.actualHours,
+                    assigned_to: validatedData.assignedTo,
+                    parent_task_id: validatedData.parentTaskId
+                };
+                
+                // Remove campos camelCase que foram convertidos
+                if ('dueDate' in validatedData) delete normalizedData.dueDate;
+                if ('estimatedHours' in validatedData) delete normalizedData.estimatedHours;
+                if ('actualHours' in validatedData) delete normalizedData.actualHours;
+                if ('assignedTo' in validatedData) delete normalizedData.assignedTo;
+                if ('parentTaskId' in validatedData) delete normalizedData.parentTaskId;
+                
+                logger.debug('TaskController.create: Dados normalizados', normalizedData);
+                
+                const task = await this.taskService.createTask(normalizedData, req.params.projectId, req.user.id);
+                logger.success('TaskController.create: Tarefa criada com sucesso', { taskId: task.id });
+                
+                res.status(201).json(task);
+            } catch (zodError) {
+                logger.warn('TaskController.create: Erro de validação Zod', zodError.errors);
+                return res.status(400).json({ 
+                    message: 'Dados inválidos para criação da tarefa',
+                    errors: zodError.errors 
+                });
             }
-            res.status(500).json({ error: 'Internal server error' });
+        } catch (error) {
+            logger.error('TaskController.create: Erro ao criar tarefa', error);
+            
+            res.status(500).json({ 
+                message: 'Erro ao criar tarefa', 
+                error: error.message 
+            });
         }
     }
 
