@@ -8,6 +8,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  profileImage?: string | null;
 }
 
 interface AuthContextType {
@@ -20,6 +21,8 @@ interface AuthContextType {
   logout: () => void;
   clearError: () => void;
   refreshSession: () => Promise<boolean>;
+  updateProfile: (data: { name: string; profileImage?: string | null }) => Promise<void>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -183,6 +186,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setError(null);
   };
 
+  const updateProfile = async (data: { name: string; profileImage?: string | null }): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await authService.updateProfile(data);
+      
+      if (response.user) {
+        setUser(response.user);
+      }
+    } catch (err: any) {
+      console.error('Erro ao atualizar perfil:', err);
+      setError(err.message || 'Erro ao atualizar perfil');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await authService.updatePassword(currentPassword, newPassword);
+    } catch (err: any) {
+      console.error('Erro ao atualizar senha:', err);
+      setError(err.message || 'Erro ao atualizar senha');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -192,7 +229,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     register,
     logout,
     clearError,
-    refreshSession
+    refreshSession,
+    updateProfile,
+    updatePassword
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

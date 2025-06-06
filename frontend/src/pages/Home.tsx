@@ -120,26 +120,27 @@ const Home = () => {
             </div>
             
             <div className="space-y-5">
-              <Link to="/dashboard" className="block text-white hover:text-primary-lighter transition-colors">
-                Dashboard
-              </Link>
-              <Link to="/projects" className="block text-white hover:text-primary-lighter transition-colors">
-                Projetos
-              </Link>
-              <Link to="/tasks" className="block text-white hover:text-primary-lighter transition-colors">
-                Tarefas
-              </Link>
-              <Link to="/teams" className="block text-white hover:text-primary-lighter transition-colors">
-                Equipes
-              </Link>
+              
               <hr className="border-gray-700 my-4" />
               {isLoggedIn ? (
                 <>
+                  <Link to="/dashboard" className="block text-white hover:text-primary-lighter transition-colors">
+                  Dashboard
+                  </Link>
+                  <Link to="/projects" className="block text-white hover:text-primary-lighter transition-colors">
+                    Projetos
+                  </Link>
+                  <Link to="/tasks" className="block text-white hover:text-primary-lighter transition-colors">
+                    Tarefas
+                  </Link>
+                  <Link to="/teams" className="block text-white hover:text-primary-lighter transition-colors">
+                    Equipes
+                  </Link>
                   <Link to="/profile" className="block text-white hover:text-primary-lighter transition-colors">
                     Meu Perfil
                   </Link>
-                  <Link to="/settings" className="block text-white hover:text-primary-lighter transition-colors">
-                    Configurações
+                  <Link to="/notifications" className="block text-white hover:text-primary-lighter transition-colors">
+                    Notificações
                   </Link>
                   <button 
                     className="block text-white hover:text-primary-lighter transition-colors w-full text-left"

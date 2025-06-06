@@ -73,6 +73,53 @@ class AuthService {
       token
     };
   }
+
+  async updateProfile(userId, userData) {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: userData.name,
+        profile_image: userData.profileImage
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        profile_image: true,
+        created_at: true
+      }
+    });
+
+    return user;
+  }
+
+  async updatePassword(userId, currentPassword, newPassword) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password_hash);
+
+    if (!isValidPassword) {
+      throw new Error('Senha atual incorreta');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        password_hash: hashedPassword
+      }
+    });
+
+    return { message: 'Senha atualizada com sucesso' };
+  }
 }
 
 module.exports = new AuthService(); 

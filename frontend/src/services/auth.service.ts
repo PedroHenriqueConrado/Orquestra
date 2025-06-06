@@ -1,107 +1,93 @@
-import axios from 'axios';
-import api from './api.service';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  role?: 'developer' | 'supervisor' | 'tutor' | 'project_manager' | 'team_leader' | 'admin';
-}
-
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-  };
-  token: string;
-}
+import { API_URL } from '../config';
 
 class AuthService {
-  async register(data: RegisterData): Promise<any> {
-    try {
-      const response = await axios.post(`${API_URL}/auth/register`, data);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        throw new Error(error.response.data.message || `Erro ${error.response.status}`);
-      }
-      throw new Error('Erro ao registrar');
+  private getToken(): string {
+    return localStorage.getItem('token') || '';
+  }
+
+  async register(name: string, email: string, password: string): Promise<void> {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao registrar usuário');
     }
   }
 
-  async login(data: LoginData): Promise<AuthResponse> {
-    try {
-      // Usar axios diretamente, não o api configurado, para evitar ciclos de dependência
-      const response = await axios.post<AuthResponse>(`${API_URL}/auth/login`, data);
-      
-      // Armazena o token e dados do usuário no localStorage
-      this.setToken(response.data.token);
-      this.setUser(response.data.user);
-      
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        throw new Error(error.response.data.message || `Erro ${error.response.status}`);
+  async login(email: string, password: string): Promise<{ token: string; user: any }> {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao fazer login');
+    }
+
+    const data = await response.json();
+    localStorage.setItem('token', data.token);
+    return data;
+  }
+
+  async getProfile(): Promise<any> {
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`
       }
-      throw new Error('Erro ao fazer login');
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao obter perfil');
+    }
+
+    return response.json();
+  }
+
+  async updateProfile(data: { name: string }): Promise<void> {
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao atualizar perfil');
     }
   }
 
-  // Método para salvar o token no localStorage
-  setToken(token: string): void {
-    localStorage.setItem('token', token);
-  }
+  async updatePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const response = await fetch(`${API_URL}/auth/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`
+      },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
 
-  // Método para salvar o usuário no localStorage
-  setUser(user: any): void {
-    localStorage.setItem('user', JSON.stringify(user));
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao atualizar senha');
+    }
   }
 
   logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  }
-
-  getCurrentUser(): any {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        return JSON.parse(userStr);
-      }
-      return null;
-    } catch (error) {
-      console.error('Erro ao obter usuário atual:', error);
-      this.logout(); // Limpa o localStorage se houver erro
-      return null;
-    }
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
-  isLoggedIn(): boolean {
-    // Simplificando a verificação para apenas checar se o token existe
-    const token = this.getToken();
-    return !!token;
-  }
-
-  // Método para atualizar tokens - implementar quando o backend suportar refresh tokens
-  async refreshToken(): Promise<boolean> {
-    // Esta função deveria chamar uma rota de refresh token no backend
-    // Por enquanto, apenas retorna false indicando que não temos essa capacidade
-    console.log('Função de refresh token não implementada');
-    return false;
   }
 }
 

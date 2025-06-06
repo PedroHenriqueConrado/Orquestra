@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import DirectMessages from './pages/DirectMessages';
 import ChatDetails from './pages/ChatDetails';
 import Notifications from './pages/Notifications';
+import Profile from './pages/Profile';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -28,6 +29,12 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={
             <PrivateRoute>
               <Dashboard />
+            </PrivateRoute>
+          } />
+          
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <Profile />
             </PrivateRoute>
           } />
           
