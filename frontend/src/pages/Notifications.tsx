@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import notificationService, { type Notification } from '../services/notification.service';
 
 // Componente de paginação interno, para não depender de um componente externo
@@ -87,8 +88,10 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`px-3 py-1 rounded-md border border-gray-300 ${
-          currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+        className={`px-2 py-1 text-xs rounded-md transition-all duration-200 ${
+          currentPage === 1 
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-300' 
+            : 'text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black'
         }`}
       >
         Anterior
@@ -101,8 +104,10 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`px-3 py-1 rounded-md border border-gray-300 ${
-          currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+        className={`px-2 py-1 text-xs rounded-md transition-all duration-200 ${
+          currentPage === totalPages 
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-300' 
+            : 'text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black'
         }`}
       >
         Próxima
@@ -199,10 +204,18 @@ const Notifications: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Notificações</h1>
+        <div className="flex items-center space-x-4">
+          <Link
+            to="/dashboard"
+            className="px-3 py-1.5 text-sm font-medium text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black rounded-md transition-all duration-200"
+          >
+            Voltar
+          </Link>
+          <h1 className="text-2xl font-semibold text-gray-800">Notificações</h1>
+        </div>
         {hasUnreadNotifications() && (
           <button
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+            className="px-3 py-1.5 text-sm font-medium text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black rounded-md transition-all duration-200"
             onClick={markAllAsRead}
           >
             Marcar todas como lidas
@@ -240,14 +253,14 @@ const Notifications: React.FC = () => {
               <div className="flex mt-3 sm:mt-0 space-x-2 sm:ml-4">
                 {!notification.is_read && (
                   <button
-                    className="text-sm text-primary hover:text-primary-dark"
+                    className="px-2 py-1 text-xs text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black rounded-md transition-all duration-200"
                     onClick={() => markAsRead(notification.id)}
                   >
                     Marcar como lida
                   </button>
                 )}
                 <button
-                  className="text-sm text-red-600 hover:text-red-800"
+                  className="px-2 py-1 text-xs text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black rounded-md transition-all duration-200"
                   onClick={() => deleteNotification(notification.id)}
                 >
                   Excluir

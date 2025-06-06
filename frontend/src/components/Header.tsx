@@ -18,14 +18,14 @@ const Header: React.FC = () => {
               <Link to="/">
                 <img className="h-8 w-auto" src="/src/assets/favicon.svg" alt="Orquestra" />
               </Link>
-              <Link to="/" className="ml-2 text-xl font-bold text-primary-dark">
+              <Link to="/" className="ml-2 text-xl font-bold text-primary-dark hover:text-primary-lighter">
                 Orquestra
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 to="/dashboard"
-                className="border-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className="hover:text-gray-700 border-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
                 Dashboard
               </Link>
@@ -36,22 +36,10 @@ const Header: React.FC = () => {
                 Projetos
               </Link>
               <Link
-                to="/tasks"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Tarefas
-              </Link>
-              <Link
                 to="/messages"
                 className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
                 Mensagens
-              </Link>
-              <Link
-                to="/teams"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                Equipes
               </Link>
             </div>
           </div>
@@ -105,10 +93,10 @@ const Header: React.FC = () => {
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             {isLoggedIn ? (
               <>
-                <NotificationIcon />
+                <NotificationIcon/>
                 <Menu as="div" className="ml-3 relative">
                   <div>
-                    <Menu.Button className="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    <Menu.Button className="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary hover:border-white">
                       <span className="sr-only">Abrir menu do usuário</span>
                       <div className="h-8 w-8 rounded-full bg-primary-lighter flex items-center justify-center text-white font-semibold">
                         {user?.name.charAt(0).toUpperCase()}
@@ -135,7 +123,7 @@ const Header: React.FC = () => {
                             to="/profile"
                             className={`${
                               active ? 'bg-gray-100' : ''
-                            } block px-4 py-2 text-sm text-gray-700`}
+                            } block px-4 py-2 text-sm text-gray-700 hover:text-white`}
                           >
                             Meu perfil
                           </Link>
@@ -147,7 +135,7 @@ const Header: React.FC = () => {
                             to="/settings"
                             className={`${
                               active ? 'bg-gray-100' : ''
-                            } block px-4 py-2 text-sm text-gray-700`}
+                            } block px-4 py-2 text-sm text-gray-700 hover:text-white`}
                           >
                             Configurações
                           </Link>
@@ -159,7 +147,7 @@ const Header: React.FC = () => {
                             onClick={logout}
                             className={`${
                               active ? 'bg-gray-100' : ''
-                            } block w-full text-left px-4 py-2 text-sm text-gray-700`}
+                            } w-full text-left px-4 py-2 text-sm text-gray-700 text-center text-white hover:text-white hover:border-black`}
                           >
                             Sair
                           </button>

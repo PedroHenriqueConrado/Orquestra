@@ -157,8 +157,8 @@ const Dashboard: React.FC = () => {
               className={`${
                 activeTab === 'projects'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              } whitespace-nowrap py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0`}
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:hover:text-white'
+              } whitespace-nowrap py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 m-2 text-white hover:bg-gray-700 hover:border-white `}
             >
               Projetos
             </button>
@@ -167,8 +167,8 @@ const Dashboard: React.FC = () => {
               className={`${
                 activeTab === 'tasks'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              } whitespace-nowrap py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0`}
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-white'
+              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white`}
             >
               Tarefas
             </button>
@@ -177,8 +177,8 @@ const Dashboard: React.FC = () => {
               className={`${
                 activeTab === 'team'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              } whitespace-nowrap py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0`}
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-white'
+              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white`}
             >
               Equipe
             </button>
@@ -187,8 +187,9 @@ const Dashboard: React.FC = () => {
               className={`${
                 activeTab === 'profile'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              } whitespace-nowrap py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0`}
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-white'
+              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white `}
+              
             >
               Perfil
             </button>
@@ -203,7 +204,7 @@ const Dashboard: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
                 <h2 className="text-lg font-medium text-gray-900">Meus Projetos</h2>
                 <Link to="/projects/new">
-                  <Button variant="primary" className="w-full sm:w-auto">
+                  <Button variant="primary" className="w-full sm:w-auto hover:border-white">
                     <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
@@ -226,19 +227,19 @@ const Dashboard: React.FC = () => {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
                             Nome
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
                             Status
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
                             Progresso
                           </th>
-                          <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
                             Membros
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
                             Ações
                           </th>
                         </tr>

@@ -106,7 +106,7 @@ const NotificationIcon: React.FC = () => {
                     <h3 className="text-sm font-medium text-gray-900">Notificações</h3>
                     {unreadCount > 0 && (
                       <button
-                        className="text-xs text-primary hover:text-primary-dark"
+                        className="px-2 py-1 text-xs border-0 text-white bg-black hover:bg-yellow-300 hover:text-black rounded-md transition-all duration-200"
                         onClick={markAllAsRead}
                       >
                         Marcar todas como lidas
@@ -145,7 +145,7 @@ const NotificationIcon: React.FC = () => {
                           </div>
                           {!notification.is_read && (
                             <button
-                              className="text-xs text-primary hover:text-primary-dark flex-shrink-0"
+                              className="px-2 py-1 text-xs border-0 text-white bg-black hover:bg-white hover:text-black rounded-md transition-all duration-200"
                               onClick={() => markAsRead(notification.id)}
                             >
                               Marcar como lida

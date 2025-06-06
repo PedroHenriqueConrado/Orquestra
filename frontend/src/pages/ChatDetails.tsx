@@ -259,38 +259,40 @@ const ChatDetails: React.FC = () => {
                           key={message.id}
                           className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} group relative`}
                         >
+                          {isCurrentUser && (
+                            <div className="relative message-menu mr-2 self-start mt-2">
+                              <button 
+                                onClick={() => toggleMenu(message.id)}
+                                className="p-1 rounded-full hover:bg-gray-100 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                aria-label="Opções da mensagem"
+                              >
+                                <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                </svg>
+                              </button>
+                              
+                              {menuOpen === message.id && (
+                                <div className="absolute right-0 mt-1 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 transform origin-top-right transition-all duration-200 ease-out">
+                                  <div className="py-1">
+                                    <button 
+                                      onClick={() => handleDeleteMessage(message.id)}
+                                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 bg-white border border-white"
+                                    >
+                                      <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                      Excluir mensagem
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
                           <div className={`max-w-xs md:max-w-md lg:max-w-lg rounded-lg px-4 py-2 ${
                             isCurrentUser 
                               ? 'bg-primary text-white rounded-br-none'
                               : 'bg-gray-100 text-gray-800 rounded-bl-none'
                           }`}>
-                            <div className="flex justify-between items-start">
-                              {isCurrentUser && (
-                                <div className="relative message-menu">
-                                  <button 
-                                    onClick={() => toggleMenu(message.id)}
-                                    className="ml-2 text-gray-200 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                    </svg>
-                                  </button>
-                                  
-                                  {menuOpen === message.id && (
-                                    <div className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                                      <div className="py-1">
-                                        <button 
-                                          onClick={() => handleDeleteMessage(message.id)}
-                                          className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
-                                        >
-                                          Excluir mensagem
-                                        </button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
                             <div className="text-sm">
                               {message.message}
                             </div>

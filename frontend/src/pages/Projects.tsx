@@ -143,7 +143,7 @@ const Projects: React.FC = () => {
           Crie seu primeiro projeto para começar a organizar suas tarefas.
         </p>
         <Link to="/projects/new">
-          <Button variant="primary">
+          <Button variant="primary" className="hover:border-white">
             <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
@@ -229,7 +229,7 @@ const Projects: React.FC = () => {
             <Link to="/projects/new">
               <Button 
                 variant="primary"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto hover:border-white"
               >
                 <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
@@ -328,19 +328,19 @@ const Projects: React.FC = () => {
                     <div className="flex space-x-2">
                       <Link 
                         to={`/projects/${project.id}`}
-                        className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                        className=" hover:text-black hover:border-white inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                       >
                         Ver
                       </Link>
                       <Link 
                         to={`/projects/${project.id}/edit`}
-                        className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-primary bg-primary-lighter hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                        className="hover:text-black hover:border-white inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-black bg-primary-lighter hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                       >
                         Editar
                       </Link>
                       <button
                         onClick={() => handleDeleteProject(project.id)}
-                        className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        className="hover:text-black hover:border-white inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                       >
                         Excluir
                       </button>

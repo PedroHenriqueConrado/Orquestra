@@ -150,7 +150,7 @@ const DirectMessages: React.FC = () => {
                 const lastMessage = chat.messages && chat.messages.length > 0 ? chat.messages[0] : null;
                 
                 return (
-                  <li key={chat.id} className="hover:bg-gray-50">
+                  <li key={chat.id} className="hover:bg-gray-300">
                     <Link 
                       to={`/messages/${chat.id}`}
                       className="block px-4 py-4 sm:px-6"
