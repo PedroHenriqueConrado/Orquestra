@@ -23,6 +23,7 @@ model User {
   tasks            Task[]            @relation("AssignedTasks")
   taskComments     TaskComment[]
   taskHistory      TaskHistory[]
+  taskDocuments    TaskDocument[]    // Relação com documentos de tarefas
   sentMessages     DirectMessage[]   @relation("SentMessages")
   receivedMessages DirectMessage[]   @relation("ReceivedMessages")
   userChats        UserChat[]
@@ -81,6 +82,7 @@ model Task {
   comments       TaskComment[]
   history        TaskHistory[]
   tags           TaskToTag[]
+  documents      TaskDocument[] // Relação com documentos
 
   @@index([project_id], map: "idx_tasks_project")
   @@index([parent_task_id], map: "idx_tasks_parent")
@@ -97,6 +99,7 @@ model Document {
   versions   DocumentVersion[]
   project    Project           @relation(fields: [project_id], references: [id], onDelete: Cascade, map: "fk_docs_project")
   creator    User              @relation("CreatedDocuments", fields: [created_by], references: [id], map: "fk_docs_user")
+  tasks      TaskDocument[]    // Relação com tarefas
 
   @@index([project_id], map: "idx_docs_project")
   @@index([created_by], map: "idx_docs_created_by")
@@ -256,5 +259,22 @@ model DirectMessage {
   @@index([sender_id], map: "idx_dm_sender")
   @@index([receiver_id], map: "idx_dm_receiver")
   @@map("direct_messages")
+}
+
+// Modelo de junção entre Task e Document
+model TaskDocument {
+  task_id       Int
+  document_id   Int
+  added_at      DateTime @default(now()) @db.DateTime(0)
+  added_by      Int
+  task          Task     @relation(fields: [task_id], references: [id], onDelete: Cascade, map: "fk_td_task")
+  document      Document @relation(fields: [document_id], references: [id], onDelete: Cascade, map: "fk_td_document")
+  user          User     @relation(fields: [added_by], references: [id], map: "fk_td_user")
+
+  @@id([task_id, document_id])
+  @@index([task_id], map: "idx_td_task")
+  @@index([document_id], map: "idx_td_document")
+  @@index([added_by], map: "idx_td_added_by")
+  @@map("task_documents")
 }
  

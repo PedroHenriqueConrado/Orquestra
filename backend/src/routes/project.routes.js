@@ -8,7 +8,7 @@ const logger = require('../utils/logger');
 // Middleware para verificar se o usuário tem permissão para excluir um projeto
 const canDeleteProject = async (req, res, next) => {
     try {
-        const projectId = parseInt(req.params.id, 10);
+        const projectId = parseInt(req.params.projectId, 10);
         const userId = req.user.id;
         const userRole = req.user.role;
         
@@ -90,16 +90,16 @@ const isAdmin = (req, res, next) => {
 // Rotas básicas de CRUD
 router.post('/', projectController.create);
 router.get('/', projectController.getAll);
-router.get('/:id', isProjectMember, projectController.getById);
-router.put('/:id', isProjectMember, projectController.update);
-router.delete('/:id', canDeleteProject, projectController.delete);
+router.get('/:projectId', isProjectMember, projectController.getById);
+router.put('/:projectId', isProjectMember, projectController.update);
+router.delete('/:projectId', canDeleteProject, projectController.delete);
 
 // Rota administrativa para forçar a exclusão de qualquer projeto (só para administradores)
-router.delete('/:id/force', isAdmin, projectController.delete);
+router.delete('/:projectId/force', isAdmin, projectController.delete);
 
 // Rotas de gerenciamento de membros
-router.get('/:id/members', isProjectMember, projectController.getMembers);
-router.post('/:id/members', isProjectMember, projectController.addMember);
-router.delete('/:id/members/:userId', isProjectMember, projectController.removeMember);
+router.get('/:projectId/members', isProjectMember, projectController.getMembers);
+router.post('/:projectId/members', isProjectMember, projectController.addMember);
+router.delete('/:projectId/members/:userId', isProjectMember, projectController.removeMember);
 
 module.exports = router; 

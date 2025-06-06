@@ -84,20 +84,20 @@ class ProjectController {
 
     async getById(req, res) {
         try {
-            const { id } = req.params;
-            logger.debug(`Controller Project.getById: Buscando projeto ${id}`);
+            const { projectId } = req.params;
+            logger.debug(`Controller Project.getById: Buscando projeto ${projectId}`);
             
-            const project = await projectService.getProjectById(id);
+            const project = await projectService.getProjectById(projectId);
             
             if (!project) {
-                logger.warn(`Controller Project.getById: Projeto ${id} não encontrado`);
+                logger.warn(`Controller Project.getById: Projeto ${projectId} não encontrado`);
                 return res.status(404).json({ message: 'Projeto não encontrado' });
             }
             
-            logger.info(`Controller Project.getById: Projeto ${id} encontrado`);
+            logger.info(`Controller Project.getById: Projeto ${projectId} encontrado`);
             res.json(project);
         } catch (error) {
-            logger.error(`Controller Project.getById: Erro ao buscar projeto ${req.params.id}`, error);
+            logger.error(`Controller Project.getById: Erro ao buscar projeto ${req.params.projectId}`, error);
             
             res.status(500).json({ 
                 message: 'Erro ao buscar projeto', 
@@ -108,14 +108,14 @@ class ProjectController {
 
     async update(req, res) {
         try {
-            const { id } = req.params;
-            logger.debug(`Controller Project.update: Atualizando projeto ${id}`, req.body);
+            const { projectId } = req.params;
+            logger.debug(`Controller Project.update: Atualizando projeto ${projectId}`, req.body);
             
             try {
                 const validatedData = projectSchema.parse(req.body);
-                const project = await projectService.updateProject(id, validatedData);
+                const project = await projectService.updateProject(projectId, validatedData);
                 
-                logger.success(`Controller Project.update: Projeto ${id} atualizado com sucesso`);
+                logger.success(`Controller Project.update: Projeto ${projectId} atualizado com sucesso`);
                 res.json(project);
             } catch (zodError) {
                 logger.warn(`Controller Project.update: Erro de validação`, zodError.errors);
@@ -126,7 +126,7 @@ class ProjectController {
                 });
             }
         } catch (error) {
-            logger.error(`Controller Project.update: Erro ao atualizar projeto ${req.params.id}`, error);
+            logger.error(`Controller Project.update: Erro ao atualizar projeto ${req.params.projectId}`, error);
             
             res.status(500).json({ 
                 message: 'Erro ao atualizar projeto', 
@@ -137,15 +137,15 @@ class ProjectController {
 
     async delete(req, res) {
         try {
-            const { id } = req.params;
-            logger.debug(`Controller Project.delete: Excluindo projeto ${id}`);
+            const { projectId } = req.params;
+            logger.debug(`Controller Project.delete: Excluindo projeto ${projectId}`);
             
-            await projectService.deleteProject(id);
+            await projectService.deleteProject(projectId);
             
-            logger.success(`Controller Project.delete: Projeto ${id} excluído com sucesso`);
+            logger.success(`Controller Project.delete: Projeto ${projectId} excluído com sucesso`);
             res.status(204).send();
         } catch (error) {
-            logger.error(`Controller Project.delete: Erro ao excluir projeto ${req.params.id}`, error);
+            logger.error(`Controller Project.delete: Erro ao excluir projeto ${req.params.projectId}`, error);
             
             res.status(500).json({ 
                 message: 'Erro ao excluir projeto', 
@@ -156,20 +156,20 @@ class ProjectController {
 
     async addMember(req, res) {
         try {
-            const { id } = req.params;
-            logger.debug(`Controller Project.addMember: Adicionando membro ao projeto ${id}`, req.body);
+            const { projectId } = req.params;
+            logger.debug(`Controller Project.addMember: Adicionando membro ao projeto ${projectId}`, req.body);
             
             try {
                 const validatedData = memberSchema.parse(req.body);
                 
                 const member = await projectService.addMember(
-                    id,
+                    projectId,
                     validatedData.userId,
                     validatedData.role
                 );
                 
-                logger.success(`Controller Project.addMember: Membro adicionado ao projeto ${id} com sucesso`, { 
-                    projectId: id, 
+                logger.success(`Controller Project.addMember: Membro adicionado ao projeto ${projectId} com sucesso`, { 
+                    projectId: projectId, 
                     userId: validatedData.userId, 
                     role: validatedData.role 
                 });
@@ -184,7 +184,7 @@ class ProjectController {
                 });
             }
         } catch (error) {
-            logger.error(`Controller Project.addMember: Erro ao adicionar membro ao projeto ${req.params.id}`, error);
+            logger.error(`Controller Project.addMember: Erro ao adicionar membro ao projeto ${req.params.projectId}`, error);
             
             res.status(500).json({ 
                 message: 'Erro ao adicionar membro ao projeto', 
@@ -195,15 +195,15 @@ class ProjectController {
 
     async removeMember(req, res) {
         try {
-            const { id, userId } = req.params;
-            logger.debug(`Controller Project.removeMember: Removendo membro ${userId} do projeto ${id}`);
+            const { projectId, userId } = req.params;
+            logger.debug(`Controller Project.removeMember: Removendo membro ${userId} do projeto ${projectId}`);
             
-            await projectService.removeMember(id, userId);
+            await projectService.removeMember(projectId, userId);
             
-            logger.success(`Controller Project.removeMember: Membro ${userId} removido do projeto ${id} com sucesso`);
+            logger.success(`Controller Project.removeMember: Membro ${userId} removido do projeto ${projectId} com sucesso`);
             res.status(204).send();
         } catch (error) {
-            logger.error(`Controller Project.removeMember: Erro ao remover membro ${req.params.userId} do projeto ${req.params.id}`, error);
+            logger.error(`Controller Project.removeMember: Erro ao remover membro ${req.params.userId} do projeto ${req.params.projectId}`, error);
             
             res.status(500).json({ 
                 message: 'Erro ao remover membro do projeto', 
@@ -214,15 +214,15 @@ class ProjectController {
 
     async getMembers(req, res) {
         try {
-            const { id } = req.params;
-            logger.debug(`Controller Project.getMembers: Buscando membros do projeto ${id}`);
+            const { projectId } = req.params;
+            logger.debug(`Controller Project.getMembers: Buscando membros do projeto ${projectId}`);
             
-            const members = await projectService.getProjectMembers(id);
+            const members = await projectService.getProjectMembers(projectId);
             
-            logger.info(`Controller Project.getMembers: ${members.length} membros encontrados para o projeto ${id}`);
+            logger.info(`Controller Project.getMembers: ${members.length} membros encontrados para o projeto ${projectId}`);
             res.json(members);
         } catch (error) {
-            logger.error(`Controller Project.getMembers: Erro ao buscar membros do projeto ${req.params.id}`, error);
+            logger.error(`Controller Project.getMembers: Erro ao buscar membros do projeto ${req.params.projectId}`, error);
             
             res.status(500).json({ 
                 message: 'Erro ao buscar membros do projeto', 

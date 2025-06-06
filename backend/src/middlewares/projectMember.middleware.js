@@ -3,13 +3,15 @@ const logger = require('../utils/logger');
 
 async function isProjectMember(req, res, next) {
     try {
-        const projectId = parseInt(req.params.id, 10);
+        logger.debug('Middleware isProjectMember: Parâmetros recebidos:', req.params);
+        
+        const projectId = parseInt(req.params.projectId, 10);
         const userId = req.user.id;
         
         logger.debug(`Middleware isProjectMember: Verificando se usuário ${userId} é membro do projeto ${projectId}`);
         
         if (isNaN(projectId)) {
-            logger.warn(`Middleware isProjectMember: ID de projeto inválido: ${req.params.id}`);
+            logger.warn(`Middleware isProjectMember: ID de projeto inválido: ${req.params.projectId}`);
             return res.status(400).json({ 
                 error: 'ID de projeto inválido', 
                 details: 'O ID do projeto deve ser um número válido' 

@@ -1,11 +1,21 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
+const multer = require('multer');
 const TaskController = require('../controllers/task.controller');
 const TaskTagController = require('../controllers/task-tag.controller');
 const TaskCommentController = require('../controllers/task-comment.controller');
 const TaskHistoryController = require('../controllers/task-history.controller');
+const TaskDocumentController = require('../controllers/task-document.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const projectAccessMiddleware = require('../middlewares/project-access.middleware');
+
+// Configuração do Multer para upload de arquivos
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 50 * 1024 * 1024, // 50MB por arquivo
+    }
+});
 
 // Instantiate controllers
 const taskController = new TaskController();
@@ -35,6 +45,22 @@ router.get('/metrics', projectAccessMiddleware, (req, res) => taskController.get
 router.post('/:taskId/tags/:tagId', projectAccessMiddleware, (req, res) => taskTagController.addTagToTask(req, res));
 router.delete('/:taskId/tags/:tagId', projectAccessMiddleware, (req, res) => taskTagController.removeTagFromTask(req, res));
 router.get('/:taskId/tags', projectAccessMiddleware, (req, res) => taskTagController.getTaskTags(req, res));
+
+// Task Documents Routes
+router.get('/:taskId/documents', projectAccessMiddleware, TaskDocumentController.getTaskDocuments);
+router.post('/:taskId/documents', 
+    projectAccessMiddleware, 
+    upload.single('file'),
+    TaskDocumentController.createAndAssociateDocument
+);
+router.post('/:taskId/documents/:documentId', 
+    projectAccessMiddleware, 
+    TaskDocumentController.associateDocument
+);
+router.delete('/:taskId/documents/:documentId', 
+    projectAccessMiddleware, 
+    TaskDocumentController.removeAssociation
+);
 
 // Task Comments Routes
 router.post('/:taskId/comments', projectAccessMiddleware, (req, res) => taskCommentController.create(req, res));

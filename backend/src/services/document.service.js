@@ -250,8 +250,15 @@ class DocumentService {
         return !!document;
     }
 
-    getFilePath(version) {
-        return uploadService.getFilePath(version.file_path);
+    async getFilePath(version) {
+        try {
+            const filePath = await uploadService.getFilePath(version.file_path);
+            console.log(`Arquivo localizado: ${filePath}`);
+            return filePath;
+        } catch (error) {
+            console.error('Erro ao obter caminho do arquivo:', error);
+            throw new Error('Erro ao localizar arquivo');
+        }
     }
 }
 

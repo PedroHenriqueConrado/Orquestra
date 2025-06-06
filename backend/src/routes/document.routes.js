@@ -1,10 +1,11 @@
 const express = require('express');
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const multer = require('multer');
 const documentController = require('../controllers/document.controller');
 const authenticate = require('../middlewares/auth.middleware');
 const { isProjectMember } = require('../middlewares/projectMember.middleware');
 const { isDocumentInProject } = require('../middlewares/documentInProject.middleware');
+const logger = require('../utils/logger');
 
 // Configuração do Multer para upload de arquivos
 const upload = multer({
@@ -15,8 +16,29 @@ const upload = multer({
     }
 });
 
-// Todas as rotas requerem autenticação e ser membro do projeto
+// Middleware para garantir que projectId está disponível
+const ensureProjectId = (req, res, next) => {
+    // Logging para debug
+    logger.debug('Middleware ensureProjectId: Verificando projectId', {
+        params: req.params,
+        url: req.originalUrl
+    });
+    
+    if (!req.params.projectId) {
+        return res.status(400).json({
+            error: 'ID de projeto não fornecido',
+            details: 'O ID do projeto é necessário para esta operação'
+        });
+    }
+    
+    next();
+};
+
+// Todas as rotas requerem autenticação
 router.use(authenticate);
+
+// Aplicar middlewares em todas as rotas
+router.use(ensureProjectId);
 router.use(isProjectMember);
 
 // Rotas básicas de CRUD
@@ -44,8 +66,10 @@ router.post('/:documentId/versions',
     documentController.uploadNewVersion
 );
 
+// Rota de download 
 router.get('/:documentId/versions/:versionNumber',
-    isDocumentInProject,
+    authenticate, // Usa apenas a autenticação básica
+    isDocumentInProject, // Verificar se o documento pertence ao projeto
     documentController.downloadVersion
 );
 

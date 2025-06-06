@@ -5,30 +5,38 @@ const logger = require('../utils/logger');
 // Configuração do JWT
 const JWT_SECRET = process.env.JWT_SECRET || 'orquestra_desenvolvimento_seguro_2024';
 
+/**
+ * Middleware de autenticação
+ * Verifica se o token JWT é válido e adiciona o usuário à requisição
+ */
 const authMiddleware = async (req, res, next) => {
   try {
-    // Verifica se o token está presente no header
+    // Tenta obter o token do cabeçalho Authorization ou do parâmetro de consulta
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
+    let token;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      // Token do cabeçalho
+      token = authHeader.substring(7);
+      logger.debug(`Middleware Auth: Usando token do cabeçalho: ${token.substring(0, 15)}...`);
+    } else if (req.query.token) {
+      // Token da query string (para downloads e outros casos sem cabeçalho)
+      token = req.query.token;
+      logger.debug(`Middleware Auth: Usando token da query string: ${token.substring(0, 15)}...`);
+    }
+    
+    if (!token) {
       logger.warn('Middleware Auth: Token não fornecido');
       return res.status(401).json({ message: 'Token não fornecido' });
     }
-
-    // Extrai o token do header (formato: "Bearer TOKEN")
-    const [bearer, token] = authHeader.split(' ');
     
-    if (bearer !== 'Bearer' || !token) {
-      logger.warn('Middleware Auth: Formato de token inválido', { bearer });
-      return res.status(401).json({ message: 'Formato de token inválido' });
-    }
-
     logger.debug(`Middleware Auth: Verificando token (primeiros caracteres): ${token.substring(0, 15)}...`);
 
     // Verifica e decodifica o token
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       logger.debug('Middleware Auth: Token decodificado:', { userId: decoded.userId, role: decoded.role });
-
+      
       // Busca o usuário no banco
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
@@ -39,12 +47,12 @@ const authMiddleware = async (req, res, next) => {
           role: true
         }
       });
-
+      
       if (!user) {
         logger.warn(`Middleware Auth: Usuário ${decoded.userId} não encontrado no banco`);
         return res.status(401).json({ message: 'Usuário não encontrado' });
       }
-
+      
       logger.info(`Middleware Auth: Usuário ${user.name} (${user.id}) autenticado com sucesso, role: ${user.role}`);
 
       // Adiciona o usuário ao objeto da requisição

@@ -153,14 +153,27 @@ class UploadService {
         }
     }
 
-    getFilePath(fileName) {
+    async getFilePath(fileName) {
         const regularPath = path.join(this.uploadDir, fileName);
         const compressedPath = path.join(this.compressedDir, fileName);
         
-        // Verifica qual caminho existe
-        return fs.access(regularPath)
-            .then(() => regularPath)
-            .catch(() => compressedPath);
+        try {
+            // Tenta acessar o arquivo no diretório regular
+            await fs.access(regularPath);
+            console.log(`Arquivo encontrado no caminho regular: ${regularPath}`);
+            return regularPath;
+        } catch (error) {
+            try {
+                // Se não encontrou no diretório regular, tenta no diretório comprimido
+                await fs.access(compressedPath);
+                console.log(`Arquivo encontrado no caminho comprimido: ${compressedPath}`);
+                return compressedPath;
+            } catch (innerError) {
+                console.error(`Arquivo não encontrado em nenhum diretório: ${fileName}`);
+                console.error(`Caminhos verificados: ${regularPath}, ${compressedPath}`);
+                throw new Error(`Arquivo não encontrado: ${fileName}`);
+            }
+        }
     }
 }
 

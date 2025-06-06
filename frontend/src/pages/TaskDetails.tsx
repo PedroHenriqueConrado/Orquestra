@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/ui/Button';
+import TaskDocuments from '../components/TaskDocuments';
 import taskService from '../services/task.service';
 import projectService from '../services/project.service';
 import type { Task, TaskStatus, TaskPriority } from '../services/task.service';
@@ -372,6 +373,14 @@ const TaskDetails: React.FC = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Documentos */}
+              {!isEditing && projectId && taskId && (
+                <TaskDocuments
+                  projectId={Number(projectId)}
+                  taskId={Number(taskId)}
+                />
+              )}
             </div>
           ) : (
             // Modo de edição
