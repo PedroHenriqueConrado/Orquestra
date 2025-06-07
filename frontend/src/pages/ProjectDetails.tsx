@@ -9,10 +9,6 @@ import progressService from '../services/progress.service';
 import type { Project } from '../services/project.service';
 import type { Task, TaskStatus } from '../services/task.service';
 import TaskList from '../components/TaskList';
-import Dialog from '../components/ui/Dialog';
-import { FiPlus, FiX } from 'react-icons/fi';
-import userService, { User } from '../services/user.service';
-import { toast } from 'react-hot-toast';
 
 const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,11 +25,6 @@ const ProjectDetails: React.FC = () => {
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [projectProgress, setProjectProgress] = useState<number>(0);
-  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
-  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<number | null>(null);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const [isAddingMember, setIsAddingMember] = useState(false);
 
   // Verifica se há um parâmetro de consulta 'tab' na URL
   const queryParams = new URLSearchParams(location.search);
@@ -65,23 +56,6 @@ const ProjectDetails: React.FC = () => {
     }
   };
 
-  // Função para recarregar os dados do projeto
-  const fetchProject = async () => {
-    if (!id) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-      const fetchedProject = await projectService.getProject(Number(id));
-      setProject(fetchedProject);
-      setLoading(false);
-    } catch (err: any) {
-      console.error('Erro ao buscar projeto:', err);
-      setError(err.message || 'Erro ao carregar projeto');
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (!id) return;
     
@@ -107,7 +81,7 @@ const ProjectDetails: React.FC = () => {
         setLoading(false);
         setError('Tempo limite excedido ao carregar projeto. Por favor, tente novamente.');
       }
-    }, 15000); // 15 segundos
+    }, 15000000000); // 15 segundos
     
     return () => clearTimeout(timeout);
   }, [id]);
@@ -203,50 +177,6 @@ const ProjectDetails: React.FC = () => {
       setFilteredTasks(filtered);
     }
   }, [tasks, taskFilter]);
-
-  // Função para carregar usuários disponíveis
-  const loadAvailableUsers = async () => {
-    try {
-      setIsLoadingUsers(true);
-      const users = await userService.getAvailableUsers(Number(id));
-      // Filtra usuários que já são membros do projeto
-      const currentMemberIds = project?.members.map(m => m.user.id) || [];
-      const filteredUsers = users.filter(user => !currentMemberIds.includes(user.id));
-      setAvailableUsers(filteredUsers);
-    } catch (err: any) {
-      console.error('Erro ao carregar usuários:', err);
-      toast.error(err.message || 'Erro ao carregar usuários disponíveis');
-    } finally {
-      setIsLoadingUsers(false);
-    }
-  };
-
-  // Função para adicionar membro ao projeto
-  const handleAddMember = async () => {
-    if (!selectedUser || !id) return;
-
-    try {
-      setIsAddingMember(true);
-      await projectService.addProjectMember(Number(id), selectedUser);
-      toast.success('Membro adicionado com sucesso');
-      setIsAddMemberModalOpen(false);
-      setSelectedUser(null);
-      // Recarrega os dados do projeto
-      fetchProject();
-    } catch (err: any) {
-      console.error('Erro ao adicionar membro:', err);
-      toast.error(err.message || 'Erro ao adicionar membro');
-    } finally {
-      setIsAddingMember(false);
-    }
-  };
-
-  // Efeito para carregar usuários quando o modal abre
-  useEffect(() => {
-    if (isAddMemberModalOpen) {
-      loadAvailableUsers();
-    }
-  }, [isAddMemberModalOpen]);
 
   if (loading) {
     return (
@@ -424,12 +354,10 @@ const ProjectDetails: React.FC = () => {
               <div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                   <h2 className="text-lg font-medium text-gray-900">Membros do Projeto</h2>
-                  <Button 
-                    variant="primary" 
-                    size="sm"
-                    onClick={() => setIsAddMemberModalOpen(true)}
-                  >
-                    <FiPlus className="-ml-1 mr-2 h-4 w-4" />
+                  <Button variant="primary" size="sm">
+                    <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
                     Adicionar Membro
                   </Button>
                 </div>
@@ -583,83 +511,6 @@ const ProjectDetails: React.FC = () => {
             )}
           </div>
         </div>
-
-        {/* Modal de Adicionar Membro */}
-        <Dialog
-          isOpen={isAddMemberModalOpen}
-          onClose={() => {
-            setIsAddMemberModalOpen(false);
-            setSelectedUser(null);
-          }}
-          title="Adicionar Membro"
-          description={
-            <div className="space-y-4">
-              <p className="text-sm text-gray-500">
-                Selecione um usuário para adicionar ao projeto.
-              </p>
-              
-              {isLoadingUsers ? (
-                <div className="flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : availableUsers.length > 0 ? (
-                <div className="max-h-60 overflow-y-auto">
-                  {availableUsers.map((user) => (
-                    <div
-                      key={user.id}
-                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                        selectedUser === user.id
-                          ? 'bg-primary-50 border border-primary-200'
-                          : 'hover:bg-gray-50 border border-transparent'
-                      }`}
-                      onClick={() => setSelectedUser(user.id)}
-                    >
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                          <p className="text-xs text-gray-500">{user.email}</p>
-                        </div>
-                      </div>
-                      {selectedUser === user.id && (
-                        <div className="h-5 w-5 rounded-full bg-primary text-white flex items-center justify-center">
-                          <FiX className="h-3 w-3" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-500">
-                  Nenhum usuário disponível para adicionar.
-                </div>
-              )}
-            </div>
-          }
-        >
-          <div className="mt-6 flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddMemberModalOpen(false);
-                setSelectedUser(null);
-              }}
-              disabled={isAddingMember}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleAddMember}
-              disabled={!selectedUser || isAddingMember}
-              isLoading={isAddingMember}
-            >
-              Adicionar
-            </Button>
-          </div>
-        </Dialog>
       </main>
     </div>
   );

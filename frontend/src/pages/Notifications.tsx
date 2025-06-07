@@ -211,7 +211,7 @@ const Notifications: React.FC = () => {
           >
             Voltar
           </Link>
-          <h1 className="text-2xl font-semibold text-gray-800">Notificações</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Notificações</h1>
         </div>
         {hasUnreadNotifications() && (
           <button

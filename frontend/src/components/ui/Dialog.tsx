@@ -2,12 +2,11 @@ import React, { Fragment } from 'react';
 import { Dialog as HeadlessDialog, Transition } from '@headlessui/react';
 import { FiX } from 'react-icons/fi';
 
-export interface DialogProps {
+interface DialogProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  description?: React.ReactNode;
-  children?: React.ReactNode;
+  children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
@@ -15,7 +14,6 @@ const Dialog: React.FC<DialogProps> = ({
   isOpen,
   onClose,
   title,
-  description,
   children,
   maxWidth = 'md'
 }) => {
@@ -30,7 +28,7 @@ const Dialog: React.FC<DialogProps> = ({
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <HeadlessDialog as="div" className="fixed z-10 inset-0 overflow-y-auto" onClose={onClose}>
-        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -72,7 +70,6 @@ const Dialog: React.FC<DialogProps> = ({
               </div>
               
               <div className="px-4 py-4 sm:p-6">
-                {description}
                 {children}
               </div>
             </div>

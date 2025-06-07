@@ -75,11 +75,11 @@ router.get('/:taskId/history/:fieldName', projectAccessMiddleware, (req, res) =>
 router.get('/user/task-changes', projectAccessMiddleware, (req, res) => taskHistoryController.getUserTaskChanges(req, res));
 
 // Rotas de tarefas
-router.get('/projects/:projectId/tasks', taskController.getTasks);
-router.get('/projects/:projectId/tasks/:taskId', taskController.getTaskById);
-router.post('/projects/:projectId/tasks', taskController.createTask);
-router.put('/projects/:projectId/tasks/:taskId', taskController.updateTask);
-router.patch('/projects/:projectId/tasks/:taskId/status', taskController.updateTaskStatus);
-router.delete('/projects/:projectId/tasks/:taskId', taskController.deleteTask);
+router.get('/projects/:projectId/tasks', projectAccessMiddleware, (req, res) => taskController.getTasks(req, res));
+router.get('/projects/:projectId/tasks/:taskId', projectAccessMiddleware, (req, res) => taskController.getTaskById(req, res));
+router.post('/projects/:projectId/tasks', projectAccessMiddleware, (req, res) => taskController.createTask(req, res));
+router.put('/projects/:projectId/tasks/:taskId', projectAccessMiddleware, (req, res) => taskController.updateTask(req, res));
+router.patch('/projects/:projectId/tasks/:taskId/status', projectAccessMiddleware, (req, res) => taskController.updateTaskStatus(req, res));
+router.delete('/projects/:projectId/tasks/:taskId', projectAccessMiddleware, (req, res) => taskController.deleteTask(req, res));
 
 module.exports = router; 

@@ -34,74 +34,14 @@
     @apply text-xl font-medium leading-snug;
   }
 
-  /* Estilização padrão para campos de formulário */
+  /* Garantir que os campos de formulário sempre tenham texto visível */
   input, select, textarea {
-    @apply bg-white text-gray-900 border border-gray-900;
+    @apply text-primary-lighter bg-gray-800 border-gray-600;
   }
 
-  /* Estilização dos placeholders */
+  /* Garantir que os placeholders sejam visíveis */
   ::placeholder {
-    @apply text-gray-900/60;
-  }
-
-  /* Estilização do foco */
-  input:focus, select:focus, textarea:focus {
-    @apply outline-none ring-2 ring-primary ring-opacity-50 border-primary;
-  }
-
-  /* Estilização do hover */
-  input:hover, select:hover, textarea:hover {
-    @apply border-primary;
-  }
-
-  /* Estilização para campos desabilitados */
-  input:disabled, select:disabled, textarea:disabled {
-    @apply bg-gray-100 cursor-not-allowed;
-  }
-
-  /* Estilização para campos com erro */
-  input.error, select.error, textarea.error {
-    @apply border-red-500;
-  }
-
-  /* Estilização para campos com sucesso */
-  input.success, select.success, textarea.success {
-    @apply border-green-500;
-  }
-
-  /* Estilização para campos de busca */
-  input[type="search"] {
-    @apply pl-10;
-  }
-
-  /* Estilização para campos de data */
-  input[type="date"] {
-    @apply cursor-pointer;
-  }
-
-  /* Estilização para campos numéricos */
-  input[type="number"] {
-    @apply appearance-none;
-  }
-
-  /* Estilização para campos de arquivo */
-  input[type="file"] {
-    @apply cursor-pointer;
-  }
-
-  /* Estilização para campos de checkbox e radio */
-  input[type="checkbox"], input[type="radio"] {
-    @apply border-gray-900 text-primary focus:ring-primary;
-  }
-
-  /* Estilização para campos de select */
-  select {
-    @apply appearance-none bg-white;
-  }
-
-  /* Estilização para campos de textarea */
-  textarea {
-    @apply resize-y;
+    @apply text-gray-500;
   }
 
   :root {
@@ -118,11 +58,11 @@
 
   @media (prefers-color-scheme: dark) {
     input, select, textarea {
-      @apply bg-white text-gray-900 border border-gray-900;
+      @apply text-primary-lighter bg-gray-800 border-gray-700;
     }
     
     ::placeholder {
-      @apply text-gray-900/60;
+      @apply text-gray-500;
     }
   }
 

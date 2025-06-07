@@ -5,8 +5,6 @@ export interface User {
   name: string;
   email: string;
   role: string;
-  created_at: string;
-  updated_at: string;
 }
 
 class UserService {
@@ -34,11 +32,6 @@ class UserService {
       console.error(`Erro ao buscar usuário ${id}:`, error);
       throw new Error(error.message || 'Erro ao buscar usuário');
     }
-  }
-
-  async getAvailableUsers(projectId: number): Promise<User[]> {
-    const response = await api.get(`/users/available/${projectId}`);
-    return response.data;
   }
 }
 

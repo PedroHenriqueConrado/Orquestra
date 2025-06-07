@@ -37,9 +37,9 @@ const FormField: React.FC<FormFieldProps> = ({
         type={type}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={`appearance-none block w-full px-3 py-2 border ${
-          error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-900 focus:ring-primary focus:border-primary'
-        } rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-900/60 focus:outline-none focus:ring-2 sm:text-sm ${className}`}
+        className={`appearance-none block w-full px-3 py-2 border bg-gray-800 ${
+          error ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-600 focus:ring-primary-light focus:border-primary-light'
+        } rounded-md shadow-sm placeholder-gray-500 text-primary-lighter focus:outline-none focus:ring-2 sm:text-sm ${className}`}
         {...props}
       />
     </div>
