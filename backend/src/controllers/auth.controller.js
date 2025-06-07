@@ -183,6 +183,17 @@ class AuthController {
       res.status(500).json({ message: 'Erro ao remover imagem de perfil' });
     }
   }
+
+  async deleteAccount(req, res) {
+    try {
+      const userId = req.user.id;
+      await authService.deleteAccount(userId);
+      res.json({ message: 'Conta excluída com sucesso' });
+    } catch (error) {
+      console.error('Erro ao excluir conta:', error);
+      res.status(500).json({ message: 'Erro ao excluir conta' });
+    }
+  }
 }
 
 module.exports = new AuthController(); 

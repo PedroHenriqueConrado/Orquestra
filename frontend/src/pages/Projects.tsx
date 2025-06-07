@@ -258,19 +258,6 @@ const Projects: React.FC = () => {
                         Criado em {new Date(project.created_at).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
-                    <div className="ml-2 flex-shrink-0 flex">
-                      <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${
-                          getProjectStatus(project) === 'Em Progresso'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : getProjectStatus(project) === 'Concluído'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {getProjectStatus(project)}
-                      </p>
-                    </div>
                   </div>
                   
                   {project.description && (

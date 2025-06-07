@@ -86,7 +86,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
         <h2 className="text-lg font-medium text-gray-900">Tarefas</h2>
         <button
           onClick={onRefresh}
-          className="text-sm text-primary hover:text-primary-dark"
+          className="whitespace-nowrap m-1 py-3 sm:py-4 px-3 sm:px-5 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white"
         >
           Atualizar
         </button>
@@ -177,17 +177,17 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
                     <Link
-                      to={`/tasks/${task.id}/edit`}
-                      className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                      to={`/projects/${task.project_id}/tasks/${task.id}?from=list&tab=tasks&status=${status}`}
+                      className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors hover:text-black"
                     >
-                      Editar
+                      Abrir
                     </Link>
                     <button
                       onClick={() => onStatusChange(task.id, task.status === 'completed' ? 'pending' : 'completed')}
                       className={`px-3 py-1 text-xs border rounded-md transition-colors ${
                         task.status === 'completed'
-                          ? 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                          : 'border-primary text-primary hover:bg-primary hover:text-white'
+                          ? 'text-primary hover:bg-primary hover:text-white text-white hover:border-white'
+                          : 'text-primary hover:bg-primary hover:text-white text-white hover:border-white'
                       }`}
                     >
                       {task.status === 'completed' ? 'Reabrir' : 'Concluir'}

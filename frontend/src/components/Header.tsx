@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationIcon from './NotificationIcon';
@@ -7,7 +7,12 @@ import NotificationIcon from './NotificationIcon';
 const Header: React.FC = () => {
   const { user, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isActiveRoute = (path: string) => {
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <header className="bg-white shadow">
@@ -25,19 +30,31 @@ const Header: React.FC = () => {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 to="/dashboard"
-                className="hover:text-gray-700 border-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`${
+                  isActiveRoute('/dashboard')
+                    ? 'border-primary text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Dashboard
               </Link>
               <Link
                 to="/projects"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`${
+                  isActiveRoute('/projects')
+                    ? 'border-primary text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Projetos
               </Link>
               <Link
                 to="/messages"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`${
+                  isActiveRoute('/messages')
+                    ? 'border-primary text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Mensagens
               </Link>
@@ -187,38 +204,36 @@ const Header: React.FC = () => {
         <div className="pt-2 pb-3 space-y-1">
           <Link
             to="/dashboard"
-            className="bg-primary-lighter text-primary block pl-3 pr-4 py-2 border-l-4 border-primary text-base font-medium"
+            className={`${
+              isActiveRoute('/dashboard')
+                ? 'bg-primary-lighter text-primary border-primary'
+                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Dashboard
           </Link>
           <Link
             to="/projects"
-            className="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+            className={`${
+              isActiveRoute('/projects')
+                ? 'bg-primary-lighter text-primary border-primary'
+                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Projetos
           </Link>
           <Link
-            to="/tasks"
-            className="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Tarefas
-          </Link>
-          <Link
             to="/messages"
-            className="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+            className={`${
+              isActiveRoute('/messages')
+                ? 'bg-primary-lighter text-primary border-primary'
+                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Mensagens
-          </Link>
-          <Link
-            to="/teams"
-            className="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Equipes
           </Link>
         </div>
         

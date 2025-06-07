@@ -5,9 +5,10 @@ import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
+import Modal from '../components/ui/Modal';
 
 const Profile: React.FC = () => {
-  const { user, updateProfile, updatePassword } = useAuth();
+  const { user, updateProfile, updatePassword, deleteAccount } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +22,8 @@ const Profile: React.FC = () => {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -131,6 +134,37 @@ const Profile: React.FC = () => {
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleteLoading(true);
+      setError(null);
+      await deleteAccount();
+      navigate('/');
+    } catch (err: any) {
+      console.error('Erro ao excluir conta:', err);
+      let errorMessage = 'Erro ao excluir conta';
+      
+      if (err.message === 'Usuário não autenticado') {
+        errorMessage = 'Sua sessão expirou. Por favor, faça login novamente.';
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } else if (err.message.includes('network')) {
+        errorMessage = 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.';
+      } else if (err.message.includes('401')) {
+        errorMessage = 'Sua sessão expirou. Por favor, faça login novamente.';
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      }
+      
+      setError(errorMessage);
+      setShowDeleteModal(false);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -249,7 +283,50 @@ const Profile: React.FC = () => {
             </Button>
           </div>
         </form>
+
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="danger"
+              onClick={() => setShowDeleteModal(true)}
+              disabled={loading}
+            >
+              Excluir Conta
+            </Button>
+          </div>
+        </div>
       </div>
+
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Excluir Conta"
+      >
+        <div className="p-6">
+          <p className="text-gray-700 mb-4">
+            Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.
+          </p>
+          <div className="flex justify-end space-x-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowDeleteModal(false)}
+              disabled={deleteLoading}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleDeleteAccount}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? 'Excluindo...' : 'Confirmar Exclusão'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -141,6 +141,55 @@ class AuthService {
 
     return { message: 'Senha atualizada com sucesso' };
   }
+
+  async deleteAccount(userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    // Inicia uma transação para garantir a integridade dos dados
+    return await prisma.$transaction(async (prisma) => {
+      // Remove todas as mensagens do usuário
+      await prisma.chatMessage.deleteMany({
+        where: { user_id: userId }
+      });
+
+      // Remove todas as notificações do usuário
+      await prisma.notification.deleteMany({
+        where: { user_id: userId }
+      });
+
+      // Remove todas as associações do usuário com projetos
+      await prisma.projectMember.deleteMany({
+        where: { user_id: userId }
+      });
+
+      // Remove todas as tarefas atribuídas ao usuário
+      await prisma.task.updateMany({
+        where: { assigned_to: userId },
+        data: { assigned_to: null }
+      });
+
+      // Remove a imagem de perfil se existir
+      if (user.profileImage) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { profileImage: null }
+        });
+      }
+
+      // Por fim, remove o usuário
+      await prisma.user.delete({
+        where: { id: userId }
+      });
+
+      return { message: 'Conta excluída com sucesso' };
+    });
+  }
 }
 
 module.exports = new AuthService(); 

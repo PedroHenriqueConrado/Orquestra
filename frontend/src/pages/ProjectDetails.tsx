@@ -9,11 +9,14 @@ import progressService from '../services/progress.service';
 import type { Project } from '../services/project.service';
 import type { Task, TaskStatus } from '../services/task.service';
 import TaskList from '../components/TaskList';
+import MemberSelector from '../components/MemberSelector';
+import { useAuth } from '../contexts/AuthContext';
 
 const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user: currentUser } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +28,11 @@ const ProjectDetails: React.FC = () => {
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [projectProgress, setProjectProgress] = useState<number>(0);
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+  const [isAddingMembers, setIsAddingMembers] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<{ id: number; name: string } | null>(null);
+  const [isRemovingMember, setIsRemovingMember] = useState(false);
 
   // Verifica se há um parâmetro de consulta 'tab' na URL
   const queryParams = new URLSearchParams(location.search);
@@ -177,6 +185,55 @@ const ProjectDetails: React.FC = () => {
       setFilteredTasks(filtered);
     }
   }, [tasks, taskFilter]);
+
+  const handleAddMembers = async () => {
+    if (!project || selectedMembers.length === 0) return;
+
+    try {
+      setIsAddingMembers(true);
+      
+      // Adiciona cada membro selecionado ao projeto
+      await Promise.all(
+        selectedMembers.map(userId =>
+          projectService.addMember(project.id, userId)
+        )
+      );
+
+      // Atualiza a lista de membros do projeto
+      const updatedProject = await projectService.getProjectById(project.id);
+      setProject(updatedProject);
+      
+      // Fecha o modal e limpa a seleção
+      setIsAddMemberModalOpen(false);
+      setSelectedMembers([]);
+    } catch (err: any) {
+      console.error('Erro ao adicionar membros:', err);
+      setError(err.message || 'Erro ao adicionar membros ao projeto');
+    } finally {
+      setIsAddingMembers(false);
+    }
+  };
+
+  const handleRemoveMember = async () => {
+    if (!project || !memberToRemove) return;
+
+    try {
+      setIsRemovingMember(true);
+      await projectService.removeMember(project.id, memberToRemove.id);
+      
+      // Atualiza a lista de membros do projeto
+      const updatedProject = await projectService.getProjectById(project.id);
+      setProject(updatedProject);
+      
+      // Fecha o modal de confirmação
+      setMemberToRemove(null);
+    } catch (err: any) {
+      console.error('Erro ao remover membro:', err);
+      setError(err.message || 'Erro ao remover membro do projeto');
+    } finally {
+      setIsRemovingMember(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -354,7 +411,11 @@ const ProjectDetails: React.FC = () => {
               <div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                   <h2 className="text-lg font-medium text-gray-900">Membros do Projeto</h2>
-                  <Button variant="primary" size="sm">
+                  <Button 
+                    variant="primary" 
+                    size="sm"
+                    onClick={() => setIsAddMemberModalOpen(true)}
+                  >
                     <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
@@ -407,18 +468,15 @@ const ProjectDetails: React.FC = () => {
                               <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {new Date(member.joined_at).toLocaleDateString('pt-BR')}
                               </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-right">
-                                <button 
-                                  className="text-red-600 hover:text-red-900"
-                                  onClick={() => {
-                                    if (window.confirm(`Deseja remover ${member.user.name} do projeto?`)) {
-                                      // Implement remove member functionality
-                                      alert('Funcionalidade de remoção a ser implementada');
-                                    }
-                                  }}
-                                >
-                                  Remover
-                                </button>
+                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                {member.user.id !== currentUser?.id && (
+                                  <button
+                                    onClick={() => setMemberToRemove({ id: member.user.id, name: member.user.name })}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    Remover
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           ))}
@@ -427,8 +485,25 @@ const ProjectDetails: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-4">
-                    <p className="text-gray-500">Nenhum membro encontrado.</p>
+                  <div className="text-center py-12 bg-white rounded-lg shadow">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum membro</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Comece adicionando membros ao projeto.
+                    </p>
+                    <div className="mt-6">
+                      <Button
+                        variant="primary"
+                        onClick={() => setIsAddMemberModalOpen(true)}
+                      >
+                        <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                        </svg>
+                        Adicionar Membro
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -511,6 +586,92 @@ const ProjectDetails: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Modal de Adicionar Membros */}
+        {isAddMemberModalOpen && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Adicionar Membros</h3>
+                <button
+                  onClick={() => setIsAddMemberModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <MemberSelector
+                selectedMembers={selectedMembers}
+                onChange={setSelectedMembers}
+                currentUserId={currentUser?.id}
+              />
+
+              <div className="mt-6 flex justify-end space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsAddMemberModalOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleAddMembers}
+                  disabled={selectedMembers.length === 0 || isAddingMembers}
+                  isLoading={isAddingMembers}
+                >
+                  Adicionar
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Confirmação de Remoção */}
+        {memberToRemove && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className="sm:flex sm:items-start">
+                <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                    Remover Membro
+                  </h3>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">
+                      Tem certeza que deseja remover {memberToRemove.name} do projeto? Esta ação não pode ser desfeita.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                <Button
+                  variant="danger"
+                  onClick={handleRemoveMember}
+                  disabled={isRemovingMember}
+                  isLoading={isRemovingMember}
+                  className="w-full sm:w-auto sm:ml-3"
+                >
+                  Remover
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setMemberToRemove(null)}
+                  disabled={isRemovingMember}
+                  className="mt-3 sm:mt-0 w-full sm:w-auto"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

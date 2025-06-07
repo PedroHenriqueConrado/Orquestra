@@ -204,23 +204,38 @@ const Notifications: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-4">
+        <div className="flex-1">
           <Link
             to="/dashboard"
-            className="px-3 py-1.5 text-sm font-medium text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black rounded-md transition-all duration-200"
+            className="inline-flex items-center text-gray-600 hover:text-gray-900"
           >
+            <svg 
+              className="h-6 w-6 mr-2" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+              />
+            </svg>
             Voltar
           </Link>
-        <h1 className="text-2xl font-semibold text-gray-800">Notificações</h1>
         </div>
-        {hasUnreadNotifications() && (
-          <button
-            className="px-3 py-1.5 text-sm font-medium text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black rounded-md transition-all duration-200"
-            onClick={markAllAsRead}
-          >
-            Marcar todas como lidas
-          </button>
-        )}
+        <h1 className="text-2xl font-semibold text-gray-800 flex-1 text-center">Notificações</h1>
+        <div className="flex-1 flex justify-end">
+          {hasUnreadNotifications() && (
+            <button
+              className="px-3 py-1.5 text-sm font-medium text-white border-2 border-black bg-black hover:bg-yellow-100 hover:text-black rounded-md transition-all duration-200"
+              onClick={markAllAsRead}
+            >
+              Marcar todas como lidas
+            </button>
+          )}
+        </div>
       </div>
       
       {loading ? (

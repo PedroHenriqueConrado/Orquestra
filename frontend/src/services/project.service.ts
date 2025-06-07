@@ -153,13 +153,16 @@ class ProjectService {
     }
   }
 
-  async addMember(projectId: number, data: MemberData): Promise<ProjectMember> {
+  async addMember(projectId: number, userId: number, role: string = 'developer'): Promise<ProjectMember> {
     try {
-      const response = await api.post<ProjectMember>(`/projects/${projectId}/members`, data);
+      const response = await api.post(`/projects/${projectId}/members`, {
+        userId,
+        role
+      });
       return response.data;
     } catch (error: any) {
-      console.error(`Erro ao adicionar membro ao projeto ${projectId}:`, error);
-      throw new Error(error.message || 'Erro ao adicionar membro ao projeto');
+      console.error('Erro ao adicionar membro:', error);
+      throw new Error(error.response?.data?.message || 'Erro ao adicionar membro ao projeto');
     }
   }
 
@@ -167,8 +170,8 @@ class ProjectService {
     try {
       await api.delete(`/projects/${projectId}/members/${userId}`);
     } catch (error: any) {
-      console.error(`Erro ao remover membro do projeto ${projectId}:`, error);
-      throw new Error(error.message || 'Erro ao remover membro do projeto');
+      console.error('Erro ao remover membro:', error);
+      throw new Error(error.response?.data?.message || 'Erro ao remover membro do projeto');
     }
   }
 }

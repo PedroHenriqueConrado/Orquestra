@@ -227,25 +227,25 @@ const NewProject: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            currentStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+            currentStep >= 1 ? 'bg-gray-200 text-white' : 'bg-black text-white'
           }`}>
             1
           </div>
           <div className="ml-2 text-sm font-medium">Informações Básicas</div>
         </div>
-        <div className={`flex-1 mx-4 h-1 ${currentStep >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+        <div className={`flex-1 mx-4 h-1 ${currentStep >= 2 ? 'bg-gray-200' : 'bg-black'}`}></div>
         <div className="flex items-center">
           <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            currentStep >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+            currentStep >= 2 ? 'bg-gray-200 text-white' : 'bg-black text-white'
           }`}>
             2
           </div>
           <div className="ml-2 text-sm font-medium">Membros da Equipe</div>
         </div>
-        <div className={`flex-1 mx-4 h-1 ${currentStep >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+        <div className={`flex-1 mx-4 h-1 ${currentStep >= 3 ? 'bg-gray-200' : 'bg-black'}`}></div>
         <div className="flex items-center">
           <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            currentStep >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+            currentStep >= 3 ? 'bg-gray-200 text-white' : 'bg-black text-gray-600 text-white'
           }`}>
             3
           </div>
@@ -358,7 +358,7 @@ const NewProject: React.FC = () => {
       <Button
         type="button"
         variant="secondary"
-        onClick={() => navigate('/projects')}
+        onClick={() => navigate('/dashboard')}
       >
         Cancelar
       </Button>

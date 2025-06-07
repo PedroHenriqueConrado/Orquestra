@@ -23,6 +23,7 @@ interface AuthContextType {
   refreshSession: () => Promise<boolean>;
   updateProfile: (data: { name: string; profileImage?: string | null }) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
   // Função para verificar se o token parece válido (formato básico)
@@ -78,9 +80,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const storedUser = loadUserFromStorage();
         if (storedUser) {
           setUser(storedUser);
+          setIsLoggedIn(true);
           console.log('Usuário carregado do localStorage:', storedUser.name);
         } else {
           setUser(null);
+          setIsLoggedIn(false);
         }
       } catch (err) {
         console.error('Erro ao inicializar autenticação:', err);
@@ -118,6 +122,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (storedUser) {
         // Atualiza o estado do usuário no contexto
         setUser(storedUser);
+        setIsLoggedIn(true);
         console.log('AuthContext: Sessão renovada com sucesso para', storedUser.name);
         
         // Apenas para debug: imprime quando o token irá expirar
@@ -148,6 +153,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (response.token && isTokenValid(response.token)) {
         setUser(response.user);
+        setIsLoggedIn(true);
         navigate('/dashboard');
       } else {
         throw new Error('Token de autenticação inválido');
@@ -179,6 +185,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = (): void => {
     authService.logout();
     setUser(null);
+    setIsLoggedIn(false);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     navigate('/login');
   };
 
@@ -220,18 +229,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const deleteAccount = async () => {
+    try {
+      await authService.deleteAccount();
+      setUser(null);
+      setIsLoggedIn(false);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
     error,
-    isLoggedIn: !!user,
+    isLoggedIn,
     login,
     register,
     logout,
     clearError,
     refreshSession,
     updateProfile,
-    updatePassword
+    updatePassword,
+    deleteAccount
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -202,6 +202,28 @@ class AuthService {
   getCurrentUser(): User | null {
     return this.getUser();
   }
+
+  async deleteAccount(): Promise<void> {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao excluir conta');
+    }
+
+    this.logout();
+  }
 }
 
 export default new AuthService(); 

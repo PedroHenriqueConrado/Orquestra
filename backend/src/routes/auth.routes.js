@@ -13,6 +13,7 @@ router.post('/login', AuthController.login.bind(AuthController));
 router.use(authMiddleware);
 router.get('/profile', AuthController.getProfile.bind(AuthController));
 router.put('/profile', AuthController.updateProfile.bind(AuthController));
+router.delete('/profile', AuthController.deleteAccount.bind(AuthController));
 router.put('/password', AuthController.updatePassword.bind(AuthController));
 
 // Rotas de imagem de perfil
