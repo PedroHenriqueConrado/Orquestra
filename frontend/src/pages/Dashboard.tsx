@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import projectService from '../services/project.service';
 import taskService from '../services/task.service';
+import progressService from '../services/progress.service';
 import type { Project } from '../services/project.service';
 import type { Task } from '../services/task.service';
 
@@ -108,20 +109,13 @@ const Dashboard: React.FC = () => {
   // Função para calcular o progresso de um projeto
   const calculateProjectProgress = (projectId: number): number => {
     const projectTasks = tasks.filter(task => task.project_id === projectId);
-    
-    if (projectTasks.length === 0) return 0;
-    
-    const completedTasks = projectTasks.filter(task => task.status === 'completed').length;
-    return Math.round((completedTasks / projectTasks.length) * 100);
+    return progressService.calculateProgress(projectTasks);
   };
 
   // Função para determinar o status do projeto
   const getProjectStatus = (projectId: number): string => {
     const progress = calculateProjectProgress(projectId);
-    
-    if (progress === 100) return 'Concluído';
-    if (progress === 0) return 'Não iniciado';
-    return 'Em progresso';
+    return progressService.getProjectStatus(progress);
   };
 
   return (

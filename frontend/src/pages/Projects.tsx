@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import projectService from '../services/project.service';
 import type { Project } from '../services/project.service';
 import { useAuth } from '../contexts/AuthContext';
+import progressService from '../services/progress.service';
 
 type LocationState = {
   message?: string;
@@ -23,6 +24,7 @@ const Projects: React.FC = () => {
     type: 'success' | 'error' | 'info';
   } | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [projectsProgress, setProjectsProgress] = useState<Record<number, number>>({});
 
   useEffect(() => {
     // Verifica se há uma mensagem na navegação (ex: após criar um projeto)
@@ -89,38 +91,23 @@ const Projects: React.FC = () => {
     }
   };
 
-  // Função para calcular o progresso do projeto
-  const getProjectProgress = (project: Project): number => {
-    // Como não temos acesso direto às tarefas do projeto na interface Project,
-    // vamos usar um valor simulado de progresso baseado em outros fatores
-    
-    // Simulando progresso com base na data de criação
-    const creationDate = new Date(project.created_at);
-    const now = new Date();
-    const ageInDays = Math.floor((now.getTime() - creationDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    // Projetos mais antigos tendem a ter mais progresso
-    // Limitamos o progresso máximo a 95% para projetos antigos sem marcação explícita de conclusão
-    const progressByAge = Math.min(95, Math.floor(ageInDays / 2));
-    
-    // Simulamos que projetos com mais membros têm mais progresso
-    const memberFactor = Math.min(30, project.members.length * 10);
-    
-    // Combinamos os fatores, com limitação para não ultrapassar 100%
-    return Math.min(100, Math.max(10, progressByAge + memberFactor) % 100);
-  };
-  
+  // Efeito para calcular o progresso dos projetos
+  useEffect(() => {
+    const calculateProjectsProgress = async () => {
+      const progressMap: Record<number, number> = {};
+      for (const project of projects) {
+        const progress = await progressService.getProjectProgress(project.id);
+        progressMap[project.id] = progress;
+      }
+      setProjectsProgress(progressMap);
+    };
+    calculateProjectsProgress();
+  }, [projects]);
+
   // Função para determinar o status do projeto
   const getProjectStatus = (project: Project): string => {
-    const progress = getProjectProgress(project);
-    
-    if (progress >= 95) {
-      return 'Concluído';
-    } else if (progress <= 15) {
-      return 'Não Iniciado';
-    } else {
-      return 'Em Progresso';
-    }
+    const progress = projectsProgress[project.id] || 0;
+    return progressService.getProjectStatus(progress);
   };
 
   const filteredProjects = projects.filter(project =>
@@ -275,10 +262,10 @@ const Projects: React.FC = () => {
                       <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                         ${
                           getProjectStatus(project) === 'Em Progresso'
-                            ? 'bg-blue-100 text-blue-800'
+                            ? 'bg-yellow-100 text-yellow-800'
                             : getProjectStatus(project) === 'Concluído'
                             ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                            : 'bg-blue-100 text-blue-800'
                         }`}
                       >
                         {getProjectStatus(project)}
@@ -294,13 +281,13 @@ const Projects: React.FC = () => {
                   
                   <div className="mt-4">
                     <div className="flex justify-between mb-1">
-                      <span className="text-xs sm:text-sm font-medium text-gray-700">Progresso</span>
-                      <span className="text-xs sm:text-sm font-medium text-gray-700">{getProjectProgress(project)}%</span>
+                      <span className="text-sm font-medium text-gray-700">Progresso</span>
+                      <span className="text-sm font-medium text-gray-700">{projectsProgress[project.id] || 0}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-primary h-2 rounded-full" 
-                        style={{ width: `${getProjectProgress(project)}%` }}
+                        style={{ width: `${projectsProgress[project.id] || 0}%` }}
                       ></div>
                     </div>
                   </div>

@@ -341,10 +341,22 @@ class TaskService {
     }
 
     async deleteTask(taskId, projectId) {
-        return await prisma.task.delete({
+        // Verificar se a tarefa existe e pertence ao projeto
+        const task = await prisma.task.findFirst({
             where: {
                 id: Number(taskId),
                 project_id: Number(projectId)
+            }
+        });
+
+        if (!task) {
+            throw new Error('Tarefa não encontrada');
+        }
+
+        // Excluir a tarefa
+        await prisma.task.delete({
+            where: {
+                id: Number(taskId)
             }
         });
     }

@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationIcon from './NotificationIcon';
@@ -7,7 +7,15 @@ import NotificationIcon from './NotificationIcon';
 const Header: React.FC = () => {
   const { user, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isCurrentPath = (path: string) => {
+    if (path === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <header className="bg-white shadow">
@@ -15,29 +23,41 @@ const Header: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/">
+              <Link to="/dashboard">
                 <img className="h-8 w-auto" src="/src/assets/favicon.svg" alt="Orquestra" />
               </Link>
-              <Link to="/" className="ml-2 text-xl font-bold text-primary-dark hover:text-primary-lighter">
+              <Link to="/dashboard" className="ml-2 text-xl font-bold text-primary-dark hover:text-primary-lighter">
                 Orquestra
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 to="/dashboard"
-                className="hover:text-gray-700 border-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`${
+                  isCurrentPath('/dashboard')
+                    ? 'border-primary text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Dashboard
               </Link>
               <Link
                 to="/projects"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`${
+                  isCurrentPath('/projects')
+                    ? 'border-primary text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Projetos
               </Link>
               <Link
                 to="/messages"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                className={`${
+                  isCurrentPath('/messages')
+                    ? 'border-primary text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Mensagens
               </Link>
@@ -48,9 +68,7 @@ const Header: React.FC = () => {
           <div className="flex items-center sm:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
-              aria-controls="mobile-menu"
-              aria-expanded="false"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <span className="sr-only">Abrir menu principal</span>
@@ -187,38 +205,36 @@ const Header: React.FC = () => {
         <div className="pt-2 pb-3 space-y-1">
           <Link
             to="/dashboard"
-            className="bg-primary-lighter text-primary block pl-3 pr-4 py-2 border-l-4 border-primary text-base font-medium"
+            className={`${
+              isCurrentPath('/dashboard')
+                ? 'bg-primary-lighter text-primary border-primary'
+                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Dashboard
           </Link>
           <Link
             to="/projects"
-            className="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+            className={`${
+              isCurrentPath('/projects')
+                ? 'bg-primary-lighter text-primary border-primary'
+                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Projetos
           </Link>
           <Link
-            to="/tasks"
-            className="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Tarefas
-          </Link>
-          <Link
             to="/messages"
-            className="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+            className={`${
+              isCurrentPath('/messages')
+                ? 'bg-primary-lighter text-primary border-primary'
+                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Mensagens
-          </Link>
-          <Link
-            to="/teams"
-            className="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            Equipes
           </Link>
         </div>
         

@@ -171,6 +171,10 @@ class ProjectService {
       throw new Error(error.message || 'Erro ao remover membro do projeto');
     }
   }
+
+  async addProjectMember(projectId: number, userId: number): Promise<void> {
+    await api.post(`/projects/${projectId}/members`, { user_id: userId });
+  }
 }
 
 export default new ProjectService(); 

@@ -215,6 +215,19 @@ class TaskController {
             res.status(500).json({ error: 'Internal server error' });
         }
     }
+
+    async deleteTask(req, res) {
+        try {
+            const { projectId, taskId } = req.params;
+            await this.taskService.deleteTask(taskId, projectId);
+            res.status(204).send();
+        } catch (error) {
+            console.error('Erro ao excluir tarefa:', error);
+            res.status(error.message === 'Tarefa não encontrada' ? 404 : 500).json({
+                error: error.message || 'Erro ao excluir tarefa'
+            });
+        }
+    }
 }
 
 module.exports = TaskController; 

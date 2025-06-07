@@ -5,8 +5,14 @@ import Button from '../components/ui/Button';
 import ProjectChat from '../components/ProjectChat';
 import projectService from '../services/project.service';
 import taskService from '../services/task.service';
+import progressService from '../services/progress.service';
 import type { Project } from '../services/project.service';
-import type { Task } from '../services/task.service';
+import type { Task, TaskStatus } from '../services/task.service';
+import TaskList from '../components/TaskList';
+import Dialog from '../components/ui/Dialog';
+import { FiPlus, FiX } from 'react-icons/fi';
+import userService, { User } from '../services/user.service';
+import { toast } from 'react-hot-toast';
 
 const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +24,16 @@ const ProjectDetails: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksLoading, setTasksLoading] = useState(false);
   const [tasksError, setTasksError] = useState<string | null>(null);
+  const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(false);
+  const [taskError, setTaskError] = useState<string | null>(null);
+  const [projectProgress, setProjectProgress] = useState<number>(0);
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<number | null>(null);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [isAddingMember, setIsAddingMember] = useState(false);
 
   // Verifica se há um parâmetro de consulta 'tab' na URL
   const queryParams = new URLSearchParams(location.search);
@@ -46,6 +62,23 @@ const ProjectDetails: React.FC = () => {
       });
     } catch (err: any) {
       alert(err.message || 'Erro ao excluir projeto');
+    }
+  };
+
+  // Função para recarregar os dados do projeto
+  const fetchProject = async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const fetchedProject = await projectService.getProject(Number(id));
+      setProject(fetchedProject);
+      setLoading(false);
+    } catch (err: any) {
+      console.error('Erro ao buscar projeto:', err);
+      setError(err.message || 'Erro ao carregar projeto');
+      setLoading(false);
     }
   };
 
@@ -130,6 +163,7 @@ const ProjectDetails: React.FC = () => {
       setTasksError(null);
       const fetchedTasks = await taskService.getProjectTasks(Number(id));
       setTasks(fetchedTasks);
+      setFilteredTasks(fetchedTasks);
       setTasksLoading(false);
     } catch (err: any) {
       console.error('Erro ao buscar tarefas:', err);
@@ -138,12 +172,81 @@ const ProjectDetails: React.FC = () => {
     }
   };
 
-  // Função para calcular o progresso (mock)
-  const getProjectProgress = (): number => {
-    // Aqui seria implementado uma lógica real para calcular o progresso baseado nas tarefas
-    // Por enquanto, usando um valor aleatório entre 0 e 100
-    return Math.floor(Math.random() * 100);
+  // Efeito para calcular o progresso do projeto
+  useEffect(() => {
+    const calculateProgress = async () => {
+      if (id) {
+        const progress = await progressService.getProjectProgress(Number(id));
+        setProjectProgress(progress);
+      }
+    };
+    calculateProgress();
+  }, [id, tasks]); // Recalcula quando as tarefas mudam
+
+  const handleTaskStatusChange = async (taskId: number, newStatus: TaskStatus) => {
+    if (!id || !project) return;
+    
+    try {
+      await taskService.updateTaskStatus(Number(id), taskId, newStatus);
+      fetchTasks();
+    } catch (err: any) {
+      console.error('Erro ao atualizar status da tarefa:', err);
+      setTaskError(err.message || 'Erro ao atualizar status da tarefa');
+    }
   };
+
+  useEffect(() => {
+    if (tasks) {
+      const filtered = taskFilter === 'all' 
+        ? tasks 
+        : tasks.filter(task => task.status === taskFilter);
+      setFilteredTasks(filtered);
+    }
+  }, [tasks, taskFilter]);
+
+  // Função para carregar usuários disponíveis
+  const loadAvailableUsers = async () => {
+    try {
+      setIsLoadingUsers(true);
+      const users = await userService.getAvailableUsers(Number(id));
+      // Filtra usuários que já são membros do projeto
+      const currentMemberIds = project?.members.map(m => m.user.id) || [];
+      const filteredUsers = users.filter(user => !currentMemberIds.includes(user.id));
+      setAvailableUsers(filteredUsers);
+    } catch (err: any) {
+      console.error('Erro ao carregar usuários:', err);
+      toast.error(err.message || 'Erro ao carregar usuários disponíveis');
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  // Função para adicionar membro ao projeto
+  const handleAddMember = async () => {
+    if (!selectedUser || !id) return;
+
+    try {
+      setIsAddingMember(true);
+      await projectService.addProjectMember(Number(id), selectedUser);
+      toast.success('Membro adicionado com sucesso');
+      setIsAddMemberModalOpen(false);
+      setSelectedUser(null);
+      // Recarrega os dados do projeto
+      fetchProject();
+    } catch (err: any) {
+      console.error('Erro ao adicionar membro:', err);
+      toast.error(err.message || 'Erro ao adicionar membro');
+    } finally {
+      setIsAddingMember(false);
+    }
+  };
+
+  // Efeito para carregar usuários quando o modal abre
+  useEffect(() => {
+    if (isAddMemberModalOpen) {
+      loadAvailableUsers();
+    }
+  }, [isAddMemberModalOpen]);
 
   if (loading) {
     return (
@@ -213,12 +316,12 @@ const ProjectDetails: React.FC = () => {
             <div className="mt-4">
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium text-gray-700">Progresso</span>
-                <span className="text-sm font-medium text-gray-700">{getProjectProgress()}%</span>
+                <span className="text-sm font-medium text-gray-700">{projectProgress}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2.5">
                 <div 
                   className="bg-primary h-2.5 rounded-full" 
-                  style={{ width: `${getProjectProgress()}%` }}
+                  style={{ width: `${projectProgress}%` }}
                 ></div>
               </div>
             </div>
@@ -232,8 +335,8 @@ const ProjectDetails: React.FC = () => {
               <button
                 className={`whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm ${
                   activeTab === 'overview'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
+                    : 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
                 }`}
                 onClick={() => setActiveTab('overview')}
               >
@@ -242,8 +345,8 @@ const ProjectDetails: React.FC = () => {
               <button
                 className={`whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm ${
                   activeTab === 'members'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
+                    : 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
                 }`}
                 onClick={() => setActiveTab('members')}
               >
@@ -252,8 +355,8 @@ const ProjectDetails: React.FC = () => {
               <button
                 className={`whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm ${
                   activeTab === 'tasks'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
+                    : 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
                 }`}
                 onClick={() => setActiveTab('tasks')}
               >
@@ -262,8 +365,8 @@ const ProjectDetails: React.FC = () => {
               <button
                 className={`whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm ${
                   activeTab === 'chat'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
+                    : 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
                 }`}
                 onClick={() => setActiveTab('chat')}
               >
@@ -321,10 +424,12 @@ const ProjectDetails: React.FC = () => {
               <div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                   <h2 className="text-lg font-medium text-gray-900">Membros do Projeto</h2>
-                  <Button variant="primary" size="sm">
-                    <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
+                  <Button 
+                    variant="primary" 
+                    size="sm"
+                    onClick={() => setIsAddMemberModalOpen(true)}
+                  >
+                    <FiPlus className="-ml-1 mr-2 h-4 w-4" />
                     Adicionar Membro
                   </Button>
                 </div>
@@ -402,226 +507,74 @@ const ProjectDetails: React.FC = () => {
             )}
 
             {activeTab === 'tasks' && (
-              <div>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                  <h2 className="text-lg font-medium text-gray-900">Tarefas do Projeto</h2>
-                  <Link to={`/projects/${project.id}/tasks/new`}>
-                    <Button variant="primary" size="sm">
-                      <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                      </svg>
-                      Nova Tarefa
-                    </Button>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-900">Tarefas do Projeto</h2>
+                  <Link
+                    to={`/projects/${project.id}/tasks/new`}
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  >
+                    <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nova Tarefa
                   </Link>
                 </div>
-                
-                {tasksLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : tasksError ? (
-                  <div className="text-center py-4">
-                    <p className="text-red-500">{tasksError}</p>
-                    <Button 
-                      variant="secondary" 
-                      className="mt-2" 
-                      onClick={fetchTasks}
-                    >
-                      Tentar novamente
-                    </Button>
-                  </div>
-                ) : tasks.length > 0 ? (
-                  <div className="overflow-x-auto -mx-4 sm:mx-0">
-                    <div className="inline-block min-w-full align-middle">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Título
-                            </th>
-                            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Prioridade
-                            </th>
-                            <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Responsável
-                            </th>
-                            <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Data de Entrega
-                            </th>
-                            <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Ações
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {tasks.map((task) => (
-                            <tr key={task.id}>
-                              <td className="px-4 sm:px-6 py-4">
-                                <div className="text-sm font-medium text-gray-900">{task.title}</div>
-                                {task.description && (
-                                  <div className="text-sm text-gray-500 truncate max-w-xs hidden sm:block">{task.description}</div>
-                                )}
-                              </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center space-x-2">
-                                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    ${task.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                     task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : 
-                                     'bg-green-100 text-green-800'}`}
-                                  >
-                                    {task.status === 'pending' ? 'Pendente' : 
-                                     task.status === 'in_progress' ? 'Em Prog.' : 
-                                     'Concluída'}
-                                  </span>
-                                  <div className="relative inline-block text-left">
-                                    <button
-                                      type="button"
-                                      className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                                      id={`status-button-${task.id}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        const dropdown = document.getElementById(`status-dropdown-${task.id}`);
-                                        if (dropdown) {
-                                          dropdown.classList.toggle('hidden');
-                                        }
-                                      }}
-                                    >
-                                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                      </svg>
-                                    </button>
-                                    <div 
-                                      id={`status-dropdown-${task.id}`}
-                                      className="hidden origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                                    >
-                                      <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby={`status-button-${task.id}`}>
-                                        <button
-                                          className="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                          onClick={async () => {
-                                            try {
-                                              await taskService.updateTaskStatus(Number(project.id), task.id, 'pending');
-                                              fetchTasks(); // Recarrega as tarefas
-                                              const dropdown = document.getElementById(`status-dropdown-${task.id}`);
-                                              if (dropdown) dropdown.classList.add('hidden');
-                                            } catch (err) {
-                                              console.error('Erro ao atualizar status:', err);
-                                              alert('Erro ao atualizar status da tarefa');
-                                            }
-                                          }}
-                                        >
-                                          Marcar como Pendente
-                                        </button>
-                                        <button
-                                          className="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                          onClick={async () => {
-                                            try {
-                                              await taskService.updateTaskStatus(Number(project.id), task.id, 'in_progress');
-                                              fetchTasks(); // Recarrega as tarefas
-                                              const dropdown = document.getElementById(`status-dropdown-${task.id}`);
-                                              if (dropdown) dropdown.classList.add('hidden');
-                                            } catch (err) {
-                                              console.error('Erro ao atualizar status:', err);
-                                              alert('Erro ao atualizar status da tarefa');
-                                            }
-                                          }}
-                                        >
-                                          Marcar como Em Progresso
-                                        </button>
-                                        <button
-                                          className="text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                          onClick={async () => {
-                                            try {
-                                              await taskService.updateTaskStatus(Number(project.id), task.id, 'completed');
-                                              fetchTasks(); // Recarrega as tarefas
-                                              const dropdown = document.getElementById(`status-dropdown-${task.id}`);
-                                              if (dropdown) dropdown.classList.add('hidden');
-                                            } catch (err) {
-                                              console.error('Erro ao atualizar status:', err);
-                                              alert('Erro ao atualizar status da tarefa');
-                                            }
-                                          }}
-                                        >
-                                          Marcar como Concluída
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                  ${task.priority === 'low' ? 'bg-green-100 text-green-800' : 
-                                   task.priority === 'medium' ? 'bg-blue-100 text-blue-800' :
-                                   task.priority === 'high' ? 'bg-yellow-100 text-yellow-800' :
-                                   'bg-red-100 text-red-800'}`}
-                                >
-                                  {task.priority === 'low' ? 'Baixa' : 
-                                   task.priority === 'medium' ? 'Média' :
-                                   task.priority === 'high' ? 'Alta' : 'Urgente'}
-                                </span>
-                              </td>
-                              <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                                {task.assignedUser ? (
-                                  <div className="flex items-center">
-                                    <div className="h-6 w-6 rounded-full bg-primary-lighter flex items-center justify-center text-white text-xs">
-                                      {task.assignedUser.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <span className="ml-2 text-sm text-gray-900">{task.assignedUser.name}</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm text-gray-500">Não atribuído</span>
-                                )}
-                              </td>
-                              <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : 'Não definido'}
-                              </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-right">
-                                <Link to={`/projects/${project.id}/tasks/${task.id}`} className="text-primary hover:text-primary-dark mr-3">
-                                  <span className="hidden sm:inline">Detalhes</span>
-                                  <span className="sm:hidden">Ver</span>
-                                </Link>
-                                <button 
-                                  className="text-red-600 hover:text-red-900"
-                                  onClick={() => {
-                                    if (window.confirm(`Deseja remover a tarefa "${task.title}"?`)) {
-                                      // Implementar funcionalidade de remoção
-                                    }
-                                  }}
-                                >
-                                  <span className="hidden sm:inline">Excluir</span>
-                                  <span className="sm:hidden">Del</span>
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+
+                <div className="bg-white shadow rounded-lg p-6">
+                  <div className="mb-6">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setTaskFilter('all')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          taskFilter === 'all'
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Todas
+                      </button>
+                      <button
+                        onClick={() => setTaskFilter('pending')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          taskFilter === 'pending'
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Pendentes
+                      </button>
+                      <button
+                        onClick={() => setTaskFilter('in_progress')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          taskFilter === 'in_progress'
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Em Progresso
+                      </button>
+                      <button
+                        onClick={() => setTaskFilter('completed')}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          taskFilter === 'completed'
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        Concluídas
+                      </button>
                     </div>
                   </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">Sem tarefas</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      Comece criando uma nova tarefa para este projeto.
-                    </p>
-                    <div className="mt-6">
-                      <Link to={`/projects/${project.id}/tasks/new`}>
-                        <Button variant="primary">
-                          <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                          </svg>
-                          Criar Tarefa
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                )}
+
+                  <TaskList
+                    tasks={filteredTasks}
+                    loading={loadingTasks}
+                    error={taskError}
+                    onStatusChange={handleTaskStatusChange}
+                    onRefresh={fetchTasks}
+                  />
+                </div>
               </div>
             )}
 
@@ -630,6 +583,83 @@ const ProjectDetails: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Modal de Adicionar Membro */}
+        <Dialog
+          isOpen={isAddMemberModalOpen}
+          onClose={() => {
+            setIsAddMemberModalOpen(false);
+            setSelectedUser(null);
+          }}
+          title="Adicionar Membro"
+          description={
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                Selecione um usuário para adicionar ao projeto.
+              </p>
+              
+              {isLoadingUsers ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : availableUsers.length > 0 ? (
+                <div className="max-h-60 overflow-y-auto">
+                  {availableUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                        selectedUser === user.id
+                          ? 'bg-primary-50 border border-primary-200'
+                          : 'hover:bg-gray-50 border border-transparent'
+                      }`}
+                      onClick={() => setSelectedUser(user.id)}
+                    >
+                      <div className="flex items-center">
+                        <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
+                        </div>
+                      </div>
+                      {selectedUser === user.id && (
+                        <div className="h-5 w-5 rounded-full bg-primary text-white flex items-center justify-center">
+                          <FiX className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  Nenhum usuário disponível para adicionar.
+                </div>
+              )}
+            </div>
+          }
+        >
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddMemberModalOpen(false);
+                setSelectedUser(null);
+              }}
+              disabled={isAddingMember}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleAddMember}
+              disabled={!selectedUser || isAddingMember}
+              isLoading={isAddingMember}
+            >
+              Adicionar
+            </Button>
+          </div>
+        </Dialog>
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/ui/Button';
 import TaskDocuments from '../components/TaskDocuments';
@@ -7,10 +7,12 @@ import taskService from '../services/task.service';
 import projectService from '../services/project.service';
 import type { Task, TaskStatus, TaskPriority } from '../services/task.service';
 import type { Project } from '../services/project.service';
+import toast from 'react-hot-toast';
 
 const TaskDetails: React.FC = () => {
   const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [project, setProject] = useState<Project | null>(null);
   const [task, setTask] = useState<Task | null>(null);
@@ -19,6 +21,7 @@ const TaskDetails: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState<Partial<Task>>({});
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Carregar os dados da tarefa e do projeto
   useEffect(() => {
@@ -114,6 +117,35 @@ const TaskDetails: React.FC = () => {
     }
   };
   
+  // Função para lidar com a exclusão da tarefa
+  const handleDeleteTask = async () => {
+    if (!projectId || !taskId) return;
+    
+    try {
+      setIsDeleting(true);
+      await taskService.deleteTask(Number(projectId), Number(taskId));
+      toast.success('Tarefa excluída com sucesso');
+      
+      // Verifica se veio da lista de tarefas ou de outro lugar
+      const searchParams = new URLSearchParams(location.search);
+      const fromList = searchParams.get('from') === 'list';
+      
+      if (fromList) {
+        // Se veio da lista, volta para a lista mantendo os filtros
+        const tab = searchParams.get('tab') || 'tasks';
+        const status = searchParams.get('status') || 'all';
+        navigate(`/projects/${projectId}?tab=${tab}&status=${status}`);
+      } else {
+        // Se veio de outro lugar, volta para a página anterior
+        navigate(-1);
+      }
+    } catch (err: any) {
+      console.error('Erro ao excluir tarefa:', err);
+      toast.error(err.message || 'Erro ao excluir tarefa');
+      setIsDeleting(false);
+    }
+  };
+  
   if (loading) {
     return (
       <div className="bg-gray-50 min-h-screen">
@@ -204,6 +236,16 @@ const TaskDetails: React.FC = () => {
                     Editar
                   </Button>
                   <Button 
+                    variant="danger"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                    onClick={handleDeleteTask}
+                    isLoading={isDeleting}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Excluindo...' : 'Excluir'}
+                  </Button>
+                  <Button 
                     variant="primary"
                     size="sm"
                     className="w-full sm:w-auto"
@@ -220,7 +262,7 @@ const TaskDetails: React.FC = () => {
                     className="w-full sm:w-auto"
                     onClick={() => {
                       setIsEditing(false);
-                      setEditedTask(task); // Restaurar valores originais
+                      setEditedTask(task || {});
                     }}
                   >
                     Cancelar

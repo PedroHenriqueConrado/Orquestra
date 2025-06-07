@@ -74,4 +74,12 @@ router.get('/:taskId/history', projectAccessMiddleware, (req, res) => taskHistor
 router.get('/:taskId/history/:fieldName', projectAccessMiddleware, (req, res) => taskHistoryController.getFieldHistory(req, res));
 router.get('/user/task-changes', projectAccessMiddleware, (req, res) => taskHistoryController.getUserTaskChanges(req, res));
 
+// Rotas de tarefas
+router.get('/projects/:projectId/tasks', taskController.getTasks);
+router.get('/projects/:projectId/tasks/:taskId', taskController.getTaskById);
+router.post('/projects/:projectId/tasks', taskController.createTask);
+router.put('/projects/:projectId/tasks/:taskId', taskController.updateTask);
+router.patch('/projects/:projectId/tasks/:taskId/status', taskController.updateTaskStatus);
+router.delete('/projects/:projectId/tasks/:taskId', taskController.deleteTask);
+
 module.exports = router; 
