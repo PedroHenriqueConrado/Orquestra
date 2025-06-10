@@ -2,9 +2,12 @@ import React, { useState, useEffect, Fragment } from 'react';
 import { Popover, Transition } from '@headlessui/react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-import notificationService, { Notification } from '../services/notification.service';
+import notificationService from '../services/notification.service';
+import type { Notification } from '../services/notification.service';
+import { useAuth } from '../contexts/AuthContext';
 
 const NotificationIcon: React.FC = () => {
+  const { isLoggedIn } = useAuth();
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -12,16 +15,27 @@ const NotificationIcon: React.FC = () => {
 
   // Buscar contagem de notificações não lidas
   const fetchUnreadCount = async () => {
+    // Não tentar buscar se não estiver logado
+    if (!isLoggedIn) return;
+
     try {
       const count = await notificationService.getUnreadCount();
       setUnreadCount(count);
     } catch (error) {
       console.error('Erro ao buscar contagem de notificações não lidas:', error);
+      // Não atualizar o estado em caso de erro para manter o valor anterior
     }
   };
 
   // Buscar notificações
   const fetchNotifications = async () => {
+    // Não tentar buscar se não estiver logado
+    if (!isLoggedIn) {
+      setLoading(false);
+      setError("Você precisa estar logado para ver notificações.");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -67,12 +81,14 @@ const NotificationIcon: React.FC = () => {
 
   // Efeito para buscar a contagem inicial e configurar atualização periódica
   useEffect(() => {
-    fetchUnreadCount();
-    // Configura uma atualização a cada 30 segundos
-    const interval = setInterval(fetchUnreadCount, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);
+    if (isLoggedIn) {
+      fetchUnreadCount();
+      // Configura uma atualização a cada 30 segundos
+      const interval = setInterval(fetchUnreadCount, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isLoggedIn]);
 
   return (
     <Popover className="relative">

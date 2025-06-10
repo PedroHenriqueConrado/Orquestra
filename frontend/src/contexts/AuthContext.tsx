@@ -1,14 +1,26 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
-import type { LoginData, RegisterData, AuthResponse } from '../services/auth.service';
+
+// Definindo interfaces localmente já que foram removidas da importação
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  role: string;
+}
 
 interface User {
   id: number;
   name: string;
   email: string;
   role: string;
-  profileImage?: string | null;
 }
 
 interface AuthContextType {
@@ -21,7 +33,7 @@ interface AuthContextType {
   logout: () => void;
   clearError: () => void;
   refreshSession: () => Promise<boolean>;
-  updateProfile: (data: { name: string; profileImage?: string | null }) => Promise<void>;
+  updateProfile: (data: { name: string }) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
 }
@@ -195,16 +207,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setError(null);
   };
 
-  const updateProfile = async (data: { name: string; profileImage?: string | null }): Promise<void> => {
+  const updateProfile = async (data: { name: string }): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await authService.updateProfile(data);
-      
-      if (response.user) {
-        setUser(response.user);
-      }
+      const updatedUser = await authService.updateProfile(data);
+      setUser(updatedUser);
     } catch (err: any) {
       console.error('Erro ao atualizar perfil:', err);
       setError(err.message || 'Erro ao atualizar perfil');

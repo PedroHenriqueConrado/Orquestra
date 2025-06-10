@@ -56,7 +56,7 @@ const Sidebar: React.FC = () => {
         <div className="flex items-center space-x-3">
           <div className="relative">
             <img
-              src={user?.profileImage || '/default-avatar.png'}
+              src="/default-avatar.png"
               alt="Foto de perfil"
               className="h-10 w-10 rounded-full object-cover cursor-pointer"
               onClick={() => navigate('/profile')}

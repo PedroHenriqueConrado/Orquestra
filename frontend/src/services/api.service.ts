@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { TOKEN_KEY } from '../config';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -10,7 +11,7 @@ const api = axios.create({
 
 // Função para obter o token diretamente do localStorage, evitando ciclo de dependência
 const getTokenFromStorage = (): string | null => {
-  return localStorage.getItem('token');
+  return localStorage.getItem(TOKEN_KEY);
 };
 
 // Interceptor para adicionar o token em todas as requisições

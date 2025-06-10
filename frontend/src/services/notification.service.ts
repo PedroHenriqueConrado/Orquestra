@@ -39,7 +39,8 @@ class NotificationService {
       return response.data.count;
     } catch (error: any) {
       console.error('Erro ao buscar contagem de notificações não lidas:', error);
-      return 0; // Em caso de erro, retorna 0 para não interromper o fluxo da aplicação
+      // Não lançar erro, apenas retornar 0 em caso de falha de autenticação
+      return 0;
     }
   }
 

@@ -5,7 +5,6 @@ interface User {
   name: string;
   email: string;
   role: string;
-  profileImage?: string;
   created_at: string;
   updated_at: string;
 }
@@ -29,8 +28,30 @@ interface LoginData {
 }
 
 class AuthService {
-  private getToken(): string {
-    return localStorage.getItem(TOKEN_KEY) || '';
+  getToken(): string {
+    try {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) return '';
+      
+      // Verificar se o token está expirado
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiryTime = payload.exp * 1000; // Converter para milissegundos
+      const currentTime = Date.now();
+      
+      if (currentTime >= expiryTime) {
+        console.log('Token expirado, removendo do localStorage');
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+        return '';
+      }
+      
+      return token;
+    } catch (error) {
+      console.error('Erro ao validar token:', error);
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      return '';
+    }
   }
 
   private setUser(user: User): void {
@@ -128,47 +149,6 @@ class AuthService {
       const error = await response.json();
       throw new Error(error.message || 'Erro ao atualizar senha');
     }
-  }
-
-  async updateProfileImage(image: File): Promise<User> {
-    const formData = new FormData();
-    formData.append('image', image);
-
-    const response = await fetch(`${API_URL}/auth/profile/image`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.getToken()}`
-      },
-      body: formData
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Erro ao atualizar imagem de perfil');
-    }
-
-    const user = await response.json();
-    this.setUser(user);
-    return user;
-  }
-
-  async deleteProfileImage(): Promise<void> {
-    const response = await fetch(`${API_URL}/auth/profile/image`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${this.getToken()}`
-      }
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Erro ao remover imagem de perfil');
-    }
-  }
-
-  getProfileImageUrl(): string {
-    const user = this.getUser();
-    return user?.profileImage ? `${API_URL}/auth/profile/image` : '';
   }
 
   async logout(): Promise<void> {

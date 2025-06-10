@@ -1,8 +1,5 @@
 const authService = require('../services/auth.service');
 const { registerSchema, loginSchema, updateProfileSchema, updatePasswordSchema } = require('../schemas/auth.schema');
-const profileService = require('../services/profile.service');
-const multer = require('multer');
-const upload = multer();
 
 class AuthController {
   async register(req, res) {
@@ -131,56 +128,6 @@ class AuthController {
         return res.status(400).json({ message: error.message });
       }
       res.status(500).json({ message: 'Erro ao atualizar senha' });
-    }
-  }
-
-  // Rota para atualizar a imagem de perfil
-  async updateProfileImage(req, res) {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: 'Nenhuma imagem enviada' });
-      }
-
-      const userId = req.user.id;
-      const imageData = req.file.buffer;
-      const mimeType = req.file.mimetype;
-
-      await profileService.saveProfileImage(userId, imageData, mimeType);
-
-      res.json({ message: 'Imagem de perfil atualizada com sucesso' });
-    } catch (error) {
-      console.error('Erro ao atualizar imagem de perfil:', error);
-      res.status(500).json({ message: 'Erro ao atualizar imagem de perfil' });
-    }
-  }
-
-  // Rota para obter a imagem de perfil
-  async getProfileImage(req, res) {
-    try {
-      const userId = req.user.id;
-      const image = await profileService.getProfileImage(userId);
-
-      if (!image) {
-        return res.status(404).json({ message: 'Imagem de perfil não encontrada' });
-      }
-
-      res.set('Content-Type', image.mimeType);
-      res.send(image.imageData);
-    } catch (error) {
-      console.error('Erro ao obter imagem de perfil:', error);
-      res.status(500).json({ message: 'Erro ao obter imagem de perfil' });
-    }
-  }
-
-  // Rota para remover a imagem de perfil
-  async deleteProfileImage(req, res) {
-    try {
-      const userId = req.user.id;
-      await profileService.deleteProfileImage(userId);
-      res.json({ message: 'Imagem de perfil removida com sucesso' });
-    } catch (error) {
-      console.error('Erro ao remover imagem de perfil:', error);
-      res.status(500).json({ message: 'Erro ao remover imagem de perfil' });
     }
   }
 

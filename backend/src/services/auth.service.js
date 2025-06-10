@@ -4,8 +4,8 @@ const prisma = require('../prismaClient');
 
 // Configurações padrão para JWT se não estiverem definidas nas variáveis de ambiente
 const JWT_SECRET = process.env.JWT_SECRET || 'orquestra_desenvolvimento_seguro_2024';
-// Aumentando o tempo de expiração do token para 30 dias (720 horas)
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30d';
+// Aumentando o tempo de expiração do token para 60 dias
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '60d';
 
 class AuthService {
   async register(userData) {
@@ -40,7 +40,14 @@ class AuthService {
 
   async login(email, password) {
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password_hash: true,
+        role: true
+      }
     });
 
     if (!user) {
@@ -82,7 +89,6 @@ class AuthService {
         name: true,
         email: true,
         role: true,
-        profileImage: true,
         created_at: true,
         updated_at: true
       }
@@ -99,15 +105,13 @@ class AuthService {
     const user = await prisma.user.update({
       where: { id: userId },
       data: {
-        name: userData.name,
-        profileImage: userData.profileImage
+        name: userData.name
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
-        profileImage: true,
         created_at: true
       }
     });
@@ -173,14 +177,6 @@ class AuthService {
         where: { assigned_to: userId },
         data: { assigned_to: null }
       });
-
-      // Remove a imagem de perfil se existir
-      if (user.profileImage) {
-        await prisma.user.update({
-          where: { id: userId },
-          data: { profileImage: null }
-        });
-      }
 
       // Por fim, remove o usuário
       await prisma.user.delete({
