@@ -4,13 +4,17 @@ const prisma = require('../prismaClient');
 
 // Configurações padrão para JWT se não estiverem definidas nas variáveis de ambiente
 const JWT_SECRET = process.env.JWT_SECRET || 'orquestra_desenvolvimento_seguro_2024';
-// Aumentando o tempo de expiração do token para 60 dias
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '60d';
+// Aumentando o tempo de expiração do token para 30 dias (720 horas)
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30d';
 
 class AuthService {
   async register(userData) {
     const existingUser = await prisma.user.findUnique({
-      where: { email: userData.email }
+      where: { email: userData.email },
+      select: {
+        id: true,
+        email: true
+      }
     });
 
     if (existingUser) {
@@ -121,7 +125,11 @@ class AuthService {
 
   async updatePassword(userId, currentPassword, newPassword) {
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
+      select: {
+        id: true,
+        password_hash: true
+      }
     });
 
     if (!user) {
@@ -148,7 +156,10 @@ class AuthService {
 
   async deleteAccount(userId) {
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
+      select: {
+        id: true
+      }
     });
 
     if (!user) {

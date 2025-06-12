@@ -148,13 +148,19 @@ class TasksService {
         throw new Error('ID do projeto é obrigatório para atualizar o status da tarefa');
       }
       
-      // Simplificar a solução: usar o método de atualização normal com apenas o status
       const updateData: TaskUpdatePayload = { 
         status: newStatus as 'pending' | 'in_progress' | 'completed'
       };
       
-      // Chamar o endpoint regular de atualização de tarefa
-      const response = await api.put<TaskResponse>(`/projects/${projectId}/tasks/${taskId}`, updateData);
+      if (newPosition !== undefined) {
+        updateData.position = newPosition;
+      }
+      
+      // Usar a rota correta com método PUT conforme definido no backend
+      const url = `/projects/${projectId}/tasks/${taskId}/status`;
+      
+      // PUT é o método correto definido no backend para esta rota
+      const response = await api.put<TaskResponse>(url, updateData);
       return response.data;
     } catch (error) {
       console.error('Erro ao atualizar status da tarefa:', error);

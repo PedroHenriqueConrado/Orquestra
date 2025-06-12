@@ -1,5 +1,8 @@
 const authService = require('../services/auth.service');
 const { registerSchema, loginSchema, updateProfileSchema, updatePasswordSchema } = require('../schemas/auth.schema');
+const profileService = require('../services/profile.service');
+const multer = require('multer');
+const upload = multer();
 
 class AuthController {
   async register(req, res) {
@@ -129,6 +132,21 @@ class AuthController {
       }
       res.status(500).json({ message: 'Erro ao atualizar senha' });
     }
+  }
+
+  // Rota para atualizar a imagem de perfil - Temporariamente desativada
+  async updateProfileImage(req, res) {
+    return res.status(503).json({ message: 'Funcionalidade temporariamente indisponível' });
+  }
+
+  // Rota para obter a imagem de perfil - Temporariamente desativada
+  async getProfileImage(req, res) {
+    return res.status(503).json({ message: 'Funcionalidade temporariamente indisponível' });
+  }
+
+  // Rota para remover a imagem de perfil - Temporariamente desativada
+  async deleteProfileImage(req, res) {
+    return res.status(503).json({ message: 'Funcionalidade temporariamente indisponível' });
   }
 
   async deleteAccount(req, res) {

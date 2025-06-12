@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import Projects from './pages/Projects';
 import NewProject from './pages/NewProject';
 import ProjectDetails from './pages/ProjectDetails';
+import ProjectDashboard from './pages/ProjectDashboard';
 import EditProject from './pages/EditProject';
 import NewTask from './pages/NewTask';
 import TaskDetails from './pages/TaskDetails';
@@ -15,86 +16,95 @@ import ChatDetails from './pages/ChatDetails';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import PrivateRoute from './components/PrivateRoute';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          <Route path="/dashboard" element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/profile" element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/projects" element={
-            <PrivateRoute>
-              <Projects />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/projects/new" element={
-            <PrivateRoute>
-              <NewProject />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/projects/:id" element={
-            <PrivateRoute>
-              <ProjectDetails />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/projects/:id/edit" element={
-            <PrivateRoute>
-              <EditProject />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/projects/:projectId/tasks/new" element={
-            <PrivateRoute>
-              <NewTask />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/projects/:projectId/tasks/:taskId" element={
-            <PrivateRoute>
-              <TaskDetails />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/messages" element={
-            <PrivateRoute>
-              <DirectMessages />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/messages/:chatId" element={
-            <PrivateRoute>
-              <ChatDetails />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/notifications" element={
-            <PrivateRoute>
-              <Notifications />
-            </PrivateRoute>
-          } />
-          
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            <Route path="/dashboard" element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/profile" element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/projects" element={
+              <PrivateRoute>
+                <Projects />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/projects/new" element={
+              <PrivateRoute>
+                <NewProject />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/projects/:id" element={
+              <PrivateRoute>
+                <ProjectDetails />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/projects/:projectId/dashboard" element={
+              <PrivateRoute>
+                <ProjectDashboard />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/projects/:id/edit" element={
+              <PrivateRoute>
+                <EditProject />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/projects/:projectId/tasks/new" element={
+              <PrivateRoute>
+                <NewTask />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/projects/:projectId/tasks/:taskId" element={
+              <PrivateRoute>
+                <TaskDetails />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/messages" element={
+              <PrivateRoute>
+                <DirectMessages />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/messages/:chatId" element={
+              <PrivateRoute>
+                <ChatDetails />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/notifications" element={
+              <PrivateRoute>
+                <Notifications />
+              </PrivateRoute>
+            } />
+            
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 };

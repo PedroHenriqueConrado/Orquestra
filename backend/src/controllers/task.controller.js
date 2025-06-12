@@ -69,6 +69,12 @@ const timeTrackingSchema = z.object({
     actualHours: z.number().min(0)
 });
 
+// Schema para atualização de status e posição via drag and drop
+const statusPositionSchema = z.object({
+    status: z.enum(['pending', 'in_progress', 'completed']),
+    position: z.number().int().min(0).optional()
+});
+
 class TaskController {
     constructor() {
         this.taskService = taskService;
@@ -225,6 +231,54 @@ class TaskController {
             console.error('Erro ao excluir tarefa:', error);
             res.status(error.message === 'Tarefa não encontrada' ? 404 : 500).json({
                 error: error.message || 'Erro ao excluir tarefa'
+            });
+        }
+    }
+
+    async updateTaskStatusPosition(req, res) {
+        try {
+            logger.request(req, 'TaskController.updateTaskStatusPosition');
+            logger.debug('TaskController.updateTaskStatusPosition: Dados recebidos', {
+                body: req.body,
+                projectId: req.params.projectId,
+                taskId: req.params.taskId
+            });
+            
+            try {
+                const validatedData = statusPositionSchema.parse(req.body);
+                logger.debug('TaskController.updateTaskStatusPosition: Dados validados com sucesso', validatedData);
+                
+                const { projectId, taskId } = req.params;
+                
+                // Chama o serviço para atualizar o status e posição da tarefa
+                const task = await this.taskService.updateTaskStatusPosition(
+                    taskId,
+                    projectId,
+                    req.user.id,
+                    validatedData.status,
+                    validatedData.position
+                );
+                
+                logger.success('TaskController.updateTaskStatusPosition: Status atualizado com sucesso', {
+                    taskId,
+                    status: validatedData.status,
+                    position: validatedData.position
+                });
+                
+                res.json(task);
+            } catch (zodError) {
+                logger.warn('TaskController.updateTaskStatusPosition: Erro de validação Zod', zodError.errors);
+                return res.status(400).json({ 
+                    message: 'Dados inválidos para atualização de status/posição da tarefa',
+                    errors: zodError.errors 
+                });
+            }
+        } catch (error) {
+            logger.error('TaskController.updateTaskStatusPosition: Erro ao atualizar status/posição', error);
+            
+            res.status(500).json({ 
+                message: 'Erro ao atualizar status/posição da tarefa', 
+                error: error.message 
             });
         }
     }

@@ -33,13 +33,16 @@ router.put('/tags/:tagId', projectAccessMiddleware, (req, res) => taskTagControl
 router.delete('/tags/:tagId', projectAccessMiddleware, (req, res) => taskTagController.delete(req, res));
 
 // Task Routes
-router.post('/', projectAccessMiddleware, (req, res) => taskController.create(req, res));
 router.get('/', projectAccessMiddleware, (req, res) => taskController.getAllProjectTasks(req, res));
 router.get('/:taskId', projectAccessMiddleware, (req, res) => taskController.getById(req, res));
+router.post('/', projectAccessMiddleware, (req, res) => taskController.create(req, res));
 router.put('/:taskId', projectAccessMiddleware, (req, res) => taskController.update(req, res));
 router.delete('/:taskId', projectAccessMiddleware, (req, res) => taskController.delete(req, res));
 router.put('/:taskId/time', projectAccessMiddleware, (req, res) => taskController.updateTime(req, res));
 router.get('/metrics', projectAccessMiddleware, (req, res) => taskController.getMetrics(req, res));
+
+// Nova rota para atualizar status e posição via drag-and-drop
+router.put('/:taskId/status', projectAccessMiddleware, (req, res) => taskController.updateTaskStatusPosition(req, res));
 
 // Task-Tag Association Routes
 router.post('/:taskId/tags/:tagId', projectAccessMiddleware, (req, res) => taskTagController.addTagToTask(req, res));
@@ -73,13 +76,5 @@ router.delete('/:taskId/comments/:commentId', projectAccessMiddleware, (req, res
 router.get('/:taskId/history', projectAccessMiddleware, (req, res) => taskHistoryController.getTaskHistory(req, res));
 router.get('/:taskId/history/:fieldName', projectAccessMiddleware, (req, res) => taskHistoryController.getFieldHistory(req, res));
 router.get('/user/task-changes', projectAccessMiddleware, (req, res) => taskHistoryController.getUserTaskChanges(req, res));
-
-// Rotas de tarefas
-router.get('/projects/:projectId/tasks', projectAccessMiddleware, (req, res) => taskController.getTasks(req, res));
-router.get('/projects/:projectId/tasks/:taskId', projectAccessMiddleware, (req, res) => taskController.getTaskById(req, res));
-router.post('/projects/:projectId/tasks', projectAccessMiddleware, (req, res) => taskController.createTask(req, res));
-router.put('/projects/:projectId/tasks/:taskId', projectAccessMiddleware, (req, res) => taskController.updateTask(req, res));
-router.patch('/projects/:projectId/tasks/:taskId/status', projectAccessMiddleware, (req, res) => taskController.updateTaskStatus(req, res));
-router.delete('/projects/:projectId/tasks/:taskId', projectAccessMiddleware, (req, res) => taskController.deleteTask(req, res));
 
 module.exports = router; 

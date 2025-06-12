@@ -3,9 +3,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationIcon from './NotificationIcon';
+import ThemeToggle from './ThemeToggle';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Header: React.FC = () => {
   const { user, isLoggedIn, logout } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,7 +18,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white shadow">
+    <header className={`${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} shadow transition-colors duration-200`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -23,7 +26,7 @@ const Header: React.FC = () => {
               <Link to="/">
                 <img className="h-8 w-auto" src="/src/assets/favicon.svg" alt="Orquestra" />
               </Link>
-              <Link to="/" className="ml-2 text-xl font-bold text-primary-dark hover:text-primary-lighter">
+              <Link to="/" className={`ml-2 text-xl font-bold ${theme === 'dark' ? 'text-primary-light hover:text-primary-lighter' : 'text-primary-dark hover:text-primary-lighter'}`}>
                 Orquestra
               </Link>
             </div>
@@ -32,9 +35,9 @@ const Header: React.FC = () => {
                 to="/dashboard"
                 className={`${
                   isActiveRoute('/dashboard')
-                    ? 'border-primary text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                    ? theme === 'dark' ? 'border-primary-light text-dark-text' : 'border-primary text-gray-900'
+                    : theme === 'dark' ? 'border-transparent text-dark-muted hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
               >
                 Dashboard
               </Link>
@@ -42,9 +45,9 @@ const Header: React.FC = () => {
                 to="/projects"
                 className={`${
                   isActiveRoute('/projects')
-                    ? 'border-primary text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                    ? theme === 'dark' ? 'border-primary-light text-dark-text' : 'border-primary text-gray-900'
+                    : theme === 'dark' ? 'border-transparent text-dark-muted hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
               >
                 Projetos
               </Link>
@@ -52,9 +55,9 @@ const Header: React.FC = () => {
                 to="/messages"
                 className={`${
                   isActiveRoute('/messages')
-                    ? 'border-primary text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                    ? theme === 'dark' ? 'border-primary-light text-dark-text' : 'border-primary text-gray-900'
+                    : theme === 'dark' ? 'border-transparent text-dark-muted hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
               >
                 Mensagens
               </Link>
@@ -65,7 +68,9 @@ const Header: React.FC = () => {
           <div className="flex items-center sm:hidden">
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+              className={`inline-flex items-center justify-center p-2 rounded-md ${
+                theme === 'dark' ? 'text-dark-muted hover:text-dark-text hover:bg-dark-accent' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+              } focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200`}
               aria-controls="mobile-menu"
               aria-expanded="false"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -108,12 +113,15 @@ const Header: React.FC = () => {
           </div>
           
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
+            {/* Theme toggle button */}
+            <ThemeToggle className="mr-4" />
+            
             {isLoggedIn ? (
               <>
                 <NotificationIcon/>
                 <Menu as="div" className="ml-3 relative">
                   <div>
-                    <Menu.Button className="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary hover:border-white">
+                    <Menu.Button className={`${theme === 'dark' ? 'bg-dark-accent' : 'bg-white'} rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary hover:border-white transition-colors duration-200`}>
                       <span className="sr-only">Abrir menu do usuário</span>
                       <div className="h-8 w-8 rounded-full bg-primary-lighter flex items-center justify-center text-white font-semibold">
                         {user?.name.charAt(0).toUpperCase()}
@@ -129,18 +137,18 @@ const Header: React.FC = () => {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                      <div className="px-4 py-2 border-b">
-                        <p className="text-sm font-semibold text-gray-700">{user?.name}</p>
-                        <p className="text-xs text-gray-500">{user?.email}</p>
+                    <Menu.Items className={`origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 ${theme === 'dark' ? 'bg-dark-accent' : 'bg-white'} ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transition-colors duration-200`}>
+                      <div className={`px-4 py-2 border-b ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'}`}>
+                        <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-dark-text' : 'text-gray-700'}`}>{user?.name}</p>
+                        <p className={`text-xs ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>{user?.email}</p>
                       </div>
                       <Menu.Item>
                         {({ active }) => (
                           <Link
                             to="/profile"
                             className={`${
-                              active ? 'bg-gray-100' : ''
-                            } block px-4 py-2 text-sm text-gray-700 hover:text-white`}
+                              active ? (theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-100') : ''
+                            } block px-4 py-2 text-sm ${theme === 'dark' ? 'text-dark-text hover:text-white' : 'text-gray-700 hover:text-white'} transition-colors duration-200`}
                           >
                             Meu perfil
                           </Link>
@@ -151,8 +159,8 @@ const Header: React.FC = () => {
                           <Link
                             to="/settings"
                             className={`${
-                              active ? 'bg-gray-100' : ''
-                            } block px-4 py-2 text-sm text-gray-700 hover:text-white`}
+                              active ? (theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-100') : ''
+                            } block px-4 py-2 text-sm ${theme === 'dark' ? 'text-dark-text hover:text-white' : 'text-gray-700 hover:text-white'} transition-colors duration-200`}
                           >
                             Configurações
                           </Link>
@@ -163,8 +171,8 @@ const Header: React.FC = () => {
                           <button
                             onClick={logout}
                             className={`${
-                              active ? 'bg-gray-100' : ''
-                            } w-full text-left px-4 py-2 text-sm text-gray-700 text-center text-white hover:text-white hover:border-black`}
+                              active ? (theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-100') : ''
+                            } w-full text-left px-4 py-2 text-sm ${theme === 'dark' ? 'text-dark-text hover:text-white' : 'text-gray-700 hover:text-white'} transition-colors duration-200`}
                           >
                             Sair
                           </button>
@@ -178,13 +186,13 @@ const Header: React.FC = () => {
               <div className="flex space-x-4">
                 <Link
                   to="/login"
-                  className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                  className={`${theme === 'dark' ? 'text-dark-muted hover:text-dark-text' : 'text-gray-500 hover:text-gray-700'} px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200`}
                 >
                   Entrar
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-primary text-white hover:bg-primary-dark px-3 py-2 rounded-md text-sm font-medium"
+                  className={`${theme === 'dark' ? 'bg-primary-dark hover:bg-primary-darker' : 'bg-primary hover:bg-primary-dark'} text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200`}
                 >
                   Cadastrar
                 </Link>
@@ -206,9 +214,9 @@ const Header: React.FC = () => {
             to="/dashboard"
             className={`${
               isActiveRoute('/dashboard')
-                ? 'bg-primary-lighter text-primary border-primary'
-                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
+                ? theme === 'dark' ? 'bg-dark-accent text-primary-light border-primary-light' : 'bg-primary-lighter text-primary border-primary'
+                : theme === 'dark' ? 'border-transparent text-dark-muted hover:bg-dark-accent hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Dashboard
@@ -217,9 +225,9 @@ const Header: React.FC = () => {
             to="/projects"
             className={`${
               isActiveRoute('/projects')
-                ? 'bg-primary-lighter text-primary border-primary'
-                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
+                ? theme === 'dark' ? 'bg-dark-accent text-primary-light border-primary-light' : 'bg-primary-lighter text-primary border-primary'
+                : theme === 'dark' ? 'border-transparent text-dark-muted hover:bg-dark-accent hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Projetos
@@ -228,18 +236,23 @@ const Header: React.FC = () => {
             to="/messages"
             className={`${
               isActiveRoute('/messages')
-                ? 'bg-primary-lighter text-primary border-primary'
-                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
+                ? theme === 'dark' ? 'bg-dark-accent text-primary-light border-primary-light' : 'bg-primary-lighter text-primary border-primary'
+                : theme === 'dark' ? 'border-transparent text-dark-muted hover:bg-dark-accent hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Mensagens
           </Link>
+          {/* Adicionar botão de tema no menu mobile */}
+          <div className="flex items-center pl-3 pr-4 py-2">
+            <span className={`${theme === 'dark' ? 'text-dark-text' : 'text-gray-600'} mr-2`}>Alternar tema:</span>
+            <ThemeToggle />
+          </div>
         </div>
         
         {/* Mobile user profile menu */}
         {isLoggedIn ? (
-          <div className="pt-4 pb-3 border-t border-gray-200">
+          <div className={`pt-4 pb-3 border-t ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'} transition-colors duration-200`}>
             <div className="flex items-center px-4">
               <div className="flex-shrink-0">
                 <div className="h-10 w-10 rounded-full bg-primary-lighter flex items-center justify-center text-white font-semibold">
@@ -247,28 +260,25 @@ const Header: React.FC = () => {
                 </div>
               </div>
               <div className="ml-3">
-                <div className="text-base font-medium text-gray-800">
+                <div className={`text-base font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-800'} transition-colors duration-200`}>
                   {user?.name}
                 </div>
-                <div className="text-sm font-medium text-gray-500">
+                <div className={`text-sm font-medium ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'} transition-colors duration-200`}>
                   {user?.email}
                 </div>
-              </div>
-              <div className="ml-auto">
-                <NotificationIcon />
               </div>
             </div>
             <div className="mt-3 space-y-1">
               <Link
                 to="/profile"
-                className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                className={`block px-4 py-2 text-base font-medium ${theme === 'dark' ? 'text-dark-text hover:bg-dark-accent' : 'text-gray-500 hover:bg-gray-100'} transition-colors duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Meu perfil
               </Link>
               <Link
                 to="/settings"
-                className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                className={`block px-4 py-2 text-base font-medium ${theme === 'dark' ? 'text-dark-text hover:bg-dark-accent' : 'text-gray-500 hover:bg-gray-100'} transition-colors duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Configurações
@@ -278,25 +288,25 @@ const Header: React.FC = () => {
                   logout();
                   setIsMobileMenuOpen(false);
                 }}
-                className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                className={`block w-full text-left px-4 py-2 text-base font-medium ${theme === 'dark' ? 'text-dark-text hover:bg-dark-accent' : 'text-gray-500 hover:bg-gray-100'} transition-colors duration-200`}
               >
                 Sair
               </button>
             </div>
           </div>
         ) : (
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            <div className="flex flex-col space-y-2 px-4">
+          <div className={`pt-4 pb-3 border-t ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'} transition-colors duration-200`}>
+            <div className="flex flex-col items-start px-4 space-y-2">
               <Link
                 to="/login"
-                className="block text-center w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+                className={`block px-4 py-2 text-base font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-500'} hover:bg-gray-100 transition-colors duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Entrar
               </Link>
               <Link
                 to="/register"
-                className="block text-center w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark"
+                className={`block px-4 py-2 text-base font-medium ${theme === 'dark' ? 'bg-primary-dark hover:bg-primary-darker' : 'bg-primary hover:bg-primary-dark'} text-white rounded-md transition-colors duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Cadastrar

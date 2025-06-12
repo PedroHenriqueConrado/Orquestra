@@ -235,6 +235,35 @@ const ProjectDetails: React.FC = () => {
     }
   };
 
+  const renderProjectActions = () => {
+    return (
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Link to={`/projects/${id}/edit`}>
+          <Button variant="outline" size="sm">
+            <i className="fas fa-edit mr-2"></i>
+            Editar Projeto
+          </Button>
+        </Link>
+        <Link to={`/projects/${id}/tasks/new`}>
+          <Button variant="primary" size="sm">
+            <i className="fas fa-plus-circle mr-2"></i>
+            Nova Tarefa
+          </Button>
+        </Link>
+        <Link to={`/projects/${id}/dashboard`}>
+          <Button variant="secondary" size="sm">
+            <i className="fas fa-chart-bar mr-2"></i>
+            Dashboard Avançado
+          </Button>
+        </Link>
+        <Button variant="danger" size="sm" onClick={handleDeleteProject}>
+          <i className="fas fa-trash-alt mr-2"></i>
+          Excluir Projeto
+        </Button>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="bg-gray-50 min-h-screen">
@@ -284,19 +313,7 @@ const ProjectDetails: React.FC = () => {
                   Criado em {new Date(project.created_at).toLocaleDateString('pt-BR')}
                 </p>
               </div>
-              <div className="flex space-x-2">
-                <Link to={`/projects/${project.id}/edit`}>
-                  <Button variant="outline">
-                    Editar Projeto
-                  </Button>
-                </Link>
-                <Button 
-                  variant="danger"
-                  onClick={handleDeleteProject}
-                >
-                  Excluir Projeto
-                </Button>
-              </div>
+              {renderProjectActions()}
             </div>
             
             {/* Progresso do projeto */}
