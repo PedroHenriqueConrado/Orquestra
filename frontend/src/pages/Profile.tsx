@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import FormField from '../components/ui/FormField';
 import Button from '../components/ui/Button';
@@ -6,9 +6,12 @@ import Alert from '../components/ui/Alert';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
 import Modal from '../components/ui/Modal';
+import { useTheme } from '../contexts/ThemeContext';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 
 const Profile: React.FC = () => {
   const { user, updateProfile, updatePassword, deleteAccount } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +27,7 @@ const Profile: React.FC = () => {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [saveAnimation, setSaveAnimation] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,21 +49,25 @@ const Profile: React.FC = () => {
     
     if (!formData.name.trim()) {
       errors.name = 'Nome é obrigatório';
+    } else if (formData.name.length < 3) {
+      errors.name = 'Nome deve ter no mínimo 3 caracteres';
     }
 
     if (showPasswordForm) {
       if (!formData.currentPassword) {
         errors.currentPassword = 'Senha atual é obrigatória';
       }
+
       if (!formData.newPassword) {
         errors.newPassword = 'Nova senha é obrigatória';
       } else if (formData.newPassword.length < 6) {
-        errors.newPassword = 'A senha deve ter pelo menos 6 caracteres';
+        errors.newPassword = 'Nova senha deve ter no mínimo 6 caracteres';
       }
+
       if (!formData.confirmPassword) {
         errors.confirmPassword = 'Confirmação de senha é obrigatória';
       } else if (formData.newPassword !== formData.confirmPassword) {
-        errors.confirmPassword = 'As senhas não coincidem';
+        errors.confirmPassword = 'As senhas não conferem';
       }
     }
 
@@ -78,6 +86,7 @@ const Profile: React.FC = () => {
       setLoading(true);
       setError(null);
       setSuccess(null);
+      setSaveAnimation(true);
       
       // Se estiver alterando a senha
       if (showPasswordForm) {
@@ -99,6 +108,7 @@ const Profile: React.FC = () => {
               currentPassword: 'A senha atual está incorreta'
             }));
             setLoading(false);
+            setSaveAnimation(false);
             return;
           }
           let errorMessage = 'Erro ao alterar senha';
@@ -111,6 +121,7 @@ const Profile: React.FC = () => {
           
           setError(errorMessage);
           setLoading(false);
+          setSaveAnimation(false);
           return;
         }
       }
@@ -134,6 +145,7 @@ const Profile: React.FC = () => {
       setError(errorMessage);
     } finally {
       setLoading(false);
+      setTimeout(() => setSaveAnimation(false), 1000);
     }
   };
 
@@ -169,131 +181,168 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
-          Perfil do Usuário
-        </h2>
+    <div className={`${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} py-8 px-4 sm:px-6 lg:px-8`}>
+      <div className="max-w-3xl mx-auto">
+        {/* Breadcrumbs */}
+        <div className="mb-8">
+          <Breadcrumbs />
+        </div>
 
-        {error && (
-          <Alert type="error" message={error} />
-        )}
+        <div className={`${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} rounded-lg shadow-lg overflow-hidden`}>
+          <div className={`px-6 py-8 ${theme === 'dark' ? 'border-b border-dark-border' : 'border-b border-gray-200'}`}>
+            <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>
+              Perfil do Usuário
+            </h2>
+            <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>
+              Gerencie suas informações pessoais e configurações de conta
+            </p>
+          </div>
 
-        {success && (
-          <Alert type="success" message={success} />
-        )}
+          <div className="px-6 py-6">
+            {error && (
+              <div className="mb-6">
+                <Alert type="error" message={error} />
+              </div>
+            )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <FormField
-            id="name"
-            label="Nome"
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            error={formErrors.name}
-            required
-          />
+            {success && (
+              <div className="mb-6">
+                <Alert type="success" message={success} />
+              </div>
+            )}
 
-          <FormField
-            id="email"
-            label="Email"
-            type="email"
-            name="email"
-            value={formData.email}
-            disabled
-            className="bg-gray-50"
-          />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <FormField
+                  id="name"
+                  label="Nome"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  error={formErrors.name}
+                  required
+                />
 
-          {!showPasswordForm ? (
-            <div className="flex justify-center">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setShowPasswordForm(true)}
-                disabled={loading}
-              >
-                Alterar Senha
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <FormField
-                id="currentPassword"
-                label="Senha Atual"
-                type="password"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleChange}
-                error={formErrors.currentPassword}
-                required
-              />
+                <FormField
+                  id="email"
+                  label="Email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  disabled
+                  className={`${theme === 'dark' ? 'bg-dark-accent' : 'bg-gray-50'}`}
+                />
+              </div>
 
-              <FormField
-                id="newPassword"
-                label="Nova Senha"
-                type="password"
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleChange}
-                error={formErrors.newPassword}
-                required
-              />
+              {!showPasswordForm ? (
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowPasswordForm(true)}
+                    disabled={loading}
+                    tooltip="Clique para alterar sua senha"
+                  >
+                    Alterar Senha
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>
+                    Alterar Senha
+                  </h3>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <FormField
+                      id="currentPassword"
+                      label="Senha Atual"
+                      type="password"
+                      name="currentPassword"
+                      value={formData.currentPassword}
+                      onChange={handleChange}
+                      error={formErrors.currentPassword}
+                      required
+                    />
 
-              <FormField
-                id="confirmPassword"
-                label="Confirmar Nova Senha"
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                error={formErrors.confirmPassword}
-                required
-              />
+                    <FormField
+                      id="newPassword"
+                      label="Nova Senha"
+                      type="password"
+                      name="newPassword"
+                      value={formData.newPassword}
+                      onChange={handleChange}
+                      error={formErrors.newPassword}
+                      required
+                    />
 
-              <div className="flex justify-center space-x-4">
+                    <FormField
+                      id="confirmPassword"
+                      label="Confirmar Nova Senha"
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      error={formErrors.confirmPassword}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-4">
+                {showPasswordForm && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setShowPasswordForm(false);
+                      setFormData(prev => ({
+                        ...prev,
+                        currentPassword: '',
+                        newPassword: '',
+                        confirmPassword: ''
+                      }));
+                      setFormErrors({});
+                    }}
+                    disabled={loading}
+                    tooltip="Cancelar alteração de senha"
+                  >
+                    Cancelar
+                  </Button>
+                )}
                 <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    setShowPasswordForm(false);
-                    setFormData(prev => ({
-                      ...prev,
-                      currentPassword: '',
-                      newPassword: '',
-                      confirmPassword: ''
-                    }));
-                    setFormErrors({});
-                  }}
-                  disabled={loading}
+                  type="submit"
+                  variant="save"
+                  isLoading={loading}
+                  tooltip="Salvar alterações do perfil"
+                  className={saveAnimation ? 'animate-pulse' : ''}
                 >
-                  Cancelar
+                  Salvar Alterações
                 </Button>
               </div>
-            </div>
-          )}
-
-          <div className="flex justify-center">
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={loading}
-            >
-              {loading ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
+            </form>
           </div>
-        </form>
 
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="flex justify-center">
-            <Button
-              type="button"
-              variant="danger"
-              onClick={() => setShowDeleteModal(true)}
-              disabled={loading}
-            >
-              Excluir Conta
-            </Button>
+          <div className={`px-6 py-4 ${theme === 'dark' ? 'bg-dark-accent border-t border-dark-border' : 'bg-gray-50 border-t border-gray-200'}`}>
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>
+                  Excluir Conta
+                </h3>
+                <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>
+                  Exclua permanentemente sua conta e todos os seus dados
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => setShowDeleteModal(true)}
+                disabled={loading || deleteLoading}
+                tooltip="Excluir sua conta permanentemente"
+              >
+                Excluir Conta
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -303,8 +352,8 @@ const Profile: React.FC = () => {
         onClose={() => setShowDeleteModal(false)}
         title="Excluir Conta"
       >
-        <div className="p-6">
-          <p className="text-gray-700 mb-4">
+        <div className="mt-4">
+          <p className={`${theme === 'dark' ? 'text-dark-text' : 'text-gray-700'} mb-4`}>
             Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.
           </p>
           <div className="flex justify-end space-x-4">
@@ -313,6 +362,7 @@ const Profile: React.FC = () => {
               variant="secondary"
               onClick={() => setShowDeleteModal(false)}
               disabled={deleteLoading}
+              tooltip="Cancelar exclusão da conta"
             >
               Cancelar
             </Button>
@@ -320,9 +370,10 @@ const Profile: React.FC = () => {
               type="button"
               variant="danger"
               onClick={handleDeleteAccount}
-              disabled={deleteLoading}
+              isLoading={deleteLoading}
+              tooltip="Confirmar exclusão da conta"
             >
-              {deleteLoading ? 'Excluindo...' : 'Confirmar Exclusão'}
+              Confirmar Exclusão
             </Button>
           </div>
         </div>

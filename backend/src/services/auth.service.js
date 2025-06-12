@@ -1,11 +1,7 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const prisma = require('../prismaClient');
-
-// Configurações padrão para JWT se não estiverem definidas nas variáveis de ambiente
-const JWT_SECRET = process.env.JWT_SECRET || 'orquestra_desenvolvimento_seguro_2024';
-// Aumentando o tempo de expiração do token para 30 dias (720 horas)
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30d';
+const config = require('../config');
 
 class AuthService {
   async register(userData) {
@@ -42,9 +38,13 @@ class AuthService {
     return user;
   }
 
-  async login(email, password) {
+  async login(credentials) {
+    const { email, password } = credentials;
+    
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: {
+        email: email
+      },
       select: {
         id: true,
         name: true,
@@ -65,24 +65,15 @@ class AuthService {
     }
 
     const token = jwt.sign(
-      { 
-        userId: user.id,
-        email: user.email,
-        role: user.role
-      },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      { id: user.id, email: user.email, role: user.role },
+      config.app.jwtSecret,
+      { expiresIn: config.app.jwtExpiration }
     );
 
-    return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      },
-      token
-    };
+    // Remove a senha do objeto do usuário
+    const { password_hash, ...userWithoutPassword } = user;
+
+    return { token, user: userWithoutPassword };
   }
 
   async getProfile(userId) {
@@ -105,25 +96,24 @@ class AuthService {
     return user;
   }
 
-  async updateProfile(userId, userData) {
+  async updateProfile(userId, data) {
     const user = await prisma.user.update({
       where: { id: userId },
       data: {
-        name: userData.name
+        name: data.name
       },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true,
-        created_at: true
+        role: true
       }
     });
 
     return user;
   }
 
-  async updatePassword(userId, currentPassword, newPassword) {
+  async changePassword(userId, currentPassword, newPassword) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -151,7 +141,7 @@ class AuthService {
       }
     });
 
-    return { message: 'Senha atualizada com sucesso' };
+    return { message: 'Senha alterada com sucesso' };
   }
 
   async deleteAccount(userId) {

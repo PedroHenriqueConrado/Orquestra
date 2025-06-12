@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
-import Header from '../components/Header';
 import Button from '../components/ui/Button';
 import ProjectChat from '../components/ProjectChat';
 import projectService from '../services/project.service';
@@ -11,6 +10,8 @@ import type { Task, TaskStatus } from '../services/task.service';
 import TaskList from '../components/TaskList';
 import MemberSelector from '../components/MemberSelector';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 
 const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -267,7 +268,6 @@ const ProjectDetails: React.FC = () => {
   if (loading) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <Header />
         <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg p-6 flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -280,7 +280,6 @@ const ProjectDetails: React.FC = () => {
   if (error || !project) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <Header />
         <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg p-6">
             <div className="text-red-500 text-center">
@@ -301,7 +300,6 @@ const ProjectDetails: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header />
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-2 sm:px-4 md:px-6 lg:px-8">
         {/* Cabeçalho do projeto */}
         <div className="bg-white shadow rounded-lg mb-4 sm:mb-6">

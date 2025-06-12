@@ -10,11 +10,21 @@ class AuthController {
       console.log('Dados recebidos:', req.body);
       
       // Valida os dados de entrada
-      const validatedData = registerSchema.parse(req.body);
-      console.log('Dados validados:', validatedData);
+      const { error, value } = registerSchema.validate(req.body, { abortEarly: false });
+      if (error) {
+        return res.status(400).json({
+          message: 'Dados inválidos',
+          errors: error.details.map(detail => ({
+            field: detail.path[0],
+            message: detail.message
+          }))
+        });
+      }
+      
+      console.log('Dados validados:', value);
       
       // Remove a confirmação de senha antes de passar para o serviço
-      const { confirmPassword, ...userData } = validatedData;
+      const { confirmPassword, ...userData } = value;
       
       // Registra o usuário
       const user = await authService.register(userData);
@@ -23,13 +33,6 @@ class AuthController {
       return res.status(201).json(user);
     } catch (error) {
       console.error('Erro no registro:', error);
-      
-      if (error.name === 'ZodError') {
-        return res.status(400).json({
-          message: 'Dados inválidos',
-          errors: error.errors || error.issues
-        });
-      }
       
       if (error.message === 'Email já cadastrado') {
         return res.status(409).json({ message: error.message });
@@ -44,35 +47,33 @@ class AuthController {
 
   async login(req, res) {
     try {
-      console.log('Dados de login recebidos:', req.body);
+      console.log('Corpo da requisição:', req.body);
       
       // Valida os dados de entrada
-      const validatedData = loginSchema.parse(req.body);
-      console.log('Dados de login validados:', validatedData);
-      
-      // Realiza o login
-      const result = await authService.login(validatedData.email, validatedData.password);
-      console.log('Login realizado com sucesso');
-      
-      return res.json(result);
-    } catch (error) {
-      console.error('Erro no login:', error);
-      
-      if (error.name === 'ZodError') {
+      const { error, value } = loginSchema.validate(req.body, { abortEarly: false });
+      if (error) {
         return res.status(400).json({
           message: 'Dados inválidos',
-          errors: error.errors || error.issues
+          errors: error.details.map(detail => ({
+            field: detail.path[0],
+            message: detail.message
+          }))
         });
       }
+
+      console.log('Dados de login recebidos:', value);
+      
+      const { token, user } = await authService.login(value);
+      
+      res.json({ token, user });
+    } catch (error) {
+      console.error('Erro no login:', error);
       
       if (error.message === 'Credenciais inválidas') {
         return res.status(401).json({ message: error.message });
       }
       
-      return res.status(500).json({ 
-        message: 'Erro interno do servidor',
-        error: error.message 
-      });
+      res.status(500).json({ message: 'Erro interno do servidor' });
     }
   }
 
@@ -97,31 +98,46 @@ class AuthController {
 
   async updateProfile(req, res) {
     try {
-      const { error } = updateProfileSchema.validate(req.body);
+      const { error, value } = updateProfileSchema.validate(req.body, { abortEarly: false });
       if (error) {
-        return res.status(400).json({ message: error.details[0].message });
+        return res.status(400).json({
+          message: 'Dados inválidos',
+          errors: error.details.map(detail => ({
+            field: detail.path[0],
+            message: detail.message
+          }))
+        });
       }
 
       const userId = req.user.id;
-      const { name } = req.body;
+      const { name } = value;
 
-      await authService.updateProfile(userId, { name });
-      res.json({ message: 'Perfil atualizado com sucesso' });
+      const updatedUser = await authService.updateProfile(userId, { name });
+      res.json(updatedUser);
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
+      if (error.message === 'Usuário não encontrado') {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: 'Erro ao atualizar perfil' });
     }
   }
 
   async updatePassword(req, res) {
     try {
-      const { error } = updatePasswordSchema.validate(req.body);
+      const { error, value } = updatePasswordSchema.validate(req.body, { abortEarly: false });
       if (error) {
-        return res.status(400).json({ message: error.details[0].message });
+        return res.status(400).json({
+          message: 'Dados inválidos',
+          errors: error.details.map(detail => ({
+            field: detail.path[0],
+            message: detail.message
+          }))
+        });
       }
 
       const userId = req.user.id;
-      const { currentPassword, newPassword } = req.body;
+      const { currentPassword, newPassword } = value;
 
       await authService.updatePassword(userId, currentPassword, newPassword);
       res.json({ message: 'Senha atualizada com sucesso' });
@@ -129,6 +145,9 @@ class AuthController {
       console.error('Erro ao atualizar senha:', error);
       if (error.message === 'Senha atual incorreta') {
         return res.status(400).json({ message: error.message });
+      }
+      if (error.message === 'Usuário não encontrado') {
+        return res.status(404).json({ message: error.message });
       }
       res.status(500).json({ message: 'Erro ao atualizar senha' });
     }

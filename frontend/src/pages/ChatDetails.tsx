@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import Header from '../components/Header';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 import Button from '../components/ui/Button';
 import directChatService from '../services/direct-chat.service';
 import type { UserChat, DirectMessage, ChatMessagesResponse } from '../services/direct-chat.service';
-import { useAuth } from '../contexts/AuthContext';
 
 const ChatDetails: React.FC = () => {
   const { chatId } = useParams<{ chatId: string }>();
@@ -176,7 +177,6 @@ const ChatDetails: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 flex flex-col max-w-7xl w-full mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="flex-1 flex justify-center items-center">

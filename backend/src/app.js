@@ -1,61 +1,102 @@
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
 const morgan = require('morgan');
-const path = require('path');
-require('express-async-errors');
-
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const config = require('./config');
-const { errorHandler } = require('./middlewares/error.middleware');
-const requestIdMiddleware = require('./middlewares/request-id.middleware');
-const routes = require('./routes');
+const errorHandler = require('./middlewares/error.middleware');
+const logger = require('./utils/logger');
+
+// Importação das rotas
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const projectRoutes = require('./routes/project.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const chatRoutes = require('./routes/chat.routes');
+const directChatRoutes = require('./routes/direct-chat.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 const app = express();
 
-// Request ID para rastreamento de requisições
-app.use(requestIdMiddleware);
+// Middlewares básicos
+app.use(helmet()); // Segurança
+app.use(compression(config.app.compression)); // Compressão com configurações
+app.use(express.json({ limit: '10mb' })); // Parser JSON com limite
+app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parser URL-encoded com limite
 
-// Middlewares de segurança
-app.use(helmet());
+// Rate Limiting
+const limiter = rateLimit(config.app.rateLimit);
+app.use(limiter);
+
+// CORS
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: config.app.corsOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
 // Logging
-if (config.app.env !== 'test') {
-    // Formato personalizado para mostrar mais detalhes em desenvolvimento
-    if (config.app.env === 'development') {
-        app.use(morgan(':method :url :status :response-time ms - :res[content-length] - :req[content-type] - :req[authorization]'));
-        // Log de corpo da requisição em rotas específicas
-        app.use((req, res, next) => {
-            if (req.method === 'POST' || req.method === 'PUT') {
-                console.log('Corpo da requisição:', JSON.stringify(req.body, null, 2));
-            }
-            next();
-        });
-    } else {
-        app.use(morgan('combined'));
-    }
+if (config.app.env === 'development') {
+    app.use(morgan('dev', {
+        stream: {
+            write: (message) => logger.debug(message.trim())
+        }
+    }));
+} else {
+    app.use(morgan('combined', {
+        stream: {
+            write: (message) => logger.info(message.trim())
+        }
+    }));
 }
 
-// Parse de JSON e uploads
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Rotas
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/direct-messages', directChatRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
-// Servir arquivos estáticos
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
-
-// Rotas da API
-app.use('/api', routes);
+// Rota para favicon.ico (evita erro 404)
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Tratamento de rotas não encontradas
-app.use((req, res, next) => {
-    res.status(404).json({ error: 'Rota não encontrada' });
+app.use((req, res) => {
+    res.status(404).json({
+        error: 'Rota não encontrada',
+        code: 'not_found'
+    });
 });
 
-// Tratamento de erros
-app.use(errorHandler);
+// Middleware de erro (deve ser o último middleware)
+app.use((err, req, res, next) => errorHandler(err, req, res, next));
 
-module.exports = app; 
+// Função para iniciar o servidor
+function startServer() {
+    return new Promise((resolve, reject) => {
+        const server = app.listen(config.app.port, () => {
+            logger.info(`Servidor rodando na porta ${config.app.port}`);
+            logger.info(`Ambiente: ${config.app.env}`);
+            resolve(server);
+        }).on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                logger.error(`Porta ${config.app.port} já está em uso. Tentando encerrar o processo...`);
+                // Aqui você pode adicionar lógica para tentar encerrar o processo
+                reject(err);
+            } else {
+                logger.error('Erro ao iniciar o servidor:', err);
+                reject(err);
+            }
+        });
+    });
+}
+
+// Exporta tanto o app quanto a função de inicialização
+module.exports = {
+    app,
+    startServer
+}; 

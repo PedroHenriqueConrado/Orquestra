@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 const multer = require('multer');
 const documentController = require('../controllers/document.controller');
-const authenticate = require('../middlewares/auth.middleware');
+const authMiddleware = require('../middlewares/auth.middleware');
 const { isProjectMember } = require('../middlewares/projectMember.middleware');
 const { isDocumentInProject } = require('../middlewares/documentInProject.middleware');
 const logger = require('../utils/logger');
@@ -35,7 +35,7 @@ const ensureProjectId = (req, res, next) => {
 };
 
 // Todas as rotas requerem autenticação
-router.use(authenticate);
+router.use(authMiddleware);
 
 // Aplicar middlewares em todas as rotas
 router.use(ensureProjectId);
@@ -68,7 +68,7 @@ router.post('/:documentId/versions',
 
 // Rota de download 
 router.get('/:documentId/versions/:versionNumber',
-    authenticate, // Usa apenas a autenticação básica
+    authMiddleware, // Usa apenas a autenticação básica
     isDocumentInProject, // Verificar se o documento pertence ao projeto
     documentController.downloadVersion
 );

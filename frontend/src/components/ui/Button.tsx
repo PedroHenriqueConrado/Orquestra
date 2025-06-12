@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import Tooltip from './Tooltip';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success' | 'save';
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -15,6 +16,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   href?: string;
   isExternal?: boolean;
   rounded?: boolean;
+  tooltip?: string;
+  tooltipPosition?: 'top' | 'bottom' | 'left' | 'right';
   children: React.ReactNode;
 }
 
@@ -31,10 +34,12 @@ const Button: React.FC<ButtonProps> = ({
   isExternal = false,
   rounded = false,
   disabled,
+  tooltip,
+  tooltipPosition = 'top',
   ...props
 }) => {
   // Base classes for all button variants
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary';
+  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform hover:scale-105 active:scale-95';
   
   // Size variations
   const sizeClasses = {
@@ -44,18 +49,19 @@ const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-base'
   };
   
-  // Variant classes
+  // Variant classes with enhanced transitions
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-primary-dark border border-transparent focus:ring-primary',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 border border-transparent focus:ring-gray-500',
-    outline: 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 focus:ring-primary',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    success: 'bg-green-600 text-white hover:bg-green-700 border border-transparent focus:ring-green-500'
+    primary: 'bg-primary text-white hover:bg-primary-dark border border-transparent focus:ring-primary shadow-sm hover:shadow-md',
+    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 border border-transparent focus:ring-gray-500 shadow-sm hover:shadow-md',
+    outline: 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 focus:ring-primary shadow-sm hover:shadow-md',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm hover:shadow-md',
+    success: 'bg-green-600 text-white hover:bg-green-700 border border-transparent focus:ring-green-500 shadow-sm hover:shadow-md',
+    save: 'bg-primary text-white hover:bg-green-600 border border-transparent focus:ring-primary shadow-sm hover:shadow-md'
   };
 
   // Additional classes
   const widthClass = fullWidth ? 'w-full' : '';
-  const disabledClass = disabled || isLoading ? 'opacity-60 cursor-not-allowed' : '';
+  const disabledClass = disabled || isLoading ? 'opacity-60 cursor-not-allowed transform-none hover:scale-100' : '';
   const roundedClass = rounded ? 'rounded-full' : '';
   
   // Combine all classes
@@ -79,13 +85,20 @@ const Button: React.FC<ButtonProps> = ({
         </div>
       ) : (
         <>
-          {leftIcon && <span className="mr-2">{leftIcon}</span>}
+          {leftIcon && <span className="mr-2 transition-transform duration-300 group-hover:scale-110">{leftIcon}</span>}
           {children}
-          {rightIcon && <span className="ml-2">{rightIcon}</span>}
+          {rightIcon && <span className="ml-2 transition-transform duration-300 group-hover:scale-110">{rightIcon}</span>}
         </>
       )}
     </>
   );
+
+  // Wrap button content with tooltip if provided
+  const wrappedContent = tooltip ? (
+    <Tooltip content={tooltip} position={tooltipPosition}>
+      {buttonContent}
+    </Tooltip>
+  ) : buttonContent;
 
   // If href is provided, render a Link or anchor tag
   if (href) {
@@ -97,7 +110,7 @@ const Button: React.FC<ButtonProps> = ({
           target="_blank"
           rel="noopener noreferrer"
         >
-          {buttonContent}
+          {wrappedContent}
         </a>
       );
     }
@@ -107,7 +120,7 @@ const Button: React.FC<ButtonProps> = ({
         to={href}
         className={buttonClasses}
       >
-        {buttonContent}
+        {wrappedContent}
       </Link>
     );
   }
@@ -119,7 +132,7 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled || isLoading}
       {...props}
     >
-      {buttonContent}
+      {wrappedContent}
     </button>
   );
 };

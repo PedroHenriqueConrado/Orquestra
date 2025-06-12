@@ -3,6 +3,13 @@ const { JsonWebTokenError, TokenExpiredError } = require('jsonwebtoken');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const logger = require('../utils/logger');
 
+/**
+ * Middleware de tratamento de erros
+ * @param {Error} err - O erro que ocorreu
+ * @param {Request} req - Objeto da requisição
+ * @param {Response} res - Objeto da resposta
+ * @param {NextFunction} next - Função next do Express
+ */
 function errorHandler(err, req, res, next) {
     // Log com detalhes da requisição que gerou o erro
     const requestInfo = {
@@ -22,7 +29,11 @@ function errorHandler(err, req, res, next) {
     if (err instanceof ZodError) {
         return res.status(400).json({
             error: 'Erro de validação',
-            details: err.errors
+            code: 'validation_error',
+            details: err.errors.map(e => ({
+                field: e.path.join('.'),
+                message: e.message
+            }))
         });
     }
 
@@ -43,46 +54,42 @@ function errorHandler(err, req, res, next) {
 
     // Erros do Prisma
     if (err instanceof PrismaClientKnownRequestError) {
-        switch (err.code) {
-            case 'P2002': // Unique constraint violation
-                return res.status(409).json({
-                    error: 'Registro duplicado',
-                    field: err.meta?.target?.[0],
-                    code: 'unique_violation'
-                });
-            case 'P2025': // Record not found
-                return res.status(404).json({
-                    error: 'Registro não encontrado',
-                    code: 'not_found'
-                });
-            case 'P2003': // Foreign key constraint violation
-                return res.status(400).json({
-                    error: 'Violação de chave estrangeira',
-                    field: err.meta?.field_name,
-                    code: 'foreign_key_violation'
-                });
-            default:
-                logger.debug('Erro não tratado do Prisma:', { code: err.code, meta: err.meta });
-                return res.status(500).json({
-                    error: 'Erro no banco de dados',
-                    code: 'database_error'
-                });
+        // Erro de registro não encontrado
+        if (err.code === 'P2025') {
+            return res.status(404).json({
+                error: 'Registro não encontrado',
+                code: 'not_found'
+            });
         }
-    }
 
-    // Erros personalizados da aplicação
-    if (err instanceof AppError) {
-        return res.status(err.statusCode).json({
-            error: err.message,
-            code: err.code || 'app_error'
+        // Erro de violação de chave única
+        if (err.code === 'P2002') {
+            return res.status(409).json({
+                error: 'Conflito de dados',
+                code: 'unique_violation',
+                field: err.meta?.target?.[0]
+            });
+        }
+
+        // Outros erros do Prisma
+        return res.status(400).json({
+            error: 'Erro no banco de dados',
+            code: 'database_error'
         });
     }
 
-    // Erro padrão
+    // Erros de negócio (lançados com throw new Error)
+    if (err.message) {
+        return res.status(400).json({
+            error: err.message,
+            code: 'business_error'
+        });
+    }
+
+    // Erro interno não tratado
     return res.status(500).json({
         error: 'Erro interno do servidor',
-        code: 'internal_server_error',
-        requestId: req.id // Para referência em logs (requer middleware de geração de ID)
+        code: 'internal_error'
     });
 }
 

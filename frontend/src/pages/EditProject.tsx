@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Header from '../components/Header';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 import Button from '../components/ui/Button';
+import FormField from '../components/ui/FormField';
 import projectService from '../services/project.service';
 import type { ProjectData, Project } from '../services/project.service';
 
@@ -84,7 +87,6 @@ const EditProject: React.FC = () => {
   if (isFetching) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <Header />
         <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg p-6 flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -97,7 +99,6 @@ const EditProject: React.FC = () => {
   if (error && !project) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <Header />
         <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg p-6">
             <div className="text-red-500 text-center">

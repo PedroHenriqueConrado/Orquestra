@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 import Button from '../components/ui/Button';
 import directChatService from '../services/direct-chat.service';
 import userService from '../services/user.service';
 import type { UserChat } from '../services/direct-chat.service';
-import { useAuth } from '../contexts/AuthContext';
 
 const DirectMessages: React.FC = () => {
   const { user, logout } = useAuth();
@@ -97,7 +98,6 @@ const DirectMessages: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header />
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-0">Mensagens Diretas</h1>

@@ -1,49 +1,38 @@
 require('dotenv').config();
-const app = require('./app');
-const config = require('./config');
-const { PrismaClient } = require('@prisma/client');
+const { startServer } = require('./app');
+const logger = require('./utils/logger');
+const prisma = require('./prismaClient');
 
-const prisma = new PrismaClient();
-
-async function startServer() {
+async function main() {
     try {
-        // Testar conexão com o banco de dados
+        // Testa a conexão com o banco de dados
         await prisma.$connect();
-        console.log('✅ Conexão com o banco de dados estabelecida');
+        logger.info('✅ Conexão com o banco de dados estabelecida');
 
-        // Iniciar servidor
-        app.listen(config.app.port, () => {
-            console.log(`✅ Servidor rodando na porta ${config.app.port}`);
-            console.log(`📝 Ambiente: ${config.app.env}`);
+        // Inicia o servidor
+        const server = await startServer();
+
+        // Tratamento de encerramento gracioso
+        process.on('SIGTERM', () => {
+            logger.info('SIGTERM recebido. Encerrando servidor...');
+            server.close(() => {
+                logger.info('Servidor encerrado');
+                process.exit(0);
+            });
         });
+
+        process.on('SIGINT', () => {
+            logger.info('SIGINT recebido. Encerrando servidor...');
+            server.close(() => {
+                logger.info('Servidor encerrado');
+                process.exit(0);
+            });
+        });
+
     } catch (error) {
-        console.error('❌ Erro ao iniciar o servidor:', error);
+        logger.error('❌ Erro ao iniciar a aplicação:', error);
         process.exit(1);
     }
 }
 
-// Tratamento de erros não capturados
-process.on('unhandledRejection', (error) => {
-    console.error('❌ Erro não tratado:', error);
-    process.exit(1);
-});
-
-process.on('uncaughtException', (error) => {
-    console.error('❌ Exceção não capturada:', error);
-    process.exit(1);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-    console.log('🛑 Recebido sinal SIGTERM, encerrando...');
-    await prisma.$disconnect();
-    process.exit(0);
-});
-
-process.on('SIGINT', async () => {
-    console.log('🛑 Recebido sinal SIGINT, encerrando...');
-    await prisma.$disconnect();
-    process.exit(0);
-});
-
-startServer(); 
+main(); 

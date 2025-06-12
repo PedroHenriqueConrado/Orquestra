@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 import Button from '../components/ui/Button';
-import Header from '../components/Header';
 import projectService from '../services/project.service';
 import taskService from '../services/task.service';
 import progressService from '../services/progress.service';
@@ -120,7 +121,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header />
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         {/* Boas-vindas e estatísticas */}
         <div className="mb-6 sm:mb-8">

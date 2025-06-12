@@ -18,6 +18,7 @@ import Profile from './pages/Profile';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import PrivateRoute from './components/PrivateRoute';
+import MainLayout from './layouts/MainLayout';
 
 const App: React.FC = () => {
   return (
@@ -29,77 +30,25 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
-            <Route path="/dashboard" element={
+            {/* Rotas protegidas com MainLayout */}
+            <Route element={
               <PrivateRoute>
-                <Dashboard />
+                <MainLayout />
               </PrivateRoute>
-            } />
-            
-            <Route path="/profile" element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/projects" element={
-              <PrivateRoute>
-                <Projects />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/projects/new" element={
-              <PrivateRoute>
-                <NewProject />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/projects/:id" element={
-              <PrivateRoute>
-                <ProjectDetails />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/projects/:projectId/dashboard" element={
-              <PrivateRoute>
-                <ProjectDashboard />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/projects/:id/edit" element={
-              <PrivateRoute>
-                <EditProject />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/projects/:projectId/tasks/new" element={
-              <PrivateRoute>
-                <NewTask />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/projects/:projectId/tasks/:taskId" element={
-              <PrivateRoute>
-                <TaskDetails />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/messages" element={
-              <PrivateRoute>
-                <DirectMessages />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/messages/:chatId" element={
-              <PrivateRoute>
-                <ChatDetails />
-              </PrivateRoute>
-            } />
-            
-            <Route path="/notifications" element={
-              <PrivateRoute>
-                <Notifications />
-              </PrivateRoute>
-            } />
+            }>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/projects/new" element={<NewProject />} />
+              <Route path="/projects/:id" element={<ProjectDetails />} />
+              <Route path="/projects/:projectId/dashboard" element={<ProjectDashboard />} />
+              <Route path="/projects/:id/edit" element={<EditProject />} />
+              <Route path="/projects/:projectId/tasks/new" element={<NewTask />} />
+              <Route path="/projects/:projectId/tasks/:taskId" element={<TaskDetails />} />
+              <Route path="/messages" element={<DirectMessages />} />
+              <Route path="/messages/:chatId" element={<ChatDetails />} />
+              <Route path="/notifications" element={<Notifications />} />
+            </Route>
             
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

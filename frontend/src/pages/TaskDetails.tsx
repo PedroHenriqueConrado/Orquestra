@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import Header from '../components/Header';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import TaskDocuments from '../components/TaskDocuments';
 import taskService from '../services/task.service';
@@ -8,11 +7,13 @@ import projectService from '../services/project.service';
 import type { Task, TaskStatus, TaskPriority } from '../services/task.service';
 import type { Project } from '../services/project.service';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 
 const TaskDetails: React.FC = () => {
   const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   
   const [project, setProject] = useState<Project | null>(null);
   const [task, setTask] = useState<Task | null>(null);
@@ -149,7 +150,6 @@ const TaskDetails: React.FC = () => {
   if (loading) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <Header />
         <main className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg p-6 flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -162,7 +162,6 @@ const TaskDetails: React.FC = () => {
   if (error || !task || !project) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <Header />
         <main className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg p-6">
             <div className="text-red-500 text-center">
@@ -183,7 +182,6 @@ const TaskDetails: React.FC = () => {
   
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header />
       <main className="max-w-4xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         {/* Navegação e cabeçalho */}
         <div className="mb-4 sm:mb-6">

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 import Button from '../components/ui/Button';
+import FormField from '../components/ui/FormField';
 import taskService from '../services/task.service';
 import projectService from '../services/project.service';
 import type { TaskData, TaskStatus, TaskPriority } from '../services/task.service';
@@ -103,7 +106,6 @@ const NewTask: React.FC = () => {
   if (loading) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <Header />
         <main className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg p-6 flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -116,7 +118,6 @@ const NewTask: React.FC = () => {
   if (error || !project) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <Header />
         <main className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg p-6">
             <div className="text-red-500 text-center">
@@ -137,7 +138,6 @@ const NewTask: React.FC = () => {
   
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header />
       <main className="max-w-3xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Nova Tarefa</h1>
