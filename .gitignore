@@ -34,4 +34,13 @@ yarn-error.log*
 .vscode/*
 
 # Sistema
-Thumbs.db 
+Thumbs.db
+
+# Orquestra specific
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/debug.env
+backend/DEBUGGING.md
+backend/melhorias.txt
+backend/src/test-*.js
+*.log 
