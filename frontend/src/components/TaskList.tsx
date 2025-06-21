@@ -66,7 +66,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
   if (tasks.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500 mb-4">Nenhuma tarefa encontrada</p>
+        <p className="text-theme-secondary mb-4">Nenhuma tarefa encontrada</p>
         <Link 
           to="tasks/new"
           className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
@@ -81,62 +81,62 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
   }
 
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-md">
-      <div className="flex justify-between items-center p-4 border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900">Tarefas</h2>
+    <div className="bg-theme-surface shadow overflow-hidden sm:rounded-md border border-theme">
+      <div className="flex justify-between items-center p-4 border-b border-theme">
+        <h2 className="text-lg font-medium text-theme-primary">Tarefas</h2>
         <button
           onClick={onRefresh}
-          className="whitespace-nowrap m-1 py-3 sm:py-4 px-3 sm:px-5 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white"
+          className="whitespace-nowrap m-1 py-3 sm:py-4 px-3 sm:px-5 font-medium text-sm flex-shrink-0 text-theme-secondary hover:text-theme-primary transition-colors"
         >
           Atualizar
         </button>
       </div>
 
       {error && (
-        <div className="p-4 text-red-600 bg-red-50">
+        <div className="p-4 text-red-600 bg-red-50 dark:bg-red-900/20">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="p-4 text-center text-gray-500">
+        <div className="p-4 text-center text-theme-secondary">
           Carregando tarefas...
         </div>
       ) : tasks.length === 0 ? (
-        <div className="p-4 text-center text-gray-500">
+        <div className="p-4 text-center text-theme-secondary">
           Nenhuma tarefa encontrada.
         </div>
       ) : (
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-theme">
+          <thead className="bg-theme">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                 Tarefa
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                 Status
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                 Prioridade
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                 Data Limite
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                 Responsável
               </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-theme-secondary uppercase tracking-wider">
                 Ações
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-theme-surface divide-y divide-theme">
             {tasks.map((task) => (
-              <tr key={task.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={task.id} className="hover:bg-theme transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-theme-primary">
                         <Link 
                           to={`/projects/${task.project_id}/tasks/${task.id}?from=list&tab=tasks&status=${status}`} 
                           className="hover:text-primary"
@@ -145,7 +145,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
                         </Link>
                       </div>
                       {task.description && (
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                        <div className="text-sm text-theme-secondary truncate max-w-xs">
                           {task.description}
                         </div>
                       )}
@@ -154,9 +154,9 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <select
-                    value={task.status}
+                    value={task.status || 'pending'}
                     onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
-                    className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(task.status)}`}
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(task.status || 'pending')}`}
                   >
                     <option value="pending">Pendente</option>
                     <option value="in_progress">Em Progresso</option>
@@ -164,21 +164,21 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
                   </select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`text-sm font-medium ${getPriorityColor(task.priority)}`}>
+                  <span className={`text-sm font-medium ${getPriorityColor(task.priority || 'medium')}`}>
                     {task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Média' : 'Baixa'}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
                   {task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : '-'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {task.assigned_to?.name || '-'}
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
+                  {task.assignedUser?.name || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
                     <Link
                       to={`/projects/${task.project_id}/tasks/${task.id}?from=list&tab=tasks&status=${status}`}
-                      className="px-3 py-1 text-xs border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors hover:text-black"
+                      className="px-3 py-1 text-xs border border-theme rounded-md text-theme-primary hover:bg-theme transition-colors"
                     >
                       Abrir
                     </Link>
@@ -186,8 +186,8 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
                       onClick={() => onStatusChange(task.id, task.status === 'completed' ? 'pending' : 'completed')}
                       className={`px-3 py-1 text-xs border rounded-md transition-colors ${
                         task.status === 'completed'
-                          ? 'text-primary hover:bg-primary hover:text-white text-white hover:border-white'
-                          : 'text-primary hover:bg-primary hover:text-white text-white hover:border-white'
+                          ? 'text-primary hover:bg-primary hover:text-white border-primary'
+                          : 'text-primary hover:bg-primary hover:text-white border-primary'
                       }`}
                     >
                       {task.status === 'completed' ? 'Reabrir' : 'Concluir'}

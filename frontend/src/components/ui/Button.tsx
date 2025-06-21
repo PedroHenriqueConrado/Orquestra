@@ -46,11 +46,11 @@ const Button: React.FC<ButtonProps> = ({
   
   // Variant classes
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-primary-dark border border-transparent focus:ring-primary',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 border border-transparent focus:ring-gray-500',
-    outline: 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 focus:ring-primary',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    success: 'bg-green-600 text-white hover:bg-green-700 border border-transparent focus:ring-green-500'
+    primary: 'bg-primary text-white hover:bg-primary-dark border border-transparent focus:ring-primary shadow-sm',
+    secondary: 'bg-theme-secondary text-theme-primary hover:bg-theme-surface border border-theme focus:ring-primary shadow-sm',
+    outline: 'bg-theme-surface text-theme-secondary hover:bg-theme-secondary border border-theme focus:ring-primary shadow-sm',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
+    success: 'bg-green-600 text-white hover:bg-green-700 border border-transparent focus:ring-green-500 shadow-sm'
   };
 
   // Additional classes

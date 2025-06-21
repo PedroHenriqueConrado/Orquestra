@@ -119,13 +119,13 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-theme-primary min-h-screen">
       <Header />
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         {/* Boas-vindas e estatísticas */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Olá, {user?.name}!</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-xl sm:text-2xl font-semibold text-theme-primary">Olá, {user?.name}!</h1>
+          <p className="mt-1 text-sm text-theme-secondary">
             Bem-vindo ao seu painel de controle. Aqui está um resumo de suas atividades.
           </p>
           
@@ -134,9 +134,9 @@ const Dashboard: React.FC = () => {
             {stats.map((stat) => (
               <div
                 key={stat.id}
-                className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6"
+                className="overflow-hidden rounded-lg bg-theme-surface px-4 py-5 shadow-sm border border-theme sm:p-6"
               >
-                <dt className="truncate text-sm font-medium text-gray-500">{stat.name}</dt>
+                <dt className="truncate text-sm font-medium text-theme-secondary">{stat.name}</dt>
                 <dd className="mt-1 text-2xl sm:text-3xl font-semibold text-primary">{stat.value}</dd>
               </div>
             ))}
@@ -144,15 +144,15 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Tabs para navegação */}
-        <div className="mb-4 sm:mb-6 border-b border-gray-200">
+        <div className="mb-4 sm:mb-6 border-b border-theme">
           <nav className="-mb-px flex overflow-x-auto hide-scrollbar">
             <button
               onClick={() => setActiveTab('projects')}
               className={`${
                 activeTab === 'projects'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:hover:text-white'
-              } whitespace-nowrap py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 m-2 text-white hover:bg-gray-700 hover:border-white `}
+                  : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
+              } whitespace-nowrap py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 m-2 transition-colors duration-200`}
             >
               Projetos
             </button>
@@ -161,8 +161,8 @@ const Dashboard: React.FC = () => {
               className={`${
                 activeTab === 'tasks'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-white'
-              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white`}
+                  : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
+              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 transition-colors duration-200`}
             >
               Tarefas
             </button>
@@ -171,8 +171,8 @@ const Dashboard: React.FC = () => {
               className={`${
                 activeTab === 'team'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-white'
-              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white`}
+                  : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
+              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 transition-colors duration-200`}
             >
               Equipe
             </button>
@@ -181,9 +181,8 @@ const Dashboard: React.FC = () => {
               className={`${
                 activeTab === 'profile'
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-white'
-              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white `}
-              
+                  : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
+              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 transition-colors duration-200`}
             >
               Perfil
             </button>
@@ -191,7 +190,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Conteúdo principal */}
-        <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+        <div className="bg-theme-surface shadow-sm border border-theme rounded-lg p-4 sm:p-6">
           {/* Tab de Projetos */}
           {activeTab === 'projects' && (
             <div>
@@ -212,37 +211,37 @@ const Dashboard: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
               ) : error ? (
-                <div className="bg-red-50 p-4 rounded-md text-red-700 text-sm">
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md text-red-700 dark:text-red-400 text-sm">
                   {error}
                 </div>
               ) : projects.length > 0 ? (
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <div className="inline-block min-w-full align-middle">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-theme">
+                      <thead className="bg-theme">
                         <tr>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Nome
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Status
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Progresso
                           </th>
-                          <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
+                          <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Membros
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider text-black">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Ações
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-theme-surface divide-y divide-theme">
                         {projects.map((project) => (
                           <tr key={project.id}>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                              <div className="text-sm font-medium text-theme-primary">{project.name}</div>
                             </td>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -254,13 +253,13 @@ const Dashboard: React.FC = () => {
                               </span>
                             </td>
                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="w-full bg-theme rounded-full h-2">
                                 <div 
                                   className="bg-primary h-2 rounded-full" 
                                   style={{ width: `${calculateProjectProgress(project.id)}%` }}
                                 ></div>
                               </div>
-                              <span className="text-xs text-gray-500 mt-1">{calculateProjectProgress(project.id)}%</span>
+                              <span className="text-xs text-theme-secondary mt-1">{calculateProjectProgress(project.id)}%</span>
                             </td>
                             <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                               <div className="flex -space-x-2 overflow-hidden">
@@ -274,7 +273,7 @@ const Dashboard: React.FC = () => {
                                   </div>
                                 ))}
                                 {project.members.length > 3 && (
-                                  <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+                                  <div className="h-6 w-6 rounded-full bg-theme flex items-center justify-center text-theme-secondary text-xs">
                                     +{project.members.length - 3}
                                   </div>
                                 )}
@@ -285,7 +284,7 @@ const Dashboard: React.FC = () => {
                                 <span className="hidden sm:inline">Visualizar</span>
                                 <span className="sm:hidden">Ver</span>
                               </Link>
-                              <Link to={`/projects/${project.id}/edit`} className="text-gray-600 hover:text-gray-900">
+                              <Link to={`/projects/${project.id}/edit`} className="text-theme-secondary hover:text-theme-primary">
                                 <span className="hidden sm:inline">Editar</span>
                                 <span className="sm:hidden">Edit</span>
                               </Link>
@@ -297,8 +296,8 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="bg-gray-50 p-4 text-center rounded-md">
-                  <p className="text-sm text-gray-500">
+                <div className="bg-theme p-4 text-center rounded-md">
+                  <p className="text-sm text-theme-secondary">
                     Nenhum projeto para exibir no momento.
                   </p>
                   <Link to="/projects/new">
@@ -315,7 +314,7 @@ const Dashboard: React.FC = () => {
           {activeTab === 'tasks' && (
             <div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
-                <h2 className="text-lg font-medium text-gray-900">Minhas Tarefas</h2>
+                <h2 className="text-lg font-medium text-theme-primary">Minhas Tarefas</h2>
                 <Button variant="primary" className="w-full sm:w-auto" onClick={() => setActiveTab('projects')}>
                   <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
@@ -331,41 +330,41 @@ const Dashboard: React.FC = () => {
               ) : tasks.length > 0 ? (
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <div className="inline-block min-w-full align-middle">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-theme">
+                      <thead className="bg-theme">
                         <tr>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Tarefa
                           </th>
-                          <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Projeto
                           </th>
-                          <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Data Limite
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Prioridade
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Status
                           </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-theme-secondary uppercase tracking-wider">
                             Ações
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-theme-surface divide-y divide-theme">
                         {tasks.map((task) => {
                           const project = projects.find(p => p.id === task.project_id);
                           return (
                             <tr key={task.id}>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                                <div className="text-sm font-medium text-theme-primary">{task.title}</div>
                               </td>
-                              <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
                                 {project?.name || 'Desconhecido'}
                               </td>
-                              <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
                                 {task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : 'Não definido'}
                               </td>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
@@ -407,8 +406,8 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="bg-gray-50 p-4 text-center rounded-md">
-                  <p className="text-sm text-gray-500">
+                <div className="bg-theme p-4 text-center rounded-md">
+                  <p className="text-sm text-theme-secondary">
                     Nenhuma tarefa para exibir no momento.
                   </p>
                   <Button 
@@ -426,9 +425,9 @@ const Dashboard: React.FC = () => {
           {/* Tab de Equipe - Mantido simples, pode ser expandido depois */}
           {activeTab === 'team' && (
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Membros da Equipe</h2>
-              <div className="bg-gray-50 p-4 rounded-md text-center">
-                <p className="text-sm text-gray-500">
+              <h2 className="text-lg font-medium text-theme-primary mb-4">Membros da Equipe</h2>
+              <div className="bg-theme p-4 rounded-md text-center">
+                <p className="text-sm text-theme-secondary">
                   Você tem {stats[3].value} colaboradores em seus projetos.
                 </p>
               </div>
@@ -438,19 +437,19 @@ const Dashboard: React.FC = () => {
           {/* Tab de Perfil - Mantido simples, pode ser expandido depois */}
           {activeTab === 'profile' && (
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Meu Perfil</h2>
-              <div className="bg-gray-50 p-4 rounded-md">
+              <h2 className="text-lg font-medium text-theme-primary mb-4">Meu Perfil</h2>
+              <div className="bg-theme p-4 rounded-md">
                 <div className="flex items-center mb-4">
                   <div className="h-12 w-12 rounded-full bg-primary-lighter flex items-center justify-center text-white text-lg font-semibold">
                     {user?.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">{user?.name}</h3>
-                    <p className="text-sm text-gray-500">{user?.email}</p>
+                    <h3 className="text-lg font-medium text-theme-primary">{user?.name}</h3>
+                    <p className="text-sm text-theme-secondary">{user?.email}</p>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-theme-secondary">
                     Você está trabalhando em {projects.length} projetos e tem {tasks.filter(t => t.status !== 'completed').length} tarefas pendentes.
                   </p>
                 </div>

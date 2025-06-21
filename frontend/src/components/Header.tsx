@@ -18,7 +18,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className={`${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} shadow transition-colors duration-200`}>
+    <header className="bg-theme-surface shadow-sm border-b border-theme transition-colors duration-200">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
               <Link to="/">
                 <img className="h-8 w-auto" src="/src/assets/favicon.svg" alt="Orquestra" />
               </Link>
-              <Link to="/" className={`ml-2 text-xl font-bold ${theme === 'dark' ? 'text-primary-light hover:text-primary-lighter' : 'text-primary-dark hover:text-primary-lighter'}`}>
+              <Link to="/" className="ml-2 text-xl font-bold text-theme-primary hover:text-primary transition-colors duration-200">
                 Orquestra
               </Link>
             </div>
@@ -35,8 +35,8 @@ const Header: React.FC = () => {
                 to="/dashboard"
                 className={`${
                   isActiveRoute('/dashboard')
-                    ? theme === 'dark' ? 'border-primary-light text-dark-text' : 'border-primary text-gray-900'
-                    : theme === 'dark' ? 'border-transparent text-dark-muted hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ? 'border-primary text-theme-primary'
+                    : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
               >
                 Dashboard
@@ -45,8 +45,8 @@ const Header: React.FC = () => {
                 to="/projects"
                 className={`${
                   isActiveRoute('/projects')
-                    ? theme === 'dark' ? 'border-primary-light text-dark-text' : 'border-primary text-gray-900'
-                    : theme === 'dark' ? 'border-transparent text-dark-muted hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ? 'border-primary text-theme-primary'
+                    : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
               >
                 Projetos
@@ -55,8 +55,8 @@ const Header: React.FC = () => {
                 to="/messages"
                 className={`${
                   isActiveRoute('/messages')
-                    ? theme === 'dark' ? 'border-primary-light text-dark-text' : 'border-primary text-gray-900'
-                    : theme === 'dark' ? 'border-transparent text-dark-muted hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ? 'border-primary text-theme-primary'
+                    : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
               >
                 Mensagens
@@ -68,9 +68,7 @@ const Header: React.FC = () => {
           <div className="flex items-center sm:hidden">
             <button
               type="button"
-              className={`inline-flex items-center justify-center p-2 rounded-md ${
-                theme === 'dark' ? 'text-dark-muted hover:text-dark-text hover:bg-dark-accent' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-              } focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200`}
+              className="inline-flex items-center justify-center p-2 rounded-md text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200"
               aria-controls="mobile-menu"
               aria-expanded="false"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -121,9 +119,9 @@ const Header: React.FC = () => {
                 <NotificationIcon/>
                 <Menu as="div" className="ml-3 relative">
                   <div>
-                    <Menu.Button className={`${theme === 'dark' ? 'bg-dark-accent' : 'bg-white'} rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary hover:border-white transition-colors duration-200`}>
+                    <Menu.Button className="bg-theme-surface rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary hover:border-white transition-colors duration-200">
                       <span className="sr-only">Abrir menu do usuário</span>
-                      <div className="h-8 w-8 rounded-full bg-primary-lighter flex items-center justify-center text-white font-semibold">
+                      <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
                         {user?.name.charAt(0).toUpperCase()}
                       </div>
                     </Menu.Button>
@@ -137,18 +135,18 @@ const Header: React.FC = () => {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className={`origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 ${theme === 'dark' ? 'bg-dark-accent' : 'bg-white'} ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transition-colors duration-200`}>
-                      <div className={`px-4 py-2 border-b ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'}`}>
-                        <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-dark-text' : 'text-gray-700'}`}>{user?.name}</p>
-                        <p className={`text-xs ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>{user?.email}</p>
+                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-sm border border-theme py-1 bg-theme-surface ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transition-colors duration-200">
+                      <div className="px-4 py-2 border-b border-theme">
+                        <p className="text-sm font-semibold text-theme-primary">{user?.name}</p>
+                        <p className="text-xs text-theme-muted">{user?.email}</p>
                       </div>
                       <Menu.Item>
                         {({ active }) => (
                           <Link
                             to="/profile"
                             className={`${
-                              active ? (theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-100') : ''
-                            } block px-4 py-2 text-sm ${theme === 'dark' ? 'text-dark-text hover:text-white' : 'text-gray-700 hover:text-white'} transition-colors duration-200`}
+                              active ? 'bg-theme-secondary' : ''
+                            } block px-4 py-2 text-sm text-theme-secondary hover:text-theme-primary transition-colors duration-200`}
                           >
                             Meu perfil
                           </Link>
@@ -159,8 +157,8 @@ const Header: React.FC = () => {
                           <Link
                             to="/settings"
                             className={`${
-                              active ? (theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-100') : ''
-                            } block px-4 py-2 text-sm ${theme === 'dark' ? 'text-dark-text hover:text-white' : 'text-gray-700 hover:text-white'} transition-colors duration-200`}
+                              active ? 'bg-theme-secondary' : ''
+                            } block px-4 py-2 text-sm text-theme-secondary hover:text-theme-primary transition-colors duration-200`}
                           >
                             Configurações
                           </Link>
@@ -171,8 +169,8 @@ const Header: React.FC = () => {
                           <button
                             onClick={logout}
                             className={`${
-                              active ? (theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-100') : ''
-                            } w-full text-left px-4 py-2 text-sm ${theme === 'dark' ? 'text-dark-text hover:text-white' : 'text-gray-700 hover:text-white'} transition-colors duration-200`}
+                              active ? 'bg-theme-secondary' : ''
+                            } w-full text-left px-4 py-2 text-sm text-theme-secondary hover:text-theme-primary transition-colors duration-200`}
                           >
                             Sair
                           </button>
@@ -186,13 +184,13 @@ const Header: React.FC = () => {
               <div className="flex space-x-4">
                 <Link
                   to="/login"
-                  className={`${theme === 'dark' ? 'text-dark-muted hover:text-dark-text' : 'text-gray-500 hover:text-gray-700'} px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200`}
+                  className="text-theme-secondary hover:text-theme-primary px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   Entrar
                 </Link>
                 <Link
                   to="/register"
-                  className={`${theme === 'dark' ? 'bg-primary-dark hover:bg-primary-darker' : 'bg-primary hover:bg-primary-dark'} text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200`}
+                  className="bg-primary hover:bg-primary-dark text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   Cadastrar
                 </Link>

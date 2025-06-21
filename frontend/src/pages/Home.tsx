@@ -211,16 +211,16 @@ const Home = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-16 bg-gray-50 overflow-hidden">
+      <div className="py-16 bg-theme-primary overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-base font-semibold text-primary tracking-wide uppercase">
               Funcionalidades
             </h2>
-            <p className="mt-1 text-4xl font-extrabold text-primary-dark sm:text-5xl sm:tracking-tight">
+            <p className="mt-1 text-4xl font-extrabold text-theme-primary sm:text-5xl sm:tracking-tight">
               Por que escolher o Orquestra?
             </p>
-            <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
+            <p className="max-w-xl mt-5 mx-auto text-xl text-theme-secondary">
               Nossa plataforma foi projetada para tornar a gestão de projetos corporativos
               mais simples, eficiente e colaborativa.
             </p>
@@ -230,19 +230,19 @@ const Home = () => {
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {/* Feature 1 */}
               <div className="pt-6">
-                <div className="flow-root bg-white rounded-lg px-6 pb-8 shadow-lg h-full">
+                <div className="flow-root bg-theme-surface rounded-lg px-6 pb-8 shadow-sm border border-theme h-full">
                   <div className="-mt-6">
                     <div>
-                      <span className="inline-flex items-center justify-center p-3 bg-primary rounded-md shadow-lg">
+                      <span className="inline-flex items-center justify-center p-3 bg-primary rounded-md shadow-sm">
                         <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                       </span>
                     </div>
-                    <h3 className="mt-8 text-lg font-medium text-primary-dark tracking-tight">
+                    <h3 className="mt-8 text-lg font-medium text-theme-primary tracking-tight">
                       Organização simplificada
                     </h3>
-                    <p className="mt-5 text-base text-gray-500">
+                    <p className="mt-5 text-base text-theme-secondary">
                       Organize todos os seus projetos, tarefas e recursos em um único lugar. 
                       Visualize facilmente o progresso e mantenha todos na mesma página.
                     </p>
@@ -266,19 +266,19 @@ const Home = () => {
 
               {/* Feature 2 */}
               <div className="pt-6">
-                <div className="flow-root bg-white rounded-lg px-6 pb-8 shadow-lg h-full">
+                <div className="flow-root bg-theme-surface rounded-lg px-6 pb-8 shadow-sm border border-theme h-full">
                   <div className="-mt-6">
                     <div>
-                      <span className="inline-flex items-center justify-center p-3 bg-primary rounded-md shadow-lg">
+                      <span className="inline-flex items-center justify-center p-3 bg-primary rounded-md shadow-sm">
                         <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                       </span>
                     </div>
-                    <h3 className="mt-8 text-lg font-medium text-primary-dark tracking-tight">
+                    <h3 className="mt-8 text-lg font-medium text-theme-primary tracking-tight">
                       Colaboração em tempo real
                     </h3>
-                    <p className="mt-5 text-base text-gray-500">
+                    <p className="mt-5 text-base text-theme-secondary">
                       Trabalhe em conjunto com sua equipe em tempo real. Compartilhe arquivos, 
                       atribua tarefas e comunique-se diretamente na plataforma.
                     </p>
@@ -302,19 +302,19 @@ const Home = () => {
 
               {/* Feature 3 */}
               <div className="pt-6">
-                <div className="flow-root bg-white rounded-lg px-6 pb-8 shadow-lg h-full">
+                <div className="flow-root bg-theme-surface rounded-lg px-6 pb-8 shadow-sm border border-theme h-full">
                   <div className="-mt-6">
                     <div>
-                      <span className="inline-flex items-center justify-center p-3 bg-primary rounded-md shadow-lg">
+                      <span className="inline-flex items-center justify-center p-3 bg-primary rounded-md shadow-sm">
                         <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                       </span>
                     </div>
-                    <h3 className="mt-8 text-lg font-medium text-primary-dark tracking-tight">
+                    <h3 className="mt-8 text-lg font-medium text-theme-primary tracking-tight">
                       Análises e relatórios avançados
                     </h3>
-                    <p className="mt-5 text-base text-gray-500">
+                    <p className="mt-5 text-base text-theme-secondary">
                       Obtenha insights valiosos sobre o desempenho dos seus projetos com 
                       relatórios detalhados e análises personalizáveis.
                     </p>
@@ -341,64 +341,64 @@ const Home = () => {
       </div>
 
       {/* Testimonials */}
-      <div className="bg-white py-16 sm:py-24">
+      <div className="bg-theme-secondary py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-base font-semibold text-primary tracking-wide uppercase">
               Depoimentos
             </h2>
-            <p className="mt-1 text-4xl font-extrabold text-primary-dark sm:text-5xl sm:tracking-tight">
+            <p className="mt-1 text-4xl font-extrabold text-theme-primary sm:text-5xl sm:tracking-tight">
               O que nossos clientes dizem
             </p>
           </div>
           <div className="mt-12">
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {/* Testimonial 1 */}
-              <div className="bg-gray-50 rounded-lg shadow-md p-6">
+              <div className="bg-theme-surface rounded-lg shadow-sm border border-theme p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <img className="h-12 w-12 rounded-full" src="https://randomuser.me/api/portraits/women/32.jpg" alt="Cliente" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-bold text-primary-darker">Ana Silva</h4>
-                    <p className="text-gray-600">Gerente de Projetos, TechCorp</p>
+                    <h4 className="text-lg font-bold text-theme-primary">Ana Silva</h4>
+                    <p className="text-theme-secondary">Gerente de Projetos, TechCorp</p>
                   </div>
                 </div>
-                <p className="mt-4 text-gray-800">
+                <p className="mt-4 text-theme-secondary">
                   "O Orquestra transformou a maneira como gerenciamos nossos projetos. A interface intuitiva e as 
                   ferramentas de colaboração permitiram que nossa equipe trabalhasse de forma mais eficiente."
                 </p>
               </div>
 
               {/* Testimonial 2 */}
-              <div className="bg-gray-50 rounded-lg shadow-md p-6">
+              <div className="bg-theme-surface rounded-lg shadow-sm border border-theme p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <img className="h-12 w-12 rounded-full" src="https://randomuser.me/api/portraits/men/46.jpg" alt="Cliente" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-bold text-primary-darker">Carlos Mendes</h4>
-                    <p className="text-gray-600">Diretor de Operações, InnovaSoft</p>
+                    <h4 className="text-lg font-bold text-theme-primary">Carlos Mendes</h4>
+                    <p className="text-theme-secondary">Diretor de Operações, InnovaSoft</p>
                   </div>
                 </div>
-                <p className="mt-4 text-gray-800">
+                <p className="mt-4 text-theme-secondary">
                   "Desde que começamos a usar o Orquestra, nossos prazos de entrega melhoraram em 30%. 
                   A visibilidade que temos do progresso dos projetos é incrível."
                 </p>
               </div>
 
               {/* Testimonial 3 */}
-              <div className="bg-gray-50 rounded-lg shadow-md p-6">
+              <div className="bg-theme-surface rounded-lg shadow-sm border border-theme p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <img className="h-12 w-12 rounded-full" src="https://randomuser.me/api/portraits/women/68.jpg" alt="Cliente" />
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-lg font-bold text-primary-darker">Mariana Costa</h4>
-                    <p className="text-gray-600">CEO, StartUp Ventures</p>
+                    <h4 className="text-lg font-bold text-theme-primary">Mariana Costa</h4>
+                    <p className="text-theme-secondary">CEO, StartUp Ventures</p>
                   </div>
                 </div>
-                <p className="mt-4 text-gray-800">
+                <p className="mt-4 text-theme-secondary">
                   "Como uma startup em crescimento, precisávamos de uma ferramenta que crescesse conosco. 
                   O Orquestra nos ofereceu flexibilidade, escalabilidade e recursos que atenderam às nossas necessidades."
                 </p>

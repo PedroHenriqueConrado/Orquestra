@@ -148,7 +148,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId }) => {
 
   if (error) {
     return (
-      <div className="bg-red-50 p-4 rounded-md text-red-500 text-center">
+      <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md text-red-500 text-center">
         <p>{error}</p>
         <Button 
           variant="outline" 
@@ -163,9 +163,9 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId }) => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg flex flex-col overflow-hidden" style={{ height: '500px' }}>
-      <div className="px-4 py-3 border-b border-gray-200">
-        <h2 className="text-lg font-medium text-gray-900">Chat do Projeto</h2>
+    <div className="bg-theme-surface shadow rounded-lg flex flex-col overflow-hidden border border-theme" style={{ height: '500px' }}>
+      <div className="px-4 py-3 border-b border-theme">
+        <h2 className="text-lg font-medium text-theme-primary">Chat do Projeto</h2>
       </div>
       
       <div 
@@ -200,7 +200,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId }) => {
                   <div className={`max-w-xs md:max-w-md lg:max-w-lg rounded-lg px-4 py-2 ${
                     isCurrentUser 
                       ? 'bg-primary text-white rounded-br-none'
-                      : 'bg-gray-100 text-gray-800 rounded-bl-none'
+                      : 'bg-theme text-theme-primary rounded-bl-none'
                   }`}>
                     <div className="flex justify-between items-start">
                       <span className="font-medium text-xs mb-1">
@@ -219,11 +219,11 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId }) => {
                           </button>
                           
                           {menuOpen === message.id && (
-                            <div className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                            <div className="absolute right-0 mt-1 w-36 rounded-md shadow-lg bg-theme-surface ring-1 ring-black ring-opacity-5 z-10 border border-theme">
                               <div className="py-1">
                                 <button 
                                   onClick={() => handleDeleteMessage(message.id)}
-                                  className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                                  className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                                 >
                                   Excluir mensagem
                                 </button>
@@ -237,7 +237,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId }) => {
                     <div className="text-sm">
                       {message.message}
                     </div>
-                    <div className={`text-xs mt-1 ${isCurrentUser ? 'text-primary-lighter' : 'text-gray-500'}`}>
+                    <div className={`text-xs mt-1 ${isCurrentUser ? 'text-primary-lighter' : 'text-theme-secondary'}`}>
                       {chatService.formatMessageTime(message.created_at)}
                     </div>
                   </div>
@@ -247,7 +247,7 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId }) => {
             <div ref={messagesEndRef} />
           </div>
         ) : (
-          <div className="flex-1 flex flex-col justify-center items-center text-gray-500">
+          <div className="flex-1 flex flex-col justify-center items-center text-theme-secondary">
             <svg className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
@@ -257,13 +257,13 @@ const ProjectChat: React.FC<ProjectChatProps> = ({ projectId }) => {
       </div>
       
       {/* Formulário para enviar mensagem */}
-      <div className="border-t border-gray-200 p-3">
+      <div className="border-t border-theme p-3">
         <form onSubmit={handleSendMessage} className="flex space-x-2">
           <input 
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="block w-full border border-gray-300 rounded-md py-2 px-3 placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+            className="block w-full border border-theme rounded-md py-2 px-3 placeholder-theme-secondary bg-theme-surface text-theme-primary focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
             placeholder="Digite sua mensagem..."
             disabled={sending}
           />

@@ -96,15 +96,15 @@ const DirectMessages: React.FC = () => {
   });
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-theme-primary min-h-screen">
       <Header />
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-0">Mensagens Diretas</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-theme-primary mb-3 sm:mb-0">Mensagens Diretas</h1>
           <div className="flex flex-col sm:flex-row gap-3 sm:space-x-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <svg className="h-5 w-5 text-theme-secondary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -114,7 +114,7 @@ const DirectMessages: React.FC = () => {
                 id="search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2 border border-theme rounded-md leading-5 bg-theme-surface text-theme-primary placeholder-theme-secondary focus:outline-none focus:placeholder-theme-secondary focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
                 placeholder="Buscar conversas..."
               />
             </div>
@@ -132,7 +132,7 @@ const DirectMessages: React.FC = () => {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-200">
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md text-sm border border-red-200 dark:border-red-800">
             {error}
           </div>
         )}
@@ -142,15 +142,15 @@ const DirectMessages: React.FC = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         ) : filteredChats.length > 0 ? (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <ul className="divide-y divide-gray-200">
+          <div className="bg-theme-surface shadow rounded-lg overflow-hidden border border-theme">
+            <ul className="divide-y divide-theme">
               {filteredChats.map((chat) => {
                 if (!user) return null;
                 const otherUser = chat.users.find(u => u.id !== user.id);
                 const lastMessage = chat.messages && chat.messages.length > 0 ? chat.messages[0] : null;
                 
                 return (
-                  <li key={chat.id} className="hover:bg-gray-300">
+                  <li key={chat.id} className="hover:bg-theme">
                     <Link 
                       to={`/messages/${chat.id}`}
                       className="block px-4 py-4 sm:px-6"
@@ -163,8 +163,8 @@ const DirectMessages: React.FC = () => {
                             </div>
                           </div>
                           <div className="ml-4 truncate">
-                            <p className="text-sm font-medium text-gray-900">{otherUser?.name}</p>
-                            <p className="text-sm text-gray-500 truncate">
+                            <p className="text-sm font-medium text-theme-primary">{otherUser?.name}</p>
+                            <p className="text-sm text-theme-secondary truncate">
                               {lastMessage ? (
                                 <>
                                   <span className="font-medium">{lastMessage.sender.id === user.id ? 'Você: ' : ''}</span>
@@ -179,7 +179,7 @@ const DirectMessages: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex flex-col items-end">
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-theme-secondary">
                             {lastMessage ? directChatService.formatMessageTime(lastMessage.created_at) : ''}
                           </p>
                           {chat.unreadCount > 0 && (
@@ -196,19 +196,19 @@ const DirectMessages: React.FC = () => {
             </ul>
           </div>
         ) : (
-          <div className="bg-white shadow rounded-lg p-6 text-center">
-            <div className="mx-auto h-12 w-12 text-gray-400">
+          <div className="bg-theme-surface shadow rounded-lg p-6 text-center border border-theme">
+            <div className="mx-auto h-12 w-12 text-theme-secondary">
               <svg className="h-full w-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhuma conversa encontrada</h3>
+            <h3 className="mt-2 text-sm font-medium text-theme-primary">Nenhuma conversa encontrada</h3>
             {searchTerm ? (
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-theme-secondary">
                 Não encontramos conversas com o termo "{searchTerm}".
               </p>
             ) : (
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-theme-secondary">
                 Comece uma nova conversa com alguém.
               </p>
             )}
@@ -232,12 +232,12 @@ const DirectMessages: React.FC = () => {
         <div className="fixed inset-0 overflow-y-auto z-50 flex items-center justify-center">
           <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={handleCloseNewChatModal}></div>
           
-          <div className="relative bg-white rounded-lg max-w-md w-full mx-4 sm:mx-auto shadow-xl overflow-hidden z-10">
+          <div className="relative bg-theme-surface rounded-lg max-w-md w-full mx-4 sm:mx-auto shadow-xl overflow-hidden z-10 border border-theme">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Nova Conversa</h3>
+              <h3 className="text-lg leading-6 font-medium text-theme-primary mb-4">Nova Conversa</h3>
               
               <div className="mb-4">
-                <label htmlFor="user-select" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="user-select" className="block text-sm font-medium text-theme-primary mb-1">
                   Selecione um usuário
                 </label>
                 
@@ -246,45 +246,51 @@ const DirectMessages: React.FC = () => {
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                   </div>
                 ) : users.length > 0 ? (
-                  <div className="max-h-60 overflow-y-auto border border-gray-300 rounded-md">
-                    <ul className="divide-y divide-gray-200">
-                      {users.map((user) => (
+                  <div className="max-h-60 overflow-y-auto border border-theme rounded-md bg-theme-surface">
+                    <ul className="divide-y divide-theme">
+                      {users.map(u => (
                         <li 
-                          key={user.id}
-                          className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${selectedUserId === user.id ? 'bg-primary-lighter' : ''}`}
-                          onClick={() => setSelectedUserId(user.id)}
+                          key={u.id}
+                          className={`p-3 flex items-center cursor-pointer hover:bg-theme ${selectedUserId === u.id ? 'bg-theme' : ''}`}
+                          onClick={() => setSelectedUserId(u.id)}
                         >
-                          <div className="flex items-center">
-                            <div className="h-8 w-8 rounded-full bg-primary-lighter flex items-center justify-center text-white font-medium">
-                              {user.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                              <p className="text-xs text-gray-500">{user.email}</p>
-                            </div>
+                          <div className="flex-shrink-0 h-8 w-8 rounded-full bg-theme-secondary flex items-center justify-center text-theme-primary">
+                            {u.name.charAt(0).toUpperCase()}
                           </div>
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-theme-primary">{u.name}</p>
+                            <p className="text-xs text-theme-secondary">{u.email}</p>
+                          </div>
+                          {selectedUserId === u.id && (
+                            <svg className="h-5 w-5 text-green-500 ml-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
                         </li>
                       ))}
                     </ul>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 py-2">Nenhum usuário disponível.</p>
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-md text-sm border border-yellow-200 dark:border-yellow-800">
+                    Nenhum usuário encontrado.
+                  </div>
                 )}
               </div>
-              
-              <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+
+              <div className="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse">
                 <Button
                   variant="primary"
                   onClick={handleStartChat}
                   disabled={!selectedUserId || startingChat}
                   isLoading={startingChat}
+                  className="w-full sm:w-auto sm:ml-3"
                 >
                   Iniciar Conversa
                 </Button>
                 <Button
                   variant="outline"
-                  className="mt-3 sm:mt-0 sm:mr-3"
                   onClick={handleCloseNewChatModal}
+                  className="mt-3 sm:mt-0 w-full sm:w-auto"
                 >
                   Cancelar
                 </Button>

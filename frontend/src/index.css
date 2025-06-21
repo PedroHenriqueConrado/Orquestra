@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply min-h-screen bg-gray-50 text-gray-900 transition-colors duration-200;
+    @apply min-h-screen bg-white text-gray-900 transition-colors duration-200;
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -28,19 +28,35 @@
   }
 
   h1 {
-    @apply text-4xl font-bold leading-tight;
+    @apply text-4xl font-bold leading-tight text-gray-900;
+  }
+
+  .dark h1 {
+    @apply text-dark-text;
   }
 
   h2 {
-    @apply text-3xl font-semibold leading-tight;
+    @apply text-3xl font-semibold leading-tight text-gray-900;
+  }
+
+  .dark h2 {
+    @apply text-dark-text;
   }
 
   h3 {
-    @apply text-2xl font-semibold leading-snug;
+    @apply text-2xl font-semibold leading-snug text-gray-900;
+  }
+
+  .dark h3 {
+    @apply text-dark-text;
   }
 
   h4 {
-    @apply text-xl font-medium leading-snug;
+    @apply text-xl font-medium leading-snug text-gray-900;
+  }
+
+  .dark h4 {
+    @apply text-dark-text;
   }
 
   /* Garantir que os campos de formulário sempre tenham texto visível */
@@ -104,17 +120,27 @@
   }
 
   .dark .btn-primary {
-    @apply bg-primary-dark text-white hover:bg-primary-darker
-           focus:ring-primary;
+    @apply bg-primary text-white hover:bg-primary-dark
+           focus:ring-primary-light;
   }
 
   .btn-secondary {
-    @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300
+    @apply btn bg-gray-100 text-gray-900 hover:bg-gray-200
            focus:ring-primary;
   }
 
   .dark .btn-secondary {
-    @apply bg-dark-accent text-dark-text hover:bg-dark-secondary
+    @apply bg-dark-accent text-dark-text hover:bg-dark-surface
+           focus:ring-primary-light;
+  }
+
+  .btn-outline {
+    @apply btn bg-white text-gray-700 hover:bg-gray-50 border border-gray-300
+           focus:ring-primary;
+  }
+
+  .dark .btn-outline {
+    @apply bg-dark-accent text-dark-text hover:bg-dark-surface border border-dark-border
            focus:ring-primary-light;
   }
 
@@ -123,7 +149,7 @@
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-md p-6 transition-colors duration-200;
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-colors duration-200;
   }
 
   .dark .card {
@@ -131,7 +157,7 @@
   }
 
   .nav-link {
-    @apply p-2 rounded-md transition-colors duration-200 hover:bg-gray-100;
+    @apply p-2 rounded-md transition-colors duration-200 hover:bg-gray-50;
   }
 
   .dark .nav-link {
@@ -139,11 +165,76 @@
   }
 
   .nav-link.active {
-    @apply bg-gray-100 text-primary;
+    @apply bg-primary-lighter text-primary-dark;
   }
 
   .dark .nav-link.active {
     @apply bg-dark-accent text-primary-light;
+  }
+
+  /* Classes utilitárias para tema */
+  .bg-theme-primary {
+    @apply bg-white;
+  }
+
+  .dark .bg-theme-primary {
+    @apply bg-dark-primary;
+  }
+
+  .bg-theme-secondary {
+    @apply bg-gray-50;
+  }
+
+  .dark .bg-theme-secondary {
+    @apply bg-dark-secondary;
+  }
+
+  .bg-theme-surface {
+    @apply bg-white;
+  }
+
+  .dark .bg-theme-surface {
+    @apply bg-dark-surface;
+  }
+
+  .text-theme-primary {
+    @apply text-gray-900;
+  }
+
+  .dark .text-theme-primary {
+    @apply text-dark-text;
+  }
+
+  .text-theme-secondary {
+    @apply text-gray-600;
+  }
+
+  .dark .text-theme-secondary {
+    @apply text-dark-textSecondary;
+  }
+
+  .text-theme-muted {
+    @apply text-gray-500;
+  }
+
+  .dark .text-theme-muted {
+    @apply text-dark-muted;
+  }
+
+  .border-theme {
+    @apply border-gray-200;
+  }
+
+  .dark .border-theme {
+    @apply border-dark-border;
+  }
+
+  .border-theme-light {
+    @apply border-gray-100;
+  }
+
+  .dark .border-theme-light {
+    @apply border-dark-borderLight;
   }
 }
 

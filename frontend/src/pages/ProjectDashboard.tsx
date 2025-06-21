@@ -185,81 +185,74 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = () => {
   return (
     <>
       <Header />
-      <div className={`container mx-auto px-4 py-8 ${theme === 'dark' ? 'text-dark-text' : 'text-gray-800'}`}>
+      <div className="container mx-auto px-4 py-8 bg-theme-primary">
         <div className="flex justify-between items-center mb-6">
           <header className="mb-2">
-            <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
-            {project.description && <p className="text-lg">{project.description}</p>}
+            <h1 className="text-3xl font-bold mb-2 text-theme-primary">{project.name}</h1>
+            {project.description && <p className="text-lg text-theme-secondary">{project.description}</p>}
           </header>
           
           <button 
             onClick={() => navigate(`/projects/${projectId}`)}
-            className={`px-4 py-2 rounded-md ${
-              theme === 'dark' 
-                ? 'bg-dark-accent hover:bg-dark-primary text-dark-text' 
-                : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-            } transition-colors flex items-center`}
+            className="px-4 py-2 rounded-md transition-colors duration-200 bg-theme-secondary hover:bg-theme-surface text-theme-primary"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            Voltar ao Projeto
+            Ver detalhes
           </button>
         </div>
 
         {/* Estatísticas do projeto */}
-        <div className={`grid grid-cols-1 md:grid-cols-4 gap-4 mb-6`}>
-          <div className={`rounded-lg p-4 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} shadow`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="rounded-lg p-4 bg-theme-surface shadow-sm border border-theme">
             <div className="flex justify-between items-center">
               <div>
-                <p className={`text-sm ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>Total de Tarefas</p>
-                <p className="text-2xl font-bold">{projectStats.totalTasks}</p>
+                <p className="text-sm text-theme-secondary">Total</p>
+                <p className="text-2xl font-bold text-theme-primary">{projectStats.totalTasks}</p>
               </div>
-              <div className={`p-3 rounded-full ${theme === 'dark' ? 'bg-dark-accent' : 'bg-blue-100'}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="p-3 rounded-full bg-theme-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-theme-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
             </div>
           </div>
           
-          <div className={`rounded-lg p-4 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} shadow`}>
+          <div className="rounded-lg p-4 bg-theme-surface shadow-sm border border-theme">
             <div className="flex justify-between items-center">
               <div>
-                <p className={`text-sm ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>Pendentes</p>
-                <p className="text-2xl font-bold">{projectStats.pendingTasks}</p>
+                <p className="text-sm text-theme-secondary">Pendentes</p>
+                <p className="text-2xl font-bold text-theme-primary">{projectStats.pendingTasks}</p>
               </div>
-              <div className={`p-3 rounded-full ${theme === 'dark' ? 'bg-yellow-900' : 'bg-yellow-100'}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="p-3 rounded-full bg-yellow-100">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
           
-          <div className={`rounded-lg p-4 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} shadow`}>
+          <div className="rounded-lg p-4 bg-theme-surface shadow-sm border border-theme">
             <div className="flex justify-between items-center">
               <div>
-                <p className={`text-sm ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>Em Progresso</p>
-                <p className="text-2xl font-bold">{projectStats.inProgressTasks}</p>
+                <p className="text-sm text-theme-secondary">Em Progresso</p>
+                <p className="text-2xl font-bold text-theme-primary">{projectStats.inProgressTasks}</p>
               </div>
-              <div className={`p-3 rounded-full ${theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="p-3 rounded-full bg-blue-100">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </div>
             </div>
           </div>
           
-          <div className={`rounded-lg p-4 ${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} shadow`}>
+          <div className="rounded-lg p-4 bg-theme-surface shadow-sm border border-theme">
             <div className="flex justify-between items-center">
               <div>
-                <p className={`text-sm ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>Concluídas</p>
-                <p className="text-2xl font-bold">{projectStats.completedTasks}</p>
+                <p className="text-sm text-theme-secondary">Concluídas</p>
+                <p className="text-2xl font-bold text-theme-primary">{projectStats.completedTasks}</p>
               </div>
-              <div className={`p-3 rounded-full ${theme === 'dark' ? 'bg-green-900' : 'bg-green-100'}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${theme === 'dark' ? 'text-green-300' : 'text-green-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="p-3 rounded-full bg-green-100">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
             </div>

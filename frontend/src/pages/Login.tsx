@@ -64,7 +64,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-theme-primary flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       {/* Botão para voltar para home */}
       <div className="absolute top-4 left-4">
         <Link
@@ -86,10 +86,10 @@ const Login: React.FC = () => {
             alt="Orquestra"
           />
         </Link>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-primary-dark">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-theme-primary">
           Entre na sua conta
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-theme-secondary">
           Não tem uma conta?{' '}
           <Link to="/register" className="font-medium text-primary hover:text-primary-dark">
             Cadastre-se gratuitamente
@@ -98,7 +98,7 @@ const Login: React.FC = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+        <div className="bg-theme-surface py-8 px-4 shadow-sm border border-theme sm:rounded-lg sm:px-10">
           {error && (
             <Alert type="error" message={error} onClose={clearError} />
           )}
@@ -136,9 +136,9 @@ const Login: React.FC = () => {
                   id="remember_me"
                   name="remember_me"
                   type="checkbox"
-                  className="h-4 w-4 text-primary focus:ring-primary-light border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary-light border-theme rounded"
                 />
-                <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember_me" className="ml-2 block text-sm text-theme-primary">
                   Lembrar-me
                 </label>
               </div>
@@ -173,10 +173,10 @@ const Login: React.FC = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-theme" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Ou continue com</span>
+                <span className="px-2 bg-theme-surface text-theme-muted">Ou continue com</span>
               </div>
             </div>
 
@@ -202,14 +202,10 @@ const Login: React.FC = () => {
                   fullWidth
                   className="justify-center"
                 >
-                  <svg className="h-5 w-5 mr-2" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                      clipRule="evenodd"
-                    />
+                  <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
                   </svg>
-                  <span>GitHub</span>
+                  <span>Twitter</span>
                 </Button>
               </div>
             </div>

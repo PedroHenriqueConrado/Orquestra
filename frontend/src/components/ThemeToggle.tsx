@@ -12,19 +12,21 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
   return (
     <button
       onClick={toggleTheme}
-      className={`p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+      className={`relative p-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
         theme === 'dark' 
-          ? 'bg-dark-accent text-dark-text hover:bg-dark-secondary' 
-          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          ? 'bg-dark-accent text-dark-text hover:bg-dark-surface hover:scale-105' 
+          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
       } ${className}`}
       aria-label={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
       title={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
     >
-      {theme === 'dark' ? (
-        <SunIcon className="h-5 w-5" />
-      ) : (
-        <MoonIcon className="h-5 w-5" />
-      )}
+      <div className="relative">
+        {theme === 'dark' ? (
+          <SunIcon className="h-5 w-5 transition-transform duration-300 rotate-0" />
+        ) : (
+          <MoonIcon className="h-5 w-5 transition-transform duration-300 rotate-0" />
+        )}
+      </div>
     </button>
   );
 };

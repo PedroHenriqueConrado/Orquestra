@@ -266,10 +266,10 @@ const ProjectDetails: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-theme-primary min-h-screen">
         <Header />
         <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white shadow rounded-lg p-6 flex justify-center">
+          <div className="bg-theme-surface shadow rounded-lg p-6 flex justify-center border border-theme">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </main>
@@ -279,10 +279,10 @@ const ProjectDetails: React.FC = () => {
 
   if (error || !project) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-theme-primary min-h-screen">
         <Header />
         <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white shadow rounded-lg p-6">
+          <div className="bg-theme-surface shadow rounded-lg p-6 border border-theme">
             <div className="text-red-500 text-center">
               <p>{error || 'Projeto não encontrado'}</p>
               <Button 
@@ -300,16 +300,16 @@ const ProjectDetails: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-theme-primary min-h-screen">
       <Header />
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-2 sm:px-4 md:px-6 lg:px-8">
         {/* Cabeçalho do projeto */}
-        <div className="bg-white shadow rounded-lg mb-4 sm:mb-6">
+        <div className="bg-theme-surface shadow rounded-lg mb-4 sm:mb-6 border border-theme">
           <div className="px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
               <div>
-                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">{project.name}</h1>
-                <p className="mt-1 text-sm text-gray-500">
+                <h1 className="text-xl sm:text-2xl font-semibold text-theme-primary">{project.name}</h1>
+                <p className="mt-1 text-sm text-theme-secondary">
                   Criado em {new Date(project.created_at).toLocaleDateString('pt-BR')}
                 </p>
               </div>
@@ -319,10 +319,10 @@ const ProjectDetails: React.FC = () => {
             {/* Progresso do projeto */}
             <div className="mt-4">
               <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Progresso</span>
-                <span className="text-sm font-medium text-gray-700">{projectProgress}%</span>
+                <span className="text-sm font-medium text-theme-primary">Progresso</span>
+                <span className="text-sm font-medium text-theme-primary">{projectProgress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-theme rounded-full h-2.5">
                 <div 
                   className="bg-primary h-2.5 rounded-full" 
                   style={{ width: `${projectProgress}%` }}
@@ -333,14 +333,14 @@ const ProjectDetails: React.FC = () => {
         </div>
 
         {/* Abas de navegação */}
-        <div className="bg-white shadow sm:rounded-lg overflow-hidden mb-6">
-          <div className="border-b border-gray-200">
+        <div className="bg-theme-surface shadow sm:rounded-lg overflow-hidden mb-6 border border-theme">
+          <div className="border-b border-theme">
             <nav className="-mb-px flex">
               <button
                 className={`whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm ${
                   activeTab === 'overview'
-                    ? 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
-                    : 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
                 }`}
                 onClick={() => setActiveTab('overview')}
               >
@@ -349,8 +349,8 @@ const ProjectDetails: React.FC = () => {
               <button
                 className={`whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm ${
                   activeTab === 'members'
-                    ? 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
-                    : 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
                 }`}
                 onClick={() => setActiveTab('members')}
               >
@@ -359,8 +359,8 @@ const ProjectDetails: React.FC = () => {
               <button
                 className={`whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm ${
                   activeTab === 'tasks'
-                    ? 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
-                    : 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
                 }`}
                 onClick={() => setActiveTab('tasks')}
               >
@@ -369,8 +369,8 @@ const ProjectDetails: React.FC = () => {
               <button
                 className={`whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm ${
                   activeTab === 'chat'
-                    ? 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
-                    : 'whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 text-white hover:bg-gray-700 hover:border-white'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
                 }`}
                 onClick={() => setActiveTab('chat')}
               >
@@ -383,38 +383,38 @@ const ProjectDetails: React.FC = () => {
           <div className="p-4 sm:p-6">
             {activeTab === 'overview' && (
               <div>
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Sobre o Projeto</h2>
+                <h2 className="text-lg font-medium text-theme-primary mb-4">Sobre o Projeto</h2>
                 {project.description ? (
-                  <p className="text-gray-700">{project.description}</p>
+                  <p className="text-theme-primary">{project.description}</p>
                 ) : (
-                  <p className="text-gray-500 italic">Nenhuma descrição fornecida.</p>
+                  <p className="text-theme-secondary italic">Nenhuma descrição fornecida.</p>
                 )}
                 
                 <div className="mt-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-2">Detalhes do Projeto</h3>
-                  <div className="bg-gray-50 rounded-md p-4">
+                  <h3 className="text-md font-medium text-theme-primary mb-2">Detalhes do Projeto</h3>
+                  <div className="bg-theme rounded-md p-4">
                     <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Data de Criação</dt>
-                        <dd className="mt-1 text-sm text-gray-900">
+                        <dt className="text-sm font-medium text-theme-secondary">Data de Criação</dt>
+                        <dd className="mt-1 text-sm text-theme-primary">
                           {new Date(project.created_at).toLocaleDateString('pt-BR')}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Última Atualização</dt>
-                        <dd className="mt-1 text-sm text-gray-900">
+                        <dt className="text-sm font-medium text-theme-secondary">Última Atualização</dt>
+                        <dd className="mt-1 text-sm text-theme-primary">
                           {new Date(project.updated_at).toLocaleDateString('pt-BR')}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Membros</dt>
-                        <dd className="mt-1 text-sm text-gray-900">
+                        <dt className="text-sm font-medium text-theme-secondary">Membros</dt>
+                        <dd className="mt-1 text-sm text-theme-primary">
                           {project.members.length} participantes
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Gerente do Projeto</dt>
-                        <dd className="mt-1 text-sm text-gray-900">
+                        <dt className="text-sm font-medium text-theme-secondary">Gerente do Projeto</dt>
+                        <dd className="mt-1 text-sm text-theme-primary">
                           {project.members.find(m => m.role === 'project_manager')?.user.name || 'Não definido'}
                         </dd>
                       </div>
@@ -427,7 +427,7 @@ const ProjectDetails: React.FC = () => {
             {activeTab === 'members' && (
               <div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                  <h2 className="text-lg font-medium text-gray-900">Membros do Projeto</h2>
+                  <h2 className="text-lg font-medium text-theme-primary">Membros do Projeto</h2>
                   <Button 
                     variant="primary" 
                     size="sm"
@@ -443,24 +443,24 @@ const ProjectDetails: React.FC = () => {
                 {project.members.length > 0 ? (
                   <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <div className="inline-block min-w-full align-middle">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-theme">
+                        <thead className="bg-theme">
                           <tr>
-                            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                               Membro
                             </th>
-                            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                               Função
                             </th>
-                            <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
                               Desde
                             </th>
-                            <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-theme-secondary uppercase tracking-wider">
                               Ações
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-theme-surface divide-y divide-theme">
                           {project.members.map((member) => (
                             <tr key={member.id}>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
@@ -469,8 +469,8 @@ const ProjectDetails: React.FC = () => {
                                     {member.user.name.charAt(0).toUpperCase()}
                                   </div>
                                   <div className="ml-3">
-                                    <div className="text-sm font-medium text-gray-900">{member.user.name}</div>
-                                    <div className="text-sm text-gray-500 hidden sm:block">{member.user.email}</div>
+                                    <div className="text-sm font-medium text-theme-primary">{member.user.name}</div>
+                                    <div className="text-sm text-theme-secondary hidden sm:block">{member.user.email}</div>
                                   </div>
                                 </div>
                               </td>
@@ -482,7 +482,7 @@ const ProjectDetails: React.FC = () => {
                                    member.role}
                                 </span>
                               </td>
-                              <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
                                 {new Date(member.joined_at).toLocaleDateString('pt-BR')}
                               </td>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -502,12 +502,12 @@ const ProjectDetails: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12 bg-white rounded-lg shadow">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="text-center py-12 bg-theme-surface rounded-lg shadow border border-theme">
+                    <svg className="mx-auto h-12 w-12 text-theme-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum membro</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h3 className="mt-2 text-sm font-medium text-theme-primary">Nenhum membro</h3>
+                    <p className="mt-1 text-sm text-theme-secondary">
                       Comece adicionando membros ao projeto.
                     </p>
                     <div className="mt-6">
@@ -529,7 +529,7 @@ const ProjectDetails: React.FC = () => {
             {activeTab === 'tasks' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold text-gray-900">Tarefas do Projeto</h2>
+                  <h2 className="text-2xl font-bold text-theme-primary">Tarefas do Projeto</h2>
                   <Link
                     to={`/projects/${project.id}/tasks/new`}
                     className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -541,7 +541,7 @@ const ProjectDetails: React.FC = () => {
                   </Link>
                 </div>
 
-                <div className="bg-white shadow rounded-lg p-6">
+                <div className="bg-theme-surface shadow rounded-lg p-6 border border-theme">
                   <div className="mb-6">
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -549,7 +549,7 @@ const ProjectDetails: React.FC = () => {
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                           taskFilter === 'all'
                             ? 'bg-primary text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-theme text-theme-primary hover:bg-theme-secondary'
                         }`}
                       >
                         Todas
@@ -559,7 +559,7 @@ const ProjectDetails: React.FC = () => {
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                           taskFilter === 'pending'
                             ? 'bg-primary text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-theme text-theme-primary hover:bg-theme-secondary'
                         }`}
                       >
                         Pendentes
@@ -569,7 +569,7 @@ const ProjectDetails: React.FC = () => {
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                           taskFilter === 'in_progress'
                             ? 'bg-primary text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-theme text-theme-primary hover:bg-theme-secondary'
                         }`}
                       >
                         Em Progresso
@@ -579,7 +579,7 @@ const ProjectDetails: React.FC = () => {
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                           taskFilter === 'completed'
                             ? 'bg-primary text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-theme text-theme-primary hover:bg-theme-secondary'
                         }`}
                       >
                         Concluídas
@@ -607,12 +607,12 @@ const ProjectDetails: React.FC = () => {
         {/* Modal de Adicionar Membros */}
         {isAddMemberModalOpen && (
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="bg-theme-surface rounded-lg max-w-md w-full p-6 border border-theme">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Adicionar Membros</h3>
+                <h3 className="text-lg font-medium text-theme-primary">Adicionar Membros</h3>
                 <button
                   onClick={() => setIsAddMemberModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-theme-secondary hover:text-theme-primary"
                 >
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -649,7 +649,7 @@ const ProjectDetails: React.FC = () => {
         {/* Modal de Confirmação de Remoção */}
         {memberToRemove && (
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="bg-theme-surface rounded-lg max-w-md w-full p-6 border border-theme">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
                   <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -657,11 +657,11 @@ const ProjectDetails: React.FC = () => {
                   </svg>
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  <h3 className="text-lg leading-6 font-medium text-theme-primary">
                     Remover Membro
                   </h3>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-theme-secondary">
                       Tem certeza que deseja remover {memberToRemove.name} do projeto? Esta ação não pode ser desfeita.
                     </p>
                   </div>
