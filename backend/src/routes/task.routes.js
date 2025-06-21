@@ -8,6 +8,7 @@ const TaskHistoryController = require('../controllers/task-history.controller');
 const TaskDocumentController = require('../controllers/task-document.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const projectAccessMiddleware = require('../middlewares/project-access.middleware');
+const { isCommentOwner } = require('../middlewares/commentOwner.middleware');
 
 // Configuração do Multer para upload de arquivos
 const upload = multer({
@@ -69,8 +70,8 @@ router.delete('/:taskId/documents/:documentId',
 router.post('/:taskId/comments', projectAccessMiddleware, (req, res) => taskCommentController.create(req, res));
 router.get('/:taskId/comments', projectAccessMiddleware, (req, res) => taskCommentController.getTaskComments(req, res));
 router.get('/:taskId/comments/:commentId', projectAccessMiddleware, (req, res) => taskCommentController.getComment(req, res));
-router.put('/:taskId/comments/:commentId', projectAccessMiddleware, (req, res) => taskCommentController.update(req, res));
-router.delete('/:taskId/comments/:commentId', projectAccessMiddleware, (req, res) => taskCommentController.delete(req, res));
+router.put('/:taskId/comments/:commentId', projectAccessMiddleware, isCommentOwner, (req, res) => taskCommentController.update(req, res));
+router.delete('/:taskId/comments/:commentId', projectAccessMiddleware, isCommentOwner, (req, res) => taskCommentController.delete(req, res));
 
 // Task History Routes
 router.get('/:taskId/history', projectAccessMiddleware, (req, res) => taskHistoryController.getTaskHistory(req, res));

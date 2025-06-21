@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/ui/Button';
 import TaskDocuments from '../components/TaskDocuments';
+import TaskComments from '../components/TaskComments';
 import taskService from '../services/task.service';
 import projectService from '../services/project.service';
 import type { Task, TaskStatus, TaskPriority } from '../services/task.service';
@@ -419,6 +420,14 @@ const TaskDetails: React.FC = () => {
               {/* Documentos */}
               {!isEditing && projectId && taskId && (
                 <TaskDocuments
+                  projectId={Number(projectId)}
+                  taskId={Number(taskId)}
+                />
+              )}
+              
+              {/* Comentários */}
+              {!isEditing && projectId && taskId && (
+                <TaskComments
                   projectId={Number(projectId)}
                   taskId={Number(taskId)}
                 />
