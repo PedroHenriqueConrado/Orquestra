@@ -95,7 +95,7 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-theme-primary flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       {/* Botão para voltar para home */}
       <div className="absolute top-4 left-4">
         <Link
@@ -129,7 +129,7 @@ const Register: React.FC = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+        <div className="bg-theme-surface py-8 px-4 shadow-sm border border-theme sm:rounded-lg sm:px-10">
           {error && (
             <Alert type="error" message={error} onClose={clearError} />
           )}

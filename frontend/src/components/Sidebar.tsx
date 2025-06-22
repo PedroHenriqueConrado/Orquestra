@@ -39,7 +39,7 @@ const Sidebar: React.FC = () => {
                 to={item.path}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
                   location.pathname === item.path
-                    ? 'bg-primary text-white'
+                    ? 'color-white text-white'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >

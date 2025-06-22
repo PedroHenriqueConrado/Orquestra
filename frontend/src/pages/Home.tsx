@@ -24,7 +24,7 @@ const Home = () => {
   return (
     <div className="bg-white min-h-screen flex flex-col">
       {/* Hero Section */}
-      <div className="relative bg-primary-dark">
+      <div className="relative bg-theme-primary">
         <div className="absolute inset-0">
           <img
             className="w-full h-full object-cover opacity-25"
@@ -37,7 +37,6 @@ const Home = () => {
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                {/* Hamburger button */}
                 <button 
                   onClick={toggleSidebar}
                   className="text-white mr-4 focus:outline-none"
