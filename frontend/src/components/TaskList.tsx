@@ -133,23 +133,21 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
           <tbody className="bg-theme-surface divide-y divide-theme">
             {tasks.map((task) => (
               <tr key={task.id} className="hover:bg-theme transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-theme-primary">
-                        <Link 
-                          to={`/projects/${task.project_id}/tasks/${task.id}?from=list&tab=tasks&status=${status}`} 
-                          className="hover:text-primary"
-                        >
-                          {task.title}
-                        </Link>
-                      </div>
-                      {task.description && (
-                        <div className="text-sm text-theme-secondary truncate max-w-xs">
-                          {task.description}
-                        </div>
-                      )}
+                <td className="px-6 py-4 align-top min-w-0">
+                  <div className="w-full">
+                    <div className="text-sm font-medium text-theme-primary break-words whitespace-normal w-full block">
+                      <Link 
+                        to={`/projects/${task.project_id}/tasks/${task.id}?from=list&tab=tasks&status=${status}`} 
+                        className="hover:text-primary break-words whitespace-normal w-full block"
+                      >
+                        {task.title}
+                      </Link>
                     </div>
+                    {task.description && (
+                      <div className="text-sm text-theme-secondary whitespace-normal break-words w-full block mt-1">
+                        {task.description}
+                      </div>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

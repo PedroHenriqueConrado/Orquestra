@@ -9,11 +9,13 @@ import projectService from '../services/project.service';
 import type { Task, TaskStatus, TaskPriority } from '../services/task.service';
 import type { Project } from '../services/project.service';
 import toast from 'react-hot-toast';
+import { useTheme } from '../contexts/ThemeContext';
 
 const TaskDetails: React.FC = () => {
   const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useTheme();
   
   const [project, setProject] = useState<Project | null>(null);
   const [task, setTask] = useState<Task | null>(null);
@@ -149,10 +151,10 @@ const TaskDetails: React.FC = () => {
   
   if (loading) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className={theme === 'dark' ? 'bg-dark-background min-h-screen' : 'bg-gray-50 min-h-screen'}>
         <Header />
         <main className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white shadow rounded-lg p-6 flex justify-center">
+          <div className={theme === 'dark' ? 'bg-dark-secondary shadow rounded-lg p-6 flex justify-center' : 'bg-white shadow rounded-lg p-6 flex justify-center'}>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </main>
@@ -162,11 +164,11 @@ const TaskDetails: React.FC = () => {
   
   if (error || !task || !project) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className={theme === 'dark' ? 'bg-dark-background min-h-screen' : 'bg-gray-50 min-h-screen'}>
         <Header />
         <main className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="text-red-500 text-center">
+          <div className={theme === 'dark' ? 'bg-dark-secondary shadow rounded-lg p-6' : 'bg-white shadow rounded-lg p-6'}>
+            <div className={theme === 'dark' ? 'text-red-400 text-center' : 'text-red-500 text-center'}>
               <p>{error || 'Tarefa não encontrada'}</p>
               <Button 
                 variant="primary" 
@@ -183,7 +185,7 @@ const TaskDetails: React.FC = () => {
   }
   
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className={theme === 'dark' ? 'bg-dark-background min-h-screen' : 'bg-gray-50 min-h-screen'}>
       <Header />
       <main className="max-w-4xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         {/* Navegação e cabeçalho */}
@@ -191,26 +193,26 @@ const TaskDetails: React.FC = () => {
           <nav className="flex mb-3 sm:mb-5 overflow-x-auto hide-scrollbar" aria-label="Breadcrumb">
             <ol className="inline-flex items-center space-x-1 md:space-x-3 min-w-full">
               <li className="inline-flex items-center">
-                <Link to="/projects" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700">
+                <Link to="/projects" className={theme === 'dark' ? 'text-xs sm:text-sm text-dark-muted hover:text-dark-text' : 'text-xs sm:text-sm text-gray-500 hover:text-gray-700'}>
                   Projetos
                 </Link>
               </li>
               <li>
                 <div className="flex items-center">
-                  <svg className="w-4 h-4 sm:w-6 sm:h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className={theme === 'dark' ? 'w-4 h-4 sm:w-6 sm:h-6 text-dark-muted' : 'w-4 h-4 sm:w-6 sm:h-6 text-gray-400'} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
                   </svg>
-                  <Link to={`/projects/${projectId}`} className="ml-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 md:ml-2 truncate max-w-[100px] sm:max-w-none">
+                  <Link to={`/projects/${projectId}`} className={theme === 'dark' ? 'ml-1 text-xs sm:text-sm text-dark-muted hover:text-dark-text md:ml-2 truncate max-w-[100px] sm:max-w-none' : 'ml-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 md:ml-2 truncate max-w-[100px] sm:max-w-none'}>
                     {project.name}
                   </Link>
                 </div>
               </li>
               <li aria-current="page">
                 <div className="flex items-center">
-                  <svg className="w-4 h-4 sm:w-6 sm:h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className={theme === 'dark' ? 'w-4 h-4 sm:w-6 sm:h-6 text-dark-muted' : 'w-4 h-4 sm:w-6 sm:h-6 text-gray-400'} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
                   </svg>
-                  <span className="ml-1 text-xs sm:text-sm font-medium text-gray-500 md:ml-2 truncate">
+                  <span className={theme === 'dark' ? 'ml-1 text-xs sm:text-sm font-medium text-dark-muted md:ml-2 truncate' : 'ml-1 text-xs sm:text-sm font-medium text-gray-500 md:ml-2 truncate'}>
                     Tarefa
                   </span>
                 </div>
@@ -220,8 +222,8 @@ const TaskDetails: React.FC = () => {
           
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 break-words">{task.title}</h1>
-              <p className="mt-1 text-xs sm:text-sm text-gray-500">
+              <h1 className={theme === 'dark' ? 'text-xl sm:text-2xl font-semibold text-dark-text break-words' : 'text-xl sm:text-2xl font-semibold text-gray-900 break-words'}>{task.title}</h1>
+              <p className={theme === 'dark' ? 'mt-1 text-xs sm:text-sm text-dark-muted' : 'mt-1 text-xs sm:text-sm text-gray-500'}>
                 Criada em {new Date(task.created_at).toLocaleDateString('pt-BR')}
               </p>
             </div>
@@ -291,14 +293,14 @@ const TaskDetails: React.FC = () => {
         )}
         
         {/* Conteúdo da tarefa */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className={theme === 'dark' ? 'bg-dark-secondary shadow rounded-lg overflow-hidden' : 'bg-white shadow rounded-lg overflow-hidden'}>
           {!isEditing ? (
             // Modo de visualização
-            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div className={theme === 'dark' ? 'p-4 sm:p-6 space-y-4 sm:space-y-6 text-dark-text' : 'p-4 sm:p-6 space-y-4 sm:space-y-6'}>
               {/* Status da tarefa */}
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-4 border-b border-gray-200 gap-4">
+              <div className={theme === 'dark' ? 'flex flex-col sm:flex-row sm:justify-between sm:items-center pb-4 border-b border-dark-border gap-4' : 'flex flex-col sm:flex-row sm:justify-between sm:items-center pb-4 border-b border-gray-200 gap-4'}>
                 <div>
-                  <h2 className="text-lg font-medium text-gray-900">Status</h2>
+                  <h2 className={theme === 'dark' ? 'text-lg font-medium text-dark-text' : 'text-lg font-medium text-gray-900'}>Status</h2>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${task.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
@@ -352,65 +354,65 @@ const TaskDetails: React.FC = () => {
               
               {/* Descrição */}
               <div>
-                <h2 className="text-lg font-medium text-gray-900">Descrição</h2>
-                <div className="mt-2 prose max-w-none text-gray-700">
+                <h2 className={theme === 'dark' ? 'text-lg font-medium text-dark-text' : 'text-lg font-medium text-gray-900'}>Descrição</h2>
+                <div className={theme === 'dark' ? 'mt-2 prose max-w-none text-dark-muted' : 'mt-2 prose max-w-none text-gray-700'}>
                   {task.description ? (
-                    <p className="text-sm sm:text-base break-words">{task.description}</p>
+                    <p className={theme === 'dark' ? 'text-sm sm:text-base break-words text-dark-text' : 'text-sm sm:text-base break-words'}>{task.description}</p>
                   ) : (
-                    <p className="text-sm sm:text-base text-gray-500 italic">Nenhuma descrição fornecida.</p>
+                    <p className={theme === 'dark' ? 'text-sm sm:text-base text-dark-muted italic' : 'text-sm sm:text-base text-gray-500 italic'}>Nenhuma descrição fornecida.</p>
                   )}
                 </div>
               </div>
               
               {/* Detalhes */}
               <div>
-                <h2 className="text-lg font-medium text-gray-900">Detalhes</h2>
+                <h2 className={theme === 'dark' ? 'text-lg font-medium text-dark-text' : 'text-lg font-medium text-gray-900'}>Detalhes</h2>
                 <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-4 sm:gap-y-6 sm:grid-cols-2">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Responsável</h3>
+                    <h3 className={theme === 'dark' ? 'text-sm font-medium text-dark-muted' : 'text-sm font-medium text-gray-500'}>Responsável</h3>
                     <div className="mt-1">
                       {task.assignedUser ? (
                         <div className="flex items-center">
                           <div className="h-8 w-8 rounded-full bg-primary-lighter flex items-center justify-center text-white">
                             {task.assignedUser.name.charAt(0).toUpperCase()}
                           </div>
-                          <span className="ml-2 text-sm text-gray-900 truncate">{task.assignedUser.name}</span>
+                          <span className={theme === 'dark' ? 'ml-2 text-sm text-dark-text truncate' : 'ml-2 text-sm text-gray-900 truncate'}>{task.assignedUser.name}</span>
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-500">Não atribuído</span>
+                        <span className={theme === 'dark' ? 'text-sm text-dark-muted' : 'text-sm text-gray-500'}>Não atribuído</span>
                       )}
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Data de Entrega</h3>
-                    <div className="mt-1 text-sm text-gray-900">
+                    <h3 className={theme === 'dark' ? 'text-sm font-medium text-dark-muted' : 'text-sm font-medium text-gray-500'}>Data de Entrega</h3>
+                    <div className={theme === 'dark' ? 'mt-1 text-sm text-dark-text' : 'mt-1 text-sm text-gray-900'}>
                       {task.due_date ? (
                         new Date(task.due_date).toLocaleDateString('pt-BR')
                       ) : (
-                        <span className="text-gray-500">Não definido</span>
+                        <span className={theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}>Não definido</span>
                       )}
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Horas Estimadas</h3>
-                    <div className="mt-1 text-sm text-gray-900">
+                    <h3 className={theme === 'dark' ? 'text-sm font-medium text-dark-muted' : 'text-sm font-medium text-gray-500'}>Horas Estimadas</h3>
+                    <div className={theme === 'dark' ? 'mt-1 text-sm text-dark-text' : 'mt-1 text-sm text-gray-900'}>
                       {task.estimated_hours ? (
                         `${task.estimated_hours} horas`
                       ) : (
-                        <span className="text-gray-500">Não definido</span>
+                        <span className={theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}>Não definido</span>
                       )}
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Horas Registradas</h3>
-                    <div className="mt-1 text-sm text-gray-900">
+                    <h3 className={theme === 'dark' ? 'text-sm font-medium text-dark-muted' : 'text-sm font-medium text-gray-500'}>Horas Registradas</h3>
+                    <div className={theme === 'dark' ? 'mt-1 text-sm text-dark-text' : 'mt-1 text-sm text-gray-900'}>
                       {task.actual_hours ? (
                         `${task.actual_hours} horas`
                       ) : (
-                        <span className="text-gray-500">Nenhuma hora registrada</span>
+                        <span className={theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}>Nenhuma hora registrada</span>
                       )}
                     </div>
                   </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import taskDocumentService, { TaskDocument } from '../services/task-document.service';
+import taskDocumentService from '../services/task-document.service';
+import type { TaskDocument } from '../services/task-document.service';
 import documentService from '../services/document.service';
 import { FiFile, FiUpload, FiDownload, FiTrash2, FiPlus, FiX, FiCheckSquare, FiSearch } from 'react-icons/fi';
 import toast from 'react-hot-toast';
@@ -7,6 +8,7 @@ import Button from './ui/Button';
 import Dialog from './ui/Dialog';
 import formatFileSize from '../utils/formatFileSize';
 import formatDate from '../utils/formatDate';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface TaskDocumentsProps {
   taskId: number;
@@ -28,6 +30,8 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
   
   // Referências
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { theme } = useTheme();
   
   // Efeito para carregar documentos da tarefa
   useEffect(() => {
@@ -240,7 +244,7 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
   return (
     <div className="mt-4">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-900">Documentos</h3>
+        <h3 className={theme === 'dark' ? 'text-lg font-medium text-dark-text' : 'text-lg font-medium text-gray-900'}>Documentos</h3>
         <div className="flex space-x-2">
           <Button
             size="sm"
@@ -269,20 +273,20 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
           <div className="animate-spin h-6 w-6 border-t-2 border-b-2 border-primary rounded-full"></div>
         </div>
       ) : documents.length === 0 ? (
-        <div className="bg-gray-50 p-4 rounded-md text-center text-gray-500">
+        <div className={theme === 'dark' ? 'bg-dark-secondary p-4 rounded-md text-center text-dark-muted' : 'bg-gray-50 p-4 rounded-md text-center text-gray-500'}>
           Nenhum documento associado a esta tarefa.
         </div>
       ) : (
         <div className="space-y-4">
           {documents.map((taskDoc) => (
-            <div key={`${taskDoc.task_id}-${taskDoc.document_id}`} className="bg-white shadow-sm rounded-md border border-gray-200 overflow-hidden">
+            <div key={`${taskDoc.task_id}-${taskDoc.document_id}`} className={theme === 'dark' ? 'bg-dark-secondary shadow-sm rounded-md border border-dark-border overflow-hidden' : 'bg-white shadow-sm rounded-md border border-gray-200 overflow-hidden'}>
               <div className="p-4">
                 <div className="flex justify-between">
                   <div className="flex items-center">
                     <FiFile className="text-blue-500 mr-2 text-xl" />
                     <div>
-                      <h4 className="font-medium text-gray-900">{taskDoc.document.title}</h4>
-                      <p className="text-sm text-gray-500">
+                      <h4 className={theme === 'dark' ? 'font-medium text-dark-text' : 'font-medium text-gray-900'}>{taskDoc.document.title}</h4>
+                      <p className={theme === 'dark' ? 'text-sm text-dark-muted' : 'text-sm text-gray-500'}>
                         Adicionado por {taskDoc.user.name} em {formatDate(taskDoc.added_at)}
                       </p>
                     </div>
@@ -307,7 +311,7 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
                 
                 {/* Lista de versões */}
                 <div className="mt-3 border-t pt-3">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">
+                  <h5 className={theme === 'dark' ? 'text-sm font-medium text-dark-text mb-2' : 'text-sm font-medium text-gray-700 mb-2'}>
                     Versões disponíveis ({taskDoc.document.versions?.length || 0}):
                   </h5>
                   
@@ -317,12 +321,12 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
                         key={version.id} 
                         className={`flex justify-between items-center p-2 rounded text-sm ${
                           index === 0 
-                            ? 'bg-blue-50 border border-blue-200' 
-                            : 'bg-gray-50'
+                            ? theme === 'dark' ? 'bg-blue-900 border border-blue-700 text-blue-200' : 'bg-blue-50 border border-blue-200 text-blue-700'
+                            : theme === 'dark' ? 'bg-dark-accent text-dark-text' : 'bg-gray-50'
                         }`}
                       >
                         <div>
-                          <span className={`font-medium ${index === 0 ? 'text-blue-700' : ''}`}>
+                          <span className={`font-medium ${index === 0 ? (theme === 'dark' ? 'text-blue-200' : 'text-blue-700') : ''}`}>
                             {index === 0 ? 'Versão atual - ' : ''}v{version.version_number}
                           </span>
                           <span className="mx-2">•</span>
@@ -341,7 +345,7 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
                           )}
                         </div>
                         <button
-                          className="text-blue-600 hover:text-blue-800 flex items-center"
+                          className={theme === 'dark' ? 'text-blue-300 hover:text-blue-400 flex items-center' : 'text-blue-600 hover:text-blue-800 flex items-center'}
                           onClick={() => handleDownloadVersion(taskDoc.document_id, version.version_number)}
                           title="Baixar esta versão"
                         >
