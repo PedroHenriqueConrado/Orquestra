@@ -1,5 +1,6 @@
 import React from 'react';
 import type { InputHTMLAttributes } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -18,15 +19,18 @@ const FormField: React.FC<FormFieldProps> = ({
   required,
   ...props
 }) => {
+  const { theme } = useTheme();
+  const labelClass = theme === 'dark' ? 'text-dark-text' : 'text-gray-700';
+  const errorClass = theme === 'dark' ? 'text-red-400' : 'text-red-600';
   return (
     <div className="mb-4">
       <div className="flex justify-between">
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor={id} className={`block text-sm font-medium mb-1 ${labelClass}`}>
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
         {error && (
-          <p className="text-sm text-red-600" id={`${id}-error`}>
+          <p className={`text-sm ${errorClass}`} id={`${id}-error`}>
             {error}
           </p>
         )}

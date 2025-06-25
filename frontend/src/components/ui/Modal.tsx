@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ModalProps {
   isOpen: boolean;
@@ -9,6 +10,10 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+  const { theme } = useTheme();
+  const panelBg = theme === 'dark' ? 'bg-dark-background' : 'bg-white';
+  const panelText = theme === 'dark' ? 'text-dark-text' : 'text-gray-900';
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -35,10 +40,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className={`w-full max-w-md transform overflow-hidden rounded-2xl ${panelBg} p-6 text-left align-middle shadow-xl transition-all ${panelText}`}>
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900"
+                  className={`text-lg font-medium leading-6 mb-2 ${panelText}`}
                 >
                   {title}
                 </Dialog.Title>
