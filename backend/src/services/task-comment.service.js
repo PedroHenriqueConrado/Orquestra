@@ -2,12 +2,13 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 class TaskCommentService {
-    async createComment(taskId, userId, content) {
+    async createComment(taskId, userId, content, rating = null) {
         return await prisma.taskComment.create({
             data: {
                 task_id: Number(taskId),
                 user_id: Number(userId),
-                content
+                content,
+                rating: rating !== null ? Number(rating) : null
             },
             include: {
                 user: {
@@ -62,7 +63,7 @@ class TaskCommentService {
         };
     }
 
-    async updateComment(commentId, userId, content) {
+    async updateComment(commentId, userId, content, rating = null) {
         return await prisma.taskComment.update({
             where: {
                 id: Number(commentId),
@@ -70,6 +71,7 @@ class TaskCommentService {
             },
             data: {
                 content,
+                rating: rating !== null ? Number(rating) : null,
                 updated_at: new Date()
             },
             include: {

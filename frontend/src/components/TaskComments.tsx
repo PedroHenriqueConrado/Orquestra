@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Button from './ui/Button';
+import Rating from './ui/Rating';
 import { useAuth } from '../contexts/AuthContext';
 import taskCommentService from '../services/task-comment.service';
 import type { TaskComment, CreateCommentData } from '../services/task-comment.service';
@@ -16,8 +17,10 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [newRating, setNewRating] = useState<number | undefined>(undefined);
   const [editingComment, setEditingComment] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
+  const [editRating, setEditRating] = useState<number | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -57,11 +60,15 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
 
     try {
       setSubmitting(true);
-      const data: CreateCommentData = { content: newComment.trim() };
+      const data: CreateCommentData = { 
+        content: newComment.trim(),
+        rating: newRating
+      };
       const comment = await taskCommentService.createComment(projectId, taskId, data);
       
       setComments(prev => [comment, ...prev]);
       setNewComment('');
+      setNewRating(undefined);
       toast.success('Comentário adicionado com sucesso!');
     } catch (error: any) {
       console.error('Erro ao criar comentário:', error);
@@ -75,12 +82,14 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
   const handleStartEdit = (comment: TaskComment) => {
     setEditingComment(comment.id);
     setEditContent(comment.content);
+    setEditRating(comment.rating);
   };
 
   // Cancelar edição
   const handleCancelEdit = () => {
     setEditingComment(null);
     setEditContent('');
+    setEditRating(undefined);
   };
 
   // Salvar edição
@@ -93,7 +102,10 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
         projectId, 
         taskId, 
         commentId, 
-        { content: editContent.trim() }
+        { 
+          content: editContent.trim(),
+          rating: editRating
+        }
       );
       
       setComments(prev => 
@@ -104,6 +116,7 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
       
       setEditingComment(null);
       setEditContent('');
+      setEditRating(undefined);
       toast.success('Comentário atualizado com sucesso!');
     } catch (error: any) {
       console.error('Erro ao atualizar comentário:', error);
@@ -159,10 +172,37 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
     }
   };
 
+  // Calcular média de ratings
+  const calculateAverageRating = () => {
+    const ratedComments = comments.filter(comment => comment.rating !== undefined && comment.rating !== null && comment.rating > 0);
+    if (ratedComments.length === 0) return null;
+    
+    const totalRating = ratedComments.reduce((sum, comment) => sum + (comment.rating || 0), 0);
+    return Math.round((totalRating / ratedComments.length) * 10) / 10; // Arredondar para 1 casa decimal
+  };
+
+  const averageRating = calculateAverageRating();
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium text-gray-900">Comentários</h2>
+        <div className="flex items-center space-x-4">
+          <h2 className="text-lg font-medium text-gray-900">Comentários</h2>
+          {averageRating && (
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">Média:</span>
+              <Rating
+                value={Math.round(averageRating)}
+                readonly={true}
+                size="sm"
+                showValue={true}
+              />
+              <span className="text-xs text-gray-500">
+                ({comments.filter(c => c.rating && c.rating > 0).length} avaliações)
+              </span>
+            </div>
+          )}
+        </div>
         <span className="text-sm text-gray-500">{comments.length} comentário{comments.length !== 1 ? 's' : ''}</span>
       </div>
 
@@ -178,6 +218,27 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
             disabled={submitting}
           />
         </div>
+        
+        {/* Rating para novo comentário */}
+        <div className="flex items-center space-x-3">
+          <span className="text-sm font-medium text-gray-700">Avaliação:</span>
+          <Rating
+            value={newRating || 0}
+            onChange={setNewRating}
+            size="md"
+            showValue={true}
+          />
+          {newRating && (
+            <button
+              type="button"
+              onClick={() => setNewRating(undefined)}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
+        
         <div className="flex justify-end">
           <Button
             type="submit"
@@ -265,15 +326,48 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
                   )}
                 </div>
                 
+                {/* Rating do comentário */}
+                {comment.rating && comment.rating > 0 && (
+                  <div className="mt-2 flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">Avaliação:</span>
+                    <Rating
+                      value={comment.rating}
+                      readonly={true}
+                      size="sm"
+                      showValue={true}
+                    />
+                  </div>
+                )}
+                
                 <div className="mt-3">
                   {editingComment === comment.id ? (
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary resize-none"
-                      disabled={submitting}
-                    />
+                    <div className="space-y-3">
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary resize-none"
+                        disabled={submitting}
+                      />
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm font-medium text-gray-700">Avaliação:</span>
+                        <Rating
+                          value={editRating || 0}
+                          onChange={setEditRating}
+                          size="sm"
+                          showValue={true}
+                        />
+                        {editRating && (
+                          <button
+                            type="button"
+                            onClick={() => setEditRating(undefined)}
+                            className="text-sm text-gray-500 hover:text-gray-700"
+                          >
+                            Limpar
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   ) : (
                     <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
                       {comment.content}

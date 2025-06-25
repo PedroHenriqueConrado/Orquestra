@@ -2,7 +2,8 @@ const taskCommentService = require('../services/task-comment.service');
 const { z } = require('zod');
 
 const commentSchema = z.object({
-    content: z.string().min(1).max(1000)
+    content: z.string().min(1).max(1000),
+    rating: z.number().min(0).max(10).optional()
 });
 
 const pageSchema = z.object({
@@ -21,7 +22,8 @@ class TaskCommentController {
             const comment = await this.taskCommentService.createComment(
                 req.params.taskId,
                 req.user.id,
-                validatedData.content
+                validatedData.content,
+                validatedData.rating
             );
             res.status(201).json(comment);
         } catch (error) {
@@ -55,7 +57,8 @@ class TaskCommentController {
             const comment = await this.taskCommentService.updateComment(
                 req.params.commentId,
                 req.user.id,
-                validatedData.content
+                validatedData.content,
+                validatedData.rating
             );
             res.json(comment);
         } catch (error) {

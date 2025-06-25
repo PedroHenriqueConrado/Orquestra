@@ -5,6 +5,7 @@ export interface TaskComment {
   task_id: number;
   user_id: number;
   content: string;
+  rating?: number;
   created_at: string;
   updated_at: string;
   user: {
@@ -16,10 +17,12 @@ export interface TaskComment {
 
 export interface CreateCommentData {
   content: string;
+  rating?: number;
 }
 
 export interface UpdateCommentData {
   content: string;
+  rating?: number;
 }
 
 export interface CommentsResponse {
