@@ -44,16 +44,25 @@ const canDeleteProject = async (req, res, next) => {
             });
         }
         
-        // Verificar se o usuário é gerente do projeto
-        if (userMembership.role === 'project_manager') {
-            logger.debug(`Middleware canDeleteProject: Usuário ${userId} é gerente do projeto ${projectId}, permissão concedida`);
+        // Verificar se o usuário é o criador do projeto (primeiro project_manager)
+        const creator = project.creator;
+        if (!creator) {
+            logger.warn(`Middleware canDeleteProject: Não foi possível identificar o criador do projeto ${projectId}`);
+            return res.status(403).json({ 
+                error: 'Acesso negado', 
+                details: 'Não foi possível verificar as permissões de exclusão' 
+            });
+        }
+        
+        if (creator.id === userId) {
+            logger.debug(`Middleware canDeleteProject: Usuário ${userId} é o criador do projeto ${projectId}, permissão concedida`);
             return next();
         }
         
-        logger.warn(`Middleware canDeleteProject: Usuário ${userId} é ${userMembership.role}, permissão negada`);
+        logger.warn(`Middleware canDeleteProject: Usuário ${userId} não é o criador do projeto ${projectId} (criador: ${creator.id})`);
         return res.status(403).json({ 
             error: 'Acesso negado', 
-            details: 'Apenas administradores e gerentes de projeto podem excluir projetos' 
+            details: 'Apenas o criador do projeto pode excluí-lo' 
         });
         
     } catch (error) {

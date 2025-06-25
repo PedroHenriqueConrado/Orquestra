@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/ui/Button';
+import ConfirmationDialog from '../components/ui/ConfirmationDialog';
+import AlertDialog from '../components/ui/AlertDialog';
 import ProjectChat from '../components/ProjectChat';
 import projectService from '../services/project.service';
 import taskService from '../services/task.service';
@@ -32,8 +34,14 @@ const ProjectDetails: React.FC = () => {
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [isAddingMembers, setIsAddingMembers] = useState(false);
-  const [memberToRemove, setMemberToRemove] = useState<{ id: number; name: string } | null>(null);
+  const [memberToRemove, setMemberToRemove] = useState<any>(null);
   const [isRemovingMember, setIsRemovingMember] = useState(false);
+  
+  // Estados para modais
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Verifica se há um parâmetro de consulta 'tab' na URL
   const queryParams = new URLSearchParams(location.search);
@@ -48,11 +56,14 @@ const ProjectDetails: React.FC = () => {
   const handleDeleteProject = async () => {
     if (!id || !project) return;
     
-    if (!window.confirm(`Tem certeza que deseja excluir o projeto "${project.name}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteProject = async () => {
+    if (!id || !project) return;
     
     try {
+      setDeleteLoading(true);
       await projectService.deleteProject(Number(id));
       navigate('/projects', { 
         state: { 
@@ -61,7 +72,16 @@ const ProjectDetails: React.FC = () => {
         } 
       });
     } catch (err: any) {
-      alert(err.message || 'Erro ao excluir projeto');
+      // Verificar se é erro de permissão (403)
+      if (err.response?.status === 403) {
+        setErrorMessage('Você não pode excluir este projeto pois não foi você quem o criou. Apenas o criador do projeto pode excluí-lo.');
+        setShowErrorAlert(true);
+      } else {
+        setErrorMessage(err.message || 'Erro ao excluir projeto');
+        setShowErrorAlert(true);
+      }
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -724,6 +744,28 @@ const ProjectDetails: React.FC = () => {
           </div>
         )}
       </main>
+      
+      {/* Modal de Confirmação de Exclusão */}
+      <ConfirmationDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={confirmDeleteProject}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o projeto "${project?.name}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir Projeto"
+        cancelText="Cancelar"
+        variant="danger"
+        loading={deleteLoading}
+      />
+      
+      {/* Modal de Erro */}
+      <AlertDialog
+        isOpen={showErrorAlert}
+        onClose={() => setShowErrorAlert(false)}
+        title="Erro"
+        message={errorMessage}
+        variant="error"
+      />
     </div>
   );
 };

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/ui/Button';
+import ConfirmationDialog from '../components/ui/ConfirmationDialog';
+import AlertDialog from '../components/ui/AlertDialog';
 import projectService from '../services/project.service';
 import type { Project } from '../services/project.service';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,6 +27,13 @@ const Projects: React.FC = () => {
   } | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [projectsProgress, setProjectsProgress] = useState<Record<number, number>>({});
+  
+  // Estados para modais
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     // Verifica se há uma mensagem na navegação (ex: após criar um projeto)
@@ -74,20 +83,35 @@ const Projects: React.FC = () => {
     }
   };
 
-  const handleDeleteProject = async (id: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir este projeto?')) {
-      return;
-    }
+  const handleDeleteProject = async (project: Project) => {
+    setProjectToDelete(project);
+    setShowDeleteConfirm(true);
+  };
 
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete) return;
+    
     try {
-      await projectService.deleteProject(id);
-      setProjects(projects.filter(project => project.id !== id));
+      setDeleteLoading(true);
+      await projectService.deleteProject(projectToDelete.id);
+      setProjects(projects.filter(project => project.id !== projectToDelete.id));
       setNotification({
         message: 'Projeto excluído com sucesso!',
         type: 'success'
       });
+      setShowDeleteConfirm(false);
+      setProjectToDelete(null);
     } catch (err: any) {
-      alert(err.message || 'Erro ao excluir projeto');
+      // Verificar se é erro de permissão (403)
+      if (err.response?.status === 403) {
+        setErrorMessage('Você não pode excluir este projeto pois não foi você quem o criou. Apenas o criador do projeto pode excluí-lo.');
+        setShowErrorAlert(true);
+      } else {
+        setErrorMessage(err.message || 'Erro ao excluir projeto');
+        setShowErrorAlert(true);
+      }
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -295,7 +319,7 @@ const Projects: React.FC = () => {
                         </button>
                       </Link>
                       <button 
-                        onClick={() => handleDeleteProject(project.id)}
+                        onClick={() => handleDeleteProject(project)}
                         className="text-theme-muted hover:text-red-600 transition-colors"
                       >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -362,6 +386,31 @@ const Projects: React.FC = () => {
           </div>
         )}
       </main>
+      
+      {/* Modal de Confirmação de Exclusão */}
+      <ConfirmationDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setProjectToDelete(null);
+        }}
+        onConfirm={confirmDeleteProject}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o projeto "${projectToDelete?.name}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir Projeto"
+        cancelText="Cancelar"
+        variant="danger"
+        loading={deleteLoading}
+      />
+      
+      {/* Modal de Erro */}
+      <AlertDialog
+        isOpen={showErrorAlert}
+        onClose={() => setShowErrorAlert(false)}
+        title="Erro"
+        message={errorMessage}
+        variant="error"
+      />
     </div>
   );
 };
