@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
+import { USER_KEY } from '../config';
 
 // Definindo interfaces localmente já que foram removidas da importação
 interface LoginData {
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const loadUserFromStorage = (): User | null => {
     try {
       const token = authService.getToken();
-      const userStr = localStorage.getItem('user');
+      const userStr = localStorage.getItem(USER_KEY);
       
       if (token && userStr && isTokenValid(token)) {
         return JSON.parse(userStr);

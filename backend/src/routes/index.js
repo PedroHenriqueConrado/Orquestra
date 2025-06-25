@@ -9,6 +9,7 @@ const directChatRoutes = require('./direct-chat.routes');
 const notificationRoutes = require('./notification.routes');
 const dashboardRoutes = require('./dashboard.routes');
 const searchRoutes = require('./search.routes');
+const templateRoutes = require('./template.routes');
 
 // Rota de teste/health check
 router.get('/health', (req, res) => {
@@ -48,5 +49,8 @@ router.use('/dashboard', dashboardRoutes);
 
 // Rotas de busca
 router.use('/search', searchRoutes);
+
+// Rotas de templates
+router.use('/templates', templateRoutes);
 
 module.exports = router; 

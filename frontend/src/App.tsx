@@ -15,6 +15,7 @@ import DirectMessages from './pages/DirectMessages';
 import ChatDetails from './pages/ChatDetails';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
+import Templates from './pages/Templates';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import PrivateRoute from './components/PrivateRoute';
@@ -80,6 +81,12 @@ const App: React.FC = () => {
             <Route path="/projects/:projectId/tasks/:taskId" element={
               <PrivateRoute>
                 <TaskDetails />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/templates" element={
+              <PrivateRoute>
+                <Templates />
               </PrivateRoute>
             } />
             

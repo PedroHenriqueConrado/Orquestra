@@ -46,16 +46,14 @@ api.interceptors.response.use(
   (error) => {
     // Se for erro de autenticação, apenas notifica
     if (error.response && error.response.status === 401) {
-      console.error('Erro de autenticação detectado (401):', error.config.url);
-      
+      const token = localStorage.getItem('orquestra_token');
+      console.error('[FRONTEND][API] 401 detectado em', error.config.url, 'Token atual:', token);
       // Não faz logout automático, apenas retorna o erro para tratamento pela aplicação
       return Promise.reject(new Error('Sessão expirada. Por favor, tente novamente ou faça login novamente.'));
     }
-    
     // Para outros erros, rejeita a promessa com informações detalhadas
     const errorMessage = error.response?.data?.message || error.message || 'Erro desconhecido';
     console.error(`Erro ${error.response?.status || 'network'}: ${errorMessage}`);
-    
     return Promise.reject(error);
   }
 );

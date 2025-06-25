@@ -6,6 +6,7 @@ import ProjectChat from '../components/ProjectChat';
 import projectService from '../services/project.service';
 import taskService from '../services/task.service';
 import progressService from '../services/progress.service';
+import templateService from '../services/template.service';
 import type { Project } from '../services/project.service';
 import type { Task, TaskStatus } from '../services/task.service';
 import TaskList from '../components/TaskList';
@@ -236,6 +237,30 @@ const ProjectDetails: React.FC = () => {
   };
 
   const renderProjectActions = () => {
+    const handleCreateTemplate = async () => {
+      if (!project) return;
+      
+      const templateName = prompt('Digite o nome do template:');
+      if (!templateName) return;
+      
+      const templateDescription = prompt('Digite uma descrição para o template (opcional):');
+      const templateCategory = prompt('Digite uma categoria para o template (opcional):');
+      const isPublic = confirm('Deseja tornar este template público?');
+      
+      try {
+        await templateService.createFromProject(project.id, {
+          name: templateName,
+          description: templateDescription || undefined,
+          category: templateCategory || undefined,
+          is_public: isPublic
+        });
+        alert('Template criado com sucesso!');
+      } catch (error) {
+        console.error('Erro ao criar template:', error);
+        alert('Erro ao criar template. Tente novamente.');
+      }
+    };
+
     return (
       <div className="flex flex-wrap gap-2 mb-6">
         <Link to={`/projects/${id}/edit`}>
@@ -256,6 +281,15 @@ const ProjectDetails: React.FC = () => {
             Dashboard Avançado
           </Button>
         </Link>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleCreateTemplate}
+          title="Criar template a partir deste projeto"
+        >
+          <i className="fas fa-copy mr-2"></i>
+          Criar Template
+        </Button>
         <Button variant="danger" size="sm" onClick={handleDeleteProject}>
           <i className="fas fa-trash-alt mr-2"></i>
           Excluir Projeto

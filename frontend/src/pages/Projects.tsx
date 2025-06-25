@@ -219,6 +219,14 @@ const Projects: React.FC = () => {
                 Novo Projeto
               </Button>
             </Link>
+            <Link to="/templates">
+              <Button variant="secondary" className="w-full sm:w-auto">
+                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M4 3a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v12H4V5zm2 2v2h8V7H6zm0 4v2h5v-2H6z" />
+                </svg>
+                Usar Template
+              </Button>
+            </Link>
           </div>
         </div>
 

@@ -11,6 +11,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'orquestra_desenvolvimento_seguro_2
  */
 const authMiddleware = async (req, res, next) => {
   try {
+    // Log do endpoint e header
+    console.log('[AUTH] Endpoint:', req.method, req.originalUrl);
+    console.log('[AUTH] Authorization header:', req.headers.authorization);
+
     // Tenta obter o token do cabeçalho Authorization ou do parâmetro de consulta
     const authHeader = req.headers.authorization;
     let token;
@@ -26,7 +30,7 @@ const authMiddleware = async (req, res, next) => {
     }
     
     if (!token) {
-      logger.warn('Middleware Auth: Token não fornecido');
+      console.log('[AUTH] Motivo do 401: Token não fornecido');
       return res.status(401).json({ message: 'Token não fornecido' });
     }
     

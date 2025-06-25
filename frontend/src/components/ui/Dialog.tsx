@@ -38,7 +38,7 @@ const Dialog: React.FC<DialogProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <HeadlessDialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <HeadlessDialog.Overlay className="fixed inset-0 bg-black bg-opacity-60 transition-opacity" />
           </Transition.Child>
 
           {/* Este elemento é para enganar o navegador a centralizar o conteúdo do modal */}
@@ -55,14 +55,14 @@ const Dialog: React.FC<DialogProps> = ({
             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <div className={`inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${maxWidthClasses[maxWidth]} w-full`}>
-              <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
-                <HeadlessDialog.Title as="h3" className="text-lg font-medium text-gray-900">
+            <div className={`inline-block align-bottom bg-theme-surface border border-theme rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${maxWidthClasses[maxWidth]} w-full`}>
+              <div className="flex items-center justify-between px-4 py-3 bg-theme border-b border-theme">
+                <HeadlessDialog.Title as="h3" className="text-lg font-medium text-theme-primary">
                   {title}
                 </HeadlessDialog.Title>
                 <button
                   type="button"
-                  className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                  className="text-theme-secondary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary rounded"
                   onClick={onClose}
                 >
                   <FiX className="h-5 w-5" aria-hidden="true" />
