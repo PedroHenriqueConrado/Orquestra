@@ -10,10 +10,12 @@ import type { ProjectData } from '../services/project.service';
 import type { TaskData } from '../services/task.service';
 import type { User } from '../services/user.service';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const NewProject: React.FC = () => {
   const navigate = useNavigate();
   const { refreshSession, user: currentUser } = useAuth();
+  const { theme } = useTheme();
   
   // Estado principal do formulário
   const [formData, setFormData] = useState<ProjectData>({
@@ -226,30 +228,60 @@ const NewProject: React.FC = () => {
     <div className="mb-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            currentStep >= 1 ? 'bg-gray-200 text-white' : 'bg-black text-white'
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold border-2 transition-colors duration-200 ${
+            currentStep >= 1
+              ? theme === 'dark'
+                ? 'bg-primary text-white border-primary' 
+                : 'bg-primary text-white border-primary'
+              : theme === 'dark'
+                ? 'bg-dark-accent text-dark-muted border-dark-border'
+                : 'bg-gray-200 text-gray-500 border-gray-300'
           }`}>
             1
           </div>
-          <div className="ml-2 text-sm font-medium">Informações Básicas</div>
+          <div className={`ml-2 text-sm font-medium transition-colors duration-200 ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>Informações Básicas</div>
         </div>
-        <div className={`flex-1 mx-4 h-1 ${currentStep >= 2 ? 'bg-gray-200' : 'bg-black'}`}></div>
+        <div className={`flex-1 mx-4 h-1 rounded transition-colors duration-200 ${
+          currentStep >= 2
+            ? theme === 'dark'
+              ? 'bg-primary' : 'bg-primary'
+            : theme === 'dark'
+              ? 'bg-dark-border' : 'bg-gray-300'
+        }`}></div>
         <div className="flex items-center">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            currentStep >= 2 ? 'bg-gray-200 text-white' : 'bg-black text-white'
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold border-2 transition-colors duration-200 ${
+            currentStep >= 2
+              ? theme === 'dark'
+                ? 'bg-primary text-white border-primary' 
+                : 'bg-primary text-white border-primary'
+              : theme === 'dark'
+                ? 'bg-dark-accent text-dark-muted border-dark-border'
+                : 'bg-gray-200 text-gray-500 border-gray-300'
           }`}>
             2
           </div>
-          <div className="ml-2 text-sm font-medium">Membros da Equipe</div>
+          <div className={`ml-2 text-sm font-medium transition-colors duration-200 ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>Membros da Equipe</div>
         </div>
-        <div className={`flex-1 mx-4 h-1 ${currentStep >= 3 ? 'bg-gray-200' : 'bg-black'}`}></div>
+        <div className={`flex-1 mx-4 h-1 rounded transition-colors duration-200 ${
+          currentStep >= 3
+            ? theme === 'dark'
+              ? 'bg-primary' : 'bg-primary'
+            : theme === 'dark'
+              ? 'bg-dark-border' : 'bg-gray-300'
+        }`}></div>
         <div className="flex items-center">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-            currentStep >= 3 ? 'bg-gray-200 text-white' : 'bg-black text-gray-600 text-white'
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold border-2 transition-colors duration-200 ${
+            currentStep >= 3
+              ? theme === 'dark'
+                ? 'bg-primary text-white border-primary' 
+                : 'bg-primary text-white border-primary'
+              : theme === 'dark'
+                ? 'bg-dark-accent text-dark-muted border-dark-border'
+                : 'bg-gray-200 text-gray-500 border-gray-300'
           }`}>
             3
           </div>
-          <div className="ml-2 text-sm font-medium">Tarefas Iniciais</div>
+          <div className={`ml-2 text-sm font-medium transition-colors duration-200 ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>Tarefas Iniciais</div>
         </div>
       </div>
     </div>
@@ -259,7 +291,7 @@ const NewProject: React.FC = () => {
   const renderStep1 = () => (
     <>
       <div className="mb-4">
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="name" className={`block text-sm font-medium mb-1 ${theme === 'dark' ? 'text-dark-text' : 'text-gray-700'}`}> 
           Nome do Projeto <span className="text-red-500">*</span>
         </label>
         <input
@@ -268,7 +300,13 @@ const NewProject: React.FC = () => {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border ${formErrors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary`}
+          className={`w-full px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-colors duration-200 ${
+            formErrors.name
+              ? 'border-red-500'
+              : theme === 'dark'
+                ? 'bg-dark-accent text-dark-text border-dark-border placeholder:text-dark-muted'
+                : 'bg-white text-gray-900 border-gray-300 placeholder:text-gray-400'
+          }`}
           placeholder="Digite o nome do projeto (mínimo 3 caracteres)"
         />
         {formErrors.name && (
@@ -277,7 +315,7 @@ const NewProject: React.FC = () => {
       </div>
 
       <div className="mb-6">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="description" className={`block text-sm font-medium mb-1 ${theme === 'dark' ? 'text-dark-text' : 'text-gray-700'}`}> 
           Descrição
         </label>
         <textarea
@@ -286,13 +324,19 @@ const NewProject: React.FC = () => {
           value={formData.description || ''}
           onChange={handleChange}
           rows={4}
-          className={`w-full px-3 py-2 border ${formErrors.description ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary`}
+          className={`w-full px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary transition-colors duration-200 ${
+            formErrors.description
+              ? 'border-red-500'
+              : theme === 'dark'
+                ? 'bg-dark-accent text-dark-text border-dark-border placeholder:text-dark-muted'
+                : 'bg-white text-gray-900 border-gray-300 placeholder:text-gray-400'
+          }`}
           placeholder="Descreva os objetivos e escopo do projeto (mínimo 10 caracteres se preenchido)"
         />
         {formErrors.description && (
           <p className="mt-1 text-sm text-red-600">{formErrors.description}</p>
         )}
-        <p className="mt-1 text-xs text-gray-500">
+        <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}> 
           A descrição é opcional, mas se preenchida deve ter pelo menos 10 caracteres.
         </p>
       </div>
@@ -307,8 +351,7 @@ const NewProject: React.FC = () => {
         onChange={handleMembersChange}
         currentUserId={currentUser?.id}
       />
-      
-      <p className="mt-4 text-sm text-gray-500">
+      <p className={`mt-4 text-sm ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}> 
         Você será automaticamente adicionado como gerente do projeto.
       </p>
     </div>
@@ -322,29 +365,28 @@ const NewProject: React.FC = () => {
         onChange={handleTasksChange}
         availableMembers={availableMembersForTasks}
       />
-      
-      <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-md">
-        <h4 className="text-sm font-medium text-blue-800">Resumo do Projeto</h4>
+      <div className={`mt-4 p-4 rounded-md border transition-colors duration-200 ${theme === 'dark' ? 'bg-dark-accent border-dark-border' : 'bg-blue-50 border-blue-100'}`}>
+        <h4 className={`text-sm font-medium ${theme === 'dark' ? 'text-primary-light' : 'text-blue-800'}`}>Resumo do Projeto</h4>
         <dl className="mt-2 text-sm">
           <div className="flex justify-between py-1">
-            <dt className="text-gray-600">Nome:</dt>
-            <dd className="font-medium text-gray-900">{formData.name}</dd>
+            <dt className={`${theme === 'dark' ? 'text-dark-muted' : 'text-gray-600'}`}>Nome:</dt>
+            <dd className={`font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>{formData.name}</dd>
           </div>
           {formData.description && (
             <div className="flex justify-between py-1">
-              <dt className="text-gray-600">Descrição:</dt>
-              <dd className="font-medium text-gray-900 max-w-md truncate">{formData.description}</dd>
+              <dt className={`${theme === 'dark' ? 'text-dark-muted' : 'text-gray-600'}`}>Descrição:</dt>
+              <dd className={`font-medium max-w-md truncate ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>{formData.description}</dd>
             </div>
           )}
           <div className="flex justify-between py-1">
-            <dt className="text-gray-600">Membros:</dt>
-            <dd className="font-medium text-gray-900">
+            <dt className={`${theme === 'dark' ? 'text-dark-muted' : 'text-gray-600'}`}>Membros:</dt>
+            <dd className={`font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>
               {currentUser ? 1 : 0} + {formData.initialMembers?.length || 0} membros
             </dd>
           </div>
           <div className="flex justify-between py-1">
-            <dt className="text-gray-600">Tarefas:</dt>
-            <dd className="font-medium text-gray-900">{formData.initialTasks?.length || 0} tarefas</dd>
+            <dt className={`${theme === 'dark' ? 'text-dark-muted' : 'text-gray-600'}`}>Tarefas:</dt>
+            <dd className={`font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>{formData.initialTasks?.length || 0} tarefas</dd>
           </div>
         </dl>
       </div>
@@ -402,20 +444,20 @@ const NewProject: React.FC = () => {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className={`${theme === 'dark' ? 'bg-dark-primary' : 'bg-gray-50'} min-h-screen transition-colors duration-200`}>
       <Header />
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">Novo Projeto</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className={`text-2xl font-semibold ${theme === 'dark' ? 'text-dark-text' : 'text-gray-900'}`}>Novo Projeto</h1>
+          <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}`}>
             Crie um novo projeto para organizar suas tarefas e colaboradores.
           </p>
         </div>
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className={`${theme === 'dark' ? 'bg-dark-secondary' : 'bg-white'} shadow rounded-lg overflow-hidden transition-colors duration-200`}>
           <form onSubmit={handleSubmit} className="p-6">
             {error && (
-              <div className={`mb-4 p-3 ${authError ? 'bg-amber-50 border-amber-400 border-l-4' : 'bg-red-50'} rounded-md`}>
+              <div className={`mb-4 p-3 ${authError ? (theme === 'dark' ? 'bg-amber-900 border-amber-400 border-l-4' : 'bg-amber-50 border-amber-400 border-l-4') : (theme === 'dark' ? 'bg-red-900' : 'bg-red-50')} rounded-md`}>
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <svg className={`h-5 w-5 ${authError ? 'text-amber-400' : 'text-red-400'}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -423,7 +465,7 @@ const NewProject: React.FC = () => {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className={`text-sm font-medium ${authError ? 'text-amber-800' : 'text-red-800'}`}>
+                    <h3 className={`text-sm font-medium ${authError ? (theme === 'dark' ? 'text-amber-200' : 'text-amber-800') : (theme === 'dark' ? 'text-red-200' : 'text-red-800')}`}>
                       {error}
                     </h3>
                     {authError && (
