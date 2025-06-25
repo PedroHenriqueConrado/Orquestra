@@ -6,6 +6,7 @@ import Alert from '../components/ui/Alert';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
 import Modal from '../components/ui/Modal';
+import AppLayout from '../layouts/AppLayout';
 
 const Profile: React.FC = () => {
   const { user, updateProfile, updatePassword, deleteAccount } = useAuth();
@@ -169,20 +170,11 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
-          Perfil do Usuário
-        </h2>
-
-        {error && (
-          <Alert type="error" message={error} />
-        )}
-
-        {success && (
-          <Alert type="success" message={success} />
-        )}
-
+    <AppLayout>
+      <div className="max-w-lg mx-auto bg-theme-surface rounded-xl shadow-lg p-8 mt-8 mb-8 border border-theme transition-colors">
+        <h2 className="text-3xl font-bold text-center text-theme-primary mb-8 tracking-tight">Perfil do Usuário</h2>
+        {error && <Alert type="error" message={error} />}
+        {success && <Alert type="success" message={success} />}
         <form onSubmit={handleSubmit} className="space-y-6">
           <FormField
             id="name"
@@ -194,7 +186,6 @@ const Profile: React.FC = () => {
             error={formErrors.name}
             required
           />
-
           <FormField
             id="email"
             label="Email"
@@ -202,9 +193,8 @@ const Profile: React.FC = () => {
             name="email"
             value={formData.email}
             disabled
-            className="bg-gray-50"
+            className="bg-theme-secondary text-theme-muted"
           />
-
           {!showPasswordForm ? (
             <div className="flex justify-center">
               <Button
@@ -228,7 +218,6 @@ const Profile: React.FC = () => {
                 error={formErrors.currentPassword}
                 required
               />
-
               <FormField
                 id="newPassword"
                 label="Nova Senha"
@@ -239,7 +228,6 @@ const Profile: React.FC = () => {
                 error={formErrors.newPassword}
                 required
               />
-
               <FormField
                 id="confirmPassword"
                 label="Confirmar Nova Senha"
@@ -250,7 +238,6 @@ const Profile: React.FC = () => {
                 error={formErrors.confirmPassword}
                 required
               />
-
               <div className="flex justify-center space-x-4">
                 <Button
                   type="button"
@@ -272,7 +259,6 @@ const Profile: React.FC = () => {
               </div>
             </div>
           )}
-
           <div className="flex justify-center">
             <Button
               type="submit"
@@ -283,28 +269,24 @@ const Profile: React.FC = () => {
             </Button>
           </div>
         </form>
-
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="flex justify-center">
-            <Button
-              type="button"
-              variant="danger"
-              onClick={() => setShowDeleteModal(true)}
-              disabled={loading}
-            >
-              Excluir Conta
-            </Button>
-          </div>
+        <div className="mt-8 pt-6 border-t border-theme flex justify-center">
+          <Button
+            type="button"
+            variant="danger"
+            onClick={() => setShowDeleteModal(true)}
+            disabled={loading}
+          >
+            Excluir Conta
+          </Button>
         </div>
       </div>
-
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         title="Excluir Conta"
       >
         <div className="p-6">
-          <p className="text-gray-700 mb-4">
+          <p className="text-theme-secondary mb-4">
             Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.
           </p>
           <div className="flex justify-end space-x-4">
@@ -327,7 +309,7 @@ const Profile: React.FC = () => {
           </div>
         </div>
       </Modal>
-    </div>
+    </AppLayout>
   );
 };
 
