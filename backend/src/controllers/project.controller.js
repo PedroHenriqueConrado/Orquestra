@@ -66,10 +66,22 @@ class ProjectController {
 
     async getAll(req, res) {
         try {
-            logger.debug('Controller Project.getAll: Buscando todos os projetos');
+            const userId = req.user.id;
+            const userRole = req.user.role;
             
-            const projects = await projectService.getAllProjects();
-            logger.info(`Controller Project.getAll: ${projects.length} projetos encontrados`);
+            logger.debug('Controller Project.getAll: Buscando projetos', { userId, userRole });
+            
+            let projects;
+            
+            // Se o usuário é admin, pode ver todos os projetos
+            if (userRole === 'admin') {
+                projects = await projectService.getAllProjectsForAdmin();
+                logger.info(`Controller Project.getAll: Admin ${userId} - ${projects.length} projetos encontrados (todos)`);
+            } else {
+                // Usuários normais só veem projetos onde são membros
+                projects = await projectService.getAllProjects(userId);
+                logger.info(`Controller Project.getAll: Usuário ${userId} - ${projects.length} projetos encontrados (apenas membros)`);
+            }
             
             res.json(projects);
         } catch (error) {

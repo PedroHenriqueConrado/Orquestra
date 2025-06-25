@@ -33,22 +33,97 @@ class ProjectService {
         return project;
     }
 
-    async getAllProjects() {
-        return await prisma.project.findMany({
-            include: {
-                members: {
+    async getAllProjects(userId = null) {
+        try {
+            logger.debug('ProjectService.getAllProjects: Buscando projetos', { userId });
+            
+            // Se um userId foi fornecido, filtrar apenas projetos onde o usuário é membro
+            if (userId) {
+                const userProjects = await prisma.project.findMany({
+                    where: {
+                        members: {
+                            some: {
+                                user_id: Number(userId)
+                            }
+                        }
+                    },
                     include: {
-                        user: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true
+                        members: {
+                            include: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        email: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                logger.debug(`ProjectService.getAllProjects: Encontrados ${userProjects.length} projetos para o usuário ${userId}`);
+                return userProjects;
+            }
+            
+            // Se não foi fornecido userId, retornar todos os projetos (comportamento original)
+            const allProjects = await prisma.project.findMany({
+                include: {
+                    members: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+            
+            logger.debug(`ProjectService.getAllProjects: Encontrados ${allProjects.length} projetos (todos)`);
+            return allProjects;
+        } catch (error) {
+            logger.error('ProjectService.getAllProjects: Erro ao buscar projetos', {
+                userId,
+                error: error.message,
+                stack: error.stack
+            });
+            throw error;
+        }
+    }
+
+    async getAllProjectsForAdmin() {
+        try {
+            logger.debug('ProjectService.getAllProjectsForAdmin: Buscando todos os projetos para administrador');
+            
+            const allProjects = await prisma.project.findMany({
+                include: {
+                    members: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            logger.debug(`ProjectService.getAllProjectsForAdmin: Encontrados ${allProjects.length} projetos`);
+            return allProjects;
+        } catch (error) {
+            logger.error('ProjectService.getAllProjectsForAdmin: Erro ao buscar projetos', {
+                error: error.message,
+                stack: error.stack
+            });
+            throw error;
+        }
     }
 
     async getProjectById(id) {
