@@ -135,7 +135,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
         <div className="space-y-4">
           {/* Título da tarefa */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="title" className="block text-sm font-medium text-white mb-1">
               Título <span className="text-red-500">*</span>
             </label>
             <input
@@ -151,7 +151,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
           
           {/* Descrição da tarefa */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-white mb-1">
               Descrição
             </label>
             <textarea
@@ -168,7 +168,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Prioridade */}
             <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="priority" className="block text-sm font-medium text-white mb-1">
                 Prioridade
               </label>
               <select
@@ -187,7 +187,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
             
             {/* Status inicial */}
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="status" className="block text-sm font-medium text-white mb-1">
                 Status Inicial
               </label>
               <select
@@ -205,7 +205,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
             
             {/* Data de vencimento */}
             <div>
-              <label htmlFor="due_date" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="due_date" className="block text-sm font-medium text-white mb-1">
                 Data de Entrega
               </label>
               <input
@@ -222,7 +222,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
           {/* Atribuição a membro (se houver membros disponíveis) */}
           {availableMembers.length > 0 && (
             <div>
-              <label htmlFor="assigned_to" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="assigned_to" className="block text-sm font-medium text-white mb-1">
                 Atribuir Para
               </label>
               <select
