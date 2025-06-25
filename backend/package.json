@@ -13,7 +13,8 @@
     "test": "jest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "check-collation": "node scripts/check-collation.js"
   },
   "dependencies": {
     "@googleapis/calendar": "^9.8.0",
