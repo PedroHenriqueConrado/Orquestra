@@ -17,6 +17,11 @@ export interface Project {
   created_at: string;
   updated_at: string;
   members: ProjectMember[];
+  creator?: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
 
 export interface ProjectMember {

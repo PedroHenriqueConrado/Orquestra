@@ -311,6 +311,16 @@ const Projects: React.FC = () => {
                     </p>
                   )}
                   
+                  {/* Informação do criador */}
+                  {project.creator && (
+                    <div className="flex items-center mb-4 text-sm text-theme-secondary">
+                      <svg className="h-4 w-4 mr-2 text-theme-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span>Criado por <span className="font-medium text-theme-primary">{project.creator.name}</span></span>
+                    </div>
+                  )}
+                  
                   <div className="space-y-3">
                     <div>
                       <div className="flex justify-between text-sm mb-1">

@@ -57,13 +57,25 @@ class ProjectService {
                                         email: true
                                     }
                                 }
+                            },
+                            orderBy: {
+                                joined_at: 'asc'
                             }
                         }
                     }
                 });
                 
+                // Adicionar informação do criador (primeiro project_manager)
+                const projectsWithCreator = userProjects.map(project => {
+                    const creator = project.members.find(member => member.role === 'project_manager');
+                    return {
+                        ...project,
+                        creator: creator ? creator.user : null
+                    };
+                });
+                
                 logger.debug(`ProjectService.getAllProjects: Encontrados ${userProjects.length} projetos para o usuário ${userId}`);
-                return userProjects;
+                return projectsWithCreator;
             }
             
             // Se não foi fornecido userId, retornar todos os projetos (comportamento original)
@@ -78,13 +90,25 @@ class ProjectService {
                                     email: true
                                 }
                             }
+                        },
+                        orderBy: {
+                            joined_at: 'asc'
                         }
                     }
                 }
             });
             
+            // Adicionar informação do criador (primeiro project_manager)
+            const projectsWithCreator = allProjects.map(project => {
+                const creator = project.members.find(member => member.role === 'project_manager');
+                return {
+                    ...project,
+                    creator: creator ? creator.user : null
+                };
+            });
+            
             logger.debug(`ProjectService.getAllProjects: Encontrados ${allProjects.length} projetos (todos)`);
-            return allProjects;
+            return projectsWithCreator;
         } catch (error) {
             logger.error('ProjectService.getAllProjects: Erro ao buscar projetos', {
                 userId,
@@ -110,13 +134,25 @@ class ProjectService {
                                     email: true
                                 }
                             }
+                        },
+                        orderBy: {
+                            joined_at: 'asc'
                         }
                     }
                 }
             });
             
+            // Adicionar informação do criador (primeiro project_manager)
+            const projectsWithCreator = allProjects.map(project => {
+                const creator = project.members.find(member => member.role === 'project_manager');
+                return {
+                    ...project,
+                    creator: creator ? creator.user : null
+                };
+            });
+            
             logger.debug(`ProjectService.getAllProjectsForAdmin: Encontrados ${allProjects.length} projetos`);
-            return allProjects;
+            return projectsWithCreator;
         } catch (error) {
             logger.error('ProjectService.getAllProjectsForAdmin: Erro ao buscar projetos', {
                 error: error.message,
@@ -127,7 +163,7 @@ class ProjectService {
     }
 
     async getProjectById(id) {
-        return await prisma.project.findUnique({
+        const project = await prisma.project.findUnique({
             where: { id: Number(id) },
             include: {
                 members: {
@@ -139,10 +175,24 @@ class ProjectService {
                                 email: true
                             }
                         }
+                    },
+                    orderBy: {
+                        joined_at: 'asc'
                     }
                 }
             }
         });
+        
+        if (project) {
+            // Adicionar informação do criador (primeiro project_manager)
+            const creator = project.members.find(member => member.role === 'project_manager');
+            return {
+                ...project,
+                creator: creator ? creator.user : null
+            };
+        }
+        
+        return project;
     }
 
     async updateProject(id, data) {
