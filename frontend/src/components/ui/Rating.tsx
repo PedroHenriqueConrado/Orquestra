@@ -18,6 +18,7 @@ const Rating: React.FC<RatingProps> = ({
   label
 }) => {
   const [hoverValue, setHoverValue] = useState<number | null>(null);
+  const [pulseIndex, setPulseIndex] = useState<number | null>(null);
   const maxRating = 10;
   const sizeClasses = {
     sm: 'w-7 h-7',
@@ -30,8 +31,10 @@ const Rating: React.FC<RatingProps> = ({
     lg: 'gap-2'
   };
 
-  const handleClick = (rating: number) => {
+  const handleClick = (rating: number, index: number) => {
     if (!readonly && onChange) {
+      setPulseIndex(index);
+      setTimeout(() => setPulseIndex(null), 300);
       if (rating === value) {
         onChange(0);
       } else {
@@ -67,19 +70,33 @@ const Rating: React.FC<RatingProps> = ({
           {Array.from({ length: maxRating }, (_, index) => {
             const starValue = index + 1;
             const isFilled = starValue <= displayValue;
+            const isPulse = pulseIndex === index;
             return (
               <button
                 key={index}
                 type="button"
-                onClick={() => handleClick(starValue)}
+                onClick={() => handleClick(starValue, index)}
                 onMouseEnter={() => handleMouseEnter(starValue)}
                 disabled={readonly}
                 aria-label={`Avaliar com ${starValue}`}
                 title={`Clique para dar nota ${starValue}`}
-                className={`${sizeClasses[size]} transition-transform duration-100 ${
-                  readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110 focus:scale-110 outline-none'
-                } p-0 bg-transparent border-none`}
-                style={{ lineHeight: 0 }}
+                className={
+                  `${sizeClasses[size]} transition-all duration-200 ease-out ${
+                    readonly ? 'cursor-default' : 'cursor-pointer'
+                  } p-0 bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-yellow-400`
+                }
+                style={{
+                  lineHeight: 0,
+                  transform: `
+                    scale(${isPulse ? 1.25 : hoverValue !== null && starValue <= hoverValue ? 1.15 : isFilled ? 1.1 : 1})
+                    rotate(${hoverValue !== null && starValue <= hoverValue ? '-8deg' : isFilled ? '-4deg' : '0deg'})
+                  `,
+                  filter: `
+                    drop-shadow(0 1px 2px rgba(0,0,0,0.10))
+                    ${hoverValue !== null && starValue <= hoverValue ? 'drop-shadow(0 0 6px #fde68a)' : ''}
+                  `,
+                  transition: 'transform 0.18s cubic-bezier(.4,2,.6,1), filter 0.18s, box-shadow 0.18s'
+                }}
                 tabIndex={readonly ? -1 : 0}
               >
                 <svg
