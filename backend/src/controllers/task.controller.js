@@ -1,6 +1,7 @@
 const taskService = require('../services/task.service');
 const { z } = require('zod');
 const logger = require('../utils/logger');
+const { hasPermission, canEditResource } = require('../utils/permissions');
 
 const taskSchema = z.object({
     title: z.string().min(3).max(200),
@@ -88,6 +89,14 @@ class TaskController {
                 projectId: req.params.projectId
             });
             
+            // Verificar permissão para criar tarefas
+            if (!hasPermission(req.user.role, 'tasks:create')) {
+                logger.warn(`TaskController.create: Usuário ${req.user.id} (${req.user.role}) tentou criar tarefa sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para criar tarefas'
+                });
+            }
+            
             try {
                 const validatedData = taskSchema.parse(req.body);
                 logger.debug('TaskController.create: Dados validados com sucesso', validatedData);
@@ -162,10 +171,32 @@ class TaskController {
 
     async update(req, res) {
         try {
-            const validatedData = updateTaskSchema.parse(req.body);
             const { projectId, taskId } = req.params;
-            const task = await this.taskService.updateTask(taskId, projectId, req.user.id, validatedData);
-            res.json(task);
+            
+            // Buscar a tarefa para verificar permissões
+            const task = await this.taskService.getTaskById(taskId, projectId);
+            if (!task) {
+                return res.status(404).json({ error: 'Task not found' });
+            }
+            
+            // Verificar se pode editar esta tarefa específica
+            const canEdit = canEditResource(
+                req.user.role,
+                task.assigned_to || task.created_by,
+                req.user.id,
+                'tasks:edit_any'
+            );
+            
+            if (!canEdit) {
+                logger.warn(`TaskController.update: Usuário ${req.user.id} (${req.user.role}) tentou editar tarefa ${taskId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para editar esta tarefa'
+                });
+            }
+            
+            const validatedData = updateTaskSchema.parse(req.body);
+            const updatedTask = await this.taskService.updateTask(taskId, projectId, req.user.id, validatedData);
+            res.json(updatedTask);
         } catch (error) {
             if (error instanceof z.ZodError) {
                 return res.status(400).json({ errors: error.errors });
@@ -177,6 +208,15 @@ class TaskController {
     async delete(req, res) {
         try {
             const { projectId, taskId } = req.params;
+            
+            // Verificar permissão para excluir tarefas
+            if (!hasPermission(req.user.role, 'tasks:delete')) {
+                logger.warn(`TaskController.delete: Usuário ${req.user.id} (${req.user.role}) tentou excluir tarefa ${taskId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para excluir tarefas'
+                });
+            }
+            
             await this.taskService.deleteTask(taskId, projectId);
             res.status(204).send();
         } catch (error) {
@@ -186,15 +226,37 @@ class TaskController {
 
     async updateTime(req, res) {
         try {
-            const validatedData = timeTrackingSchema.parse(req.body);
             const { projectId, taskId } = req.params;
-            const task = await this.taskService.updateTaskTime(
+            
+            // Buscar a tarefa para verificar permissões
+            const task = await this.taskService.getTaskById(taskId, projectId);
+            if (!task) {
+                return res.status(404).json({ error: 'Task not found' });
+            }
+            
+            // Verificar se pode editar esta tarefa específica
+            const canEdit = canEditResource(
+                req.user.role,
+                task.assigned_to || task.created_by,
+                req.user.id,
+                'tasks:edit_any'
+            );
+            
+            if (!canEdit) {
+                logger.warn(`TaskController.updateTime: Usuário ${req.user.id} (${req.user.role}) tentou atualizar tempo da tarefa ${taskId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para atualizar esta tarefa'
+                });
+            }
+            
+            const validatedData = timeTrackingSchema.parse(req.body);
+            const updatedTask = await this.taskService.updateTaskTime(
                 taskId,
                 projectId,
                 req.user.id,
                 validatedData.actualHours
             );
-            res.json(task);
+            res.json(updatedTask);
         } catch (error) {
             if (error instanceof z.ZodError) {
                 return res.status(400).json({ errors: error.errors });
@@ -203,9 +265,30 @@ class TaskController {
         }
     }
 
+    async updateStatus(req, res) {
+        try {
+            const { projectId, taskId } = req.params;
+            const { status } = req.body;
+            
+            // Verificar permissão para atualizar status
+            if (!hasPermission(req.user.role, 'tasks:update_status')) {
+                logger.warn(`TaskController.updateStatus: Usuário ${req.user.id} (${req.user.role}) tentou atualizar status da tarefa ${taskId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para atualizar status de tarefas'
+                });
+            }
+            
+            const task = await this.taskService.updateTaskStatus(taskId, projectId, status);
+            res.json(task);
+        } catch (error) {
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
     async getMetrics(req, res) {
         try {
-            const metrics = await this.taskService.getTaskMetrics(req.params.projectId);
+            const { projectId } = req.params;
+            const metrics = await this.taskService.getTaskMetrics(projectId);
             res.json(metrics);
         } catch (error) {
             res.status(500).json({ error: 'Internal server error' });
@@ -225,63 +308,49 @@ class TaskController {
     async deleteTask(req, res) {
         try {
             const { projectId, taskId } = req.params;
+            
+            // Verificar permissão para excluir tarefas
+            if (!hasPermission(req.user.role, 'tasks:delete')) {
+                logger.warn(`TaskController.deleteTask: Usuário ${req.user.id} (${req.user.role}) tentou excluir tarefa ${taskId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para excluir tarefas'
+                });
+            }
+            
             await this.taskService.deleteTask(taskId, projectId);
             res.status(204).send();
         } catch (error) {
-            console.error('Erro ao excluir tarefa:', error);
-            res.status(error.message === 'Tarefa não encontrada' ? 404 : 500).json({
-                error: error.message || 'Erro ao excluir tarefa'
-            });
+            res.status(500).json({ error: 'Internal server error' });
         }
     }
 
     async updateTaskStatusPosition(req, res) {
         try {
-            logger.request(req, 'TaskController.updateTaskStatusPosition');
-            logger.debug('TaskController.updateTaskStatusPosition: Dados recebidos', {
-                body: req.body,
-                projectId: req.params.projectId,
-                taskId: req.params.taskId
-            });
+            const { projectId, taskId } = req.params;
+            const validatedData = statusPositionSchema.parse(req.body);
             
-            try {
-                const validatedData = statusPositionSchema.parse(req.body);
-                logger.debug('TaskController.updateTaskStatusPosition: Dados validados com sucesso', validatedData);
-                
-                const { projectId, taskId } = req.params;
-                
-                // Chama o serviço para atualizar o status e posição da tarefa
-                const task = await this.taskService.updateTaskStatusPosition(
-                    taskId,
-                    projectId,
-                    req.user.id,
-                    validatedData.status,
-                    validatedData.position
-                );
-                
-                logger.success('TaskController.updateTaskStatusPosition: Status atualizado com sucesso', {
-                    taskId,
-                    status: validatedData.status,
-                    position: validatedData.position
-                });
-                
-                res.json(task);
-            } catch (zodError) {
-                logger.warn('TaskController.updateTaskStatusPosition: Erro de validação Zod', zodError.errors);
-                return res.status(400).json({ 
-                    message: 'Dados inválidos para atualização de status/posição da tarefa',
-                    errors: zodError.errors 
+            // Verificar permissão para atualizar status
+            if (!hasPermission(req.user.role, 'tasks:update_status')) {
+                logger.warn(`TaskController.updateTaskStatusPosition: Usuário ${req.user.id} (${req.user.role}) tentou atualizar status da tarefa ${taskId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para atualizar status de tarefas'
                 });
             }
-        } catch (error) {
-            logger.error('TaskController.updateTaskStatusPosition: Erro ao atualizar status/posição', error);
             
-            res.status(500).json({ 
-                message: 'Erro ao atualizar status/posição da tarefa', 
-                error: error.message 
-            });
+            const task = await this.taskService.updateTaskStatusPosition(
+                taskId,
+                projectId,
+                validatedData.status,
+                validatedData.position
+            );
+            res.json(task);
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                return res.status(400).json({ errors: error.errors });
+            }
+            res.status(500).json({ error: 'Internal server error' });
         }
     }
 }
 
-module.exports = TaskController; 
+module.exports = new TaskController(); 

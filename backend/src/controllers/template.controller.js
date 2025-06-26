@@ -1,5 +1,6 @@
 const templateService = require('../services/template.service');
 const logger = require('../utils/logger');
+const { hasPermission } = require('../utils/permissions');
 
 class TemplateController {
     /**
@@ -10,6 +11,15 @@ class TemplateController {
             const { projectId } = req.params;
             const { name, description, category, is_public } = req.body;
             const userId = req.user.id;
+
+            // Verificar permissão para criar templates
+            if (!hasPermission(req.user.role, 'templates:create')) {
+                logger.warn(`TemplateController.createFromProject: Usuário ${userId} (${req.user.role}) tentou criar template sem permissão`);
+                return res.status(403).json({
+                    success: false,
+                    message: 'Você não tem permissão para criar templates'
+                });
+            }
 
             logger.debug('TemplateController.createFromProject: Requisição recebida', {
                 projectId,
@@ -136,6 +146,15 @@ class TemplateController {
             const { name, description, members } = req.body;
             const userId = req.user.id;
 
+            // Verificar permissão para usar templates
+            if (!hasPermission(req.user.role, 'templates:use')) {
+                logger.warn(`TemplateController.createProjectFromTemplate: Usuário ${userId} (${req.user.role}) tentou usar template sem permissão`);
+                return res.status(403).json({
+                    success: false,
+                    message: 'Você não tem permissão para usar templates'
+                });
+            }
+
             logger.debug('TemplateController.createProjectFromTemplate: Requisição recebida', {
                 templateId,
                 userId,
@@ -184,6 +203,15 @@ class TemplateController {
             const { templateId } = req.params;
             const userId = req.user.id;
 
+            // Verificar permissão para gerenciar templates
+            if (!hasPermission(req.user.role, 'templates:manage')) {
+                logger.warn(`TemplateController.deleteTemplate: Usuário ${userId} (${req.user.role}) tentou excluir template sem permissão`);
+                return res.status(403).json({
+                    success: false,
+                    message: 'Você não tem permissão para gerenciar templates'
+                });
+            }
+
             logger.debug('TemplateController.deleteTemplate: Requisição recebida', {
                 templateId,
                 userId
@@ -217,13 +245,17 @@ class TemplateController {
     }
 
     /**
-     * Buscar categorias disponíveis
+     * Buscar categorias de templates
      */
     async getCategories(req, res) {
         try {
-            logger.debug('TemplateController.getCategories: Requisição recebida');
+            const userId = req.user.id;
 
-            const categories = await templateService.getCategories();
+            logger.debug('TemplateController.getCategories: Requisição recebida', {
+                userId
+            });
+
+            const categories = await templateService.getCategories(userId);
 
             res.json({
                 success: true,

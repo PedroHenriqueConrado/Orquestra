@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const multer = require('multer');
-const TaskController = require('../controllers/task.controller');
-const TaskTagController = require('../controllers/task-tag.controller');
-const TaskCommentController = require('../controllers/task-comment.controller');
-const TaskHistoryController = require('../controllers/task-history.controller');
+const taskController = require('../controllers/task.controller');
+const taskTagController = require('../controllers/task-tag.controller');
+const taskCommentController = require('../controllers/task-comment.controller');
+const taskHistoryController = require('../controllers/task-history.controller');
 const TaskDocumentController = require('../controllers/task-document.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const projectAccessMiddleware = require('../middlewares/project-access.middleware');
@@ -17,12 +17,6 @@ const upload = multer({
         fileSize: 50 * 1024 * 1024, // 50MB por arquivo
     }
 });
-
-// Instantiate controllers
-const taskController = new TaskController();
-const taskTagController = new TaskTagController();
-const taskCommentController = new TaskCommentController();
-const taskHistoryController = new TaskHistoryController();
 
 // Apply authentication middleware to all routes
 router.use(authMiddleware);

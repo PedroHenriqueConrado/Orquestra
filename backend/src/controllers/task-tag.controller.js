@@ -93,4 +93,4 @@ class TaskTagController {
     }
 }
 
-module.exports = TaskTagController; 
+module.exports = new TaskTagController(); 

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
 import Modal from '../components/ui/Modal';
 import AppLayout from '../layouts/AppLayout';
+import { getRoleDisplayName, getRoleColor, getRoleIcon, getRoleDescription } from '../utils/roleTranslations';
 
 const Profile: React.FC = () => {
   const { user, updateProfile, updatePassword, deleteAccount } = useAuth();
@@ -173,8 +174,42 @@ const Profile: React.FC = () => {
     <AppLayout>
       <div className="max-w-lg mx-auto bg-theme-surface rounded-xl shadow-lg p-8 mt-8 mb-8 border border-theme transition-colors">
         <h2 className="text-3xl font-bold text-center text-theme-primary mb-8 tracking-tight">Perfil do Usuário</h2>
+        
+        {/* Informações do usuário */}
+        {user && (
+          <div className="mb-6 p-4 bg-theme rounded-lg border border-theme">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white text-lg font-semibold">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-theme-primary">{user.name}</h3>
+                <p className="text-sm text-theme-secondary">{user.email}</p>
+              </div>
+            </div>
+            
+            {/* Cargo do usuário */}
+            {user.role && (
+              <div className="flex items-center space-x-2">
+                <span className="text-lg">{getRoleIcon(user.role)}</span>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(user.role)}`}>
+                  {getRoleDisplayName(user.role)}
+                </span>
+              </div>
+            )}
+            
+            {/* Descrição do cargo */}
+            {user.role && (
+              <p className="text-xs text-theme-secondary mt-2">
+                {getRoleDescription(user.role)}
+              </p>
+            )}
+          </div>
+        )}
+        
         {error && <Alert type="error" message={error} />}
         {success && <Alert type="success" message={success} />}
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           <FormField
             id="name"

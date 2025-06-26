@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import projectService from '../services/project.service';
 import taskService from '../services/task.service';
 import progressService from '../services/progress.service';
+import { getRoleDisplayName, getRoleColor, getRoleIcon } from '../utils/roleTranslations';
 import type { Project } from '../services/project.service';
 import type { Task } from '../services/task.service';
 
@@ -124,10 +125,24 @@ const Dashboard: React.FC = () => {
       <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         {/* Boas-vindas e estatísticas */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl font-semibold text-theme-primary">Olá, {user?.name}!</h1>
-          <p className="mt-1 text-sm text-theme-secondary">
-            Bem-vindo ao seu painel de controle. Aqui está um resumo de suas atividades.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-semibold text-theme-primary">Olá, {user?.name}!</h1>
+              <p className="mt-1 text-sm text-theme-secondary">
+                Bem-vindo ao seu painel de controle. Aqui está um resumo de suas atividades.
+              </p>
+            </div>
+            
+            {/* Cargo do usuário */}
+            {user?.role && (
+              <div className="mt-3 sm:mt-0 flex items-center space-x-2">
+                <span className="text-lg">{getRoleIcon(user.role)}</span>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getRoleColor(user.role)}`}>
+                  {getRoleDisplayName(user.role)}
+                </span>
+              </div>
+            )}
+          </div>
           
           {/* Estatísticas */}
           <dl className="mt-4 sm:mt-5 grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -207,104 +222,58 @@ const Dashboard: React.FC = () => {
               </div>
               
               {loadingProjects ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-2 text-theme-secondary">Carregando projetos...</p>
                 </div>
               ) : error ? (
-                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md text-red-700 dark:text-red-400 text-sm">
-                  {error}
+                <div className="text-center py-8">
+                  <p className="text-red-600 mb-4">{error}</p>
+                  <Button onClick={() => window.location.reload()} variant="secondary">
+                    Tentar Novamente
+                  </Button>
                 </div>
-              ) : projects.length > 0 ? (
-                <div className="overflow-x-auto -mx-4 sm:mx-0">
-                  <div className="inline-block min-w-full align-middle">
-                    <table className="min-w-full divide-y divide-theme">
-                      <thead className="bg-theme">
-                        <tr>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Nome
-                          </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Progresso
-                          </th>
-                          <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Membros
-                          </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Ações
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-theme-surface divide-y divide-theme">
-                        {projects.map((project) => (
-                          <tr key={project.id}>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-theme-primary">{project.name}</div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                getProjectStatus(project.id) === 'Em progresso' ? 'bg-blue-100 text-blue-800' : 
-                                getProjectStatus(project.id) === 'Concluído' ? 'bg-green-100 text-green-800' : 
-                                'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {getProjectStatus(project.id)}
-                              </span>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                              <div className="w-full bg-theme rounded-full h-2">
-                                <div 
-                                  className="bg-primary h-2 rounded-full" 
-                                  style={{ width: `${calculateProjectProgress(project.id)}%` }}
-                                ></div>
-                              </div>
-                              <span className="text-xs text-theme-secondary mt-1">{calculateProjectProgress(project.id)}%</span>
-                            </td>
-                            <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
-                              <div className="flex -space-x-2 overflow-hidden">
-                                {project.members.slice(0, 3).map((member) => (
-                                  <div 
-                                    key={member.id}
-                                    className="h-6 w-6 rounded-full bg-primary-lighter flex items-center justify-center text-white text-xs"
-                                    title={member.user.name}
-                                  >
-                                    {member.user.name.charAt(0).toUpperCase()}
-                                  </div>
-                                ))}
-                                {project.members.length > 3 && (
-                                  <div className="h-6 w-6 rounded-full bg-theme flex items-center justify-center text-theme-secondary text-xs">
-                                    +{project.members.length - 3}
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <Link to={`/projects/${project.id}`} className="text-primary hover:text-primary-dark mr-3">
-                                <span className="hidden sm:inline">Visualizar</span>
-                                <span className="sm:hidden">Ver</span>
-                              </Link>
-                              <Link to={`/projects/${project.id}/edit`} className="text-theme-secondary hover:text-theme-primary">
-                                <span className="hidden sm:inline">Editar</span>
-                                <span className="sm:hidden">Edit</span>
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+              ) : projects.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-theme-secondary mb-4">Nenhum projeto encontrado.</p>
+                  <Link to="/projects/new">
+                    <Button variant="primary">Criar Primeiro Projeto</Button>
+                  </Link>
                 </div>
               ) : (
-                <div className="bg-theme p-4 text-center rounded-md">
-                  <p className="text-sm text-theme-secondary">
-                    Nenhum projeto para exibir no momento.
-                  </p>
-                  <Link to="/projects/new">
-                    <Button className="mt-4" variant="primary">
-                      Criar Novo Projeto
-                    </Button>
-                  </Link>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {projects.map((project) => (
+                    <div key={project.id} className="bg-theme border border-theme rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-semibold text-theme-primary truncate">{project.name}</h3>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getProjectStatus(project.id) === 'Concluído' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                          {getProjectStatus(project.id)}
+                        </span>
+                      </div>
+                      <p className="text-theme-secondary text-sm mb-3 line-clamp-2">{project.description}</p>
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs text-theme-secondary">
+                          {project.members.length} membro{project.members.length !== 1 ? 's' : ''}
+                        </span>
+                        <span className="text-xs text-theme-secondary">
+                          {calculateProjectProgress(project.id)}% concluído
+                        </span>
+                      </div>
+                      <div className="w-full bg-theme-secondary rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${calculateProjectProgress(project.id)}%` }}
+                        ></div>
+                      </div>
+                      <div className="mt-3">
+                        <Link to={`/projects/${project.id}`}>
+                          <Button variant="secondary" className="w-full text-sm">
+                            Ver Detalhes
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -313,146 +282,99 @@ const Dashboard: React.FC = () => {
           {/* Tab de Tarefas */}
           {activeTab === 'tasks' && (
             <div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
-                <h2 className="text-lg font-medium text-theme-primary">Minhas Tarefas</h2>
-                <Button variant="primary" className="w-full sm:w-auto" onClick={() => setActiveTab('projects')}>
-                  <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  Nova Tarefa
-                </Button>
-              </div>
-
+              <h2 className="text-lg font-medium text-gray-900 mb-4 sm:mb-6">Minhas Tarefas</h2>
+              
               {loadingTasks ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-2 text-theme-secondary">Carregando tarefas...</p>
                 </div>
-              ) : tasks.length > 0 ? (
-                <div className="overflow-x-auto -mx-4 sm:mx-0">
-                  <div className="inline-block min-w-full align-middle">
-                    <table className="min-w-full divide-y divide-theme">
-                      <thead className="bg-theme">
-                        <tr>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Tarefa
-                          </th>
-                          <th scope="col" className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Projeto
-                          </th>
-                          <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Data Limite
-                          </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Prioridade
-                          </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th scope="col" className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-theme-secondary uppercase tracking-wider">
-                            Ações
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-theme-surface divide-y divide-theme">
-                        {tasks.map((task) => {
-                          const project = projects.find(p => p.id === task.project_id);
-                          return (
-                            <tr key={task.id}>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-theme-primary">{task.title}</div>
-                              </td>
-                              <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
-                                {project?.name || 'Desconhecido'}
-                              </td>
-                              <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
-                                {task.due_date ? new Date(task.due_date).toLocaleDateString('pt-BR') : 'Não definido'}
-                              </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  task.priority === 'high' ? 'bg-red-100 text-red-800' : 
-                                  task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
-                                  'bg-green-100 text-green-800'
-                                }`}>
-                                  {task.priority === 'high' ? 'Alta' : 
-                                   task.priority === 'medium' ? 'Média' : 
-                                   task.priority === 'low' ? 'Baixa' : 'Urgente'}
-                                </span>
-                              </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : 
-                                  task.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                                  'bg-yellow-100 text-yellow-800'
-                                }`}>
-                                  {task.status === 'pending' ? 'Pendente' : 
-                                   task.status === 'in_progress' ? 'Em progresso' : 
-                                   'Concluída'}
-                                </span>
-                              </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <Link 
-                                  to={`/projects/${task.project_id}/tasks/${task.id}`} 
-                                  className="text-primary hover:text-primary-dark"
-                                >
-                                  <span className="hidden sm:inline">Detalhes</span>
-                                  <span className="sm:hidden">Ver</span>
-                                </Link>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+              ) : tasks.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-theme-secondary mb-4">Nenhuma tarefa encontrada.</p>
                 </div>
               ) : (
-                <div className="bg-theme p-4 text-center rounded-md">
-                  <p className="text-sm text-theme-secondary">
-                    Nenhuma tarefa para exibir no momento.
-                  </p>
-                  <Button 
-                    className="mt-4" 
-                    variant="primary"
-                    onClick={() => setActiveTab('projects')}
-                  >
-                    Ir para Projetos
-                  </Button>
+                <div className="space-y-3">
+                  {tasks.slice(0, 10).map((task) => (
+                    <div key={task.id} className="bg-theme border border-theme rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-theme-primary">{task.title}</h4>
+                          <p className="text-sm text-theme-secondary mt-1">{task.description}</p>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                              'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {task.status === 'completed' ? 'Concluída' :
+                               task.status === 'in_progress' ? 'Em Progresso' : 'Pendente'}
+                            </span>
+                            <span className="text-xs text-theme-secondary">
+                              {task.priority === 'high' ? 'Alta' :
+                               task.priority === 'medium' ? 'Média' : 'Baixa'} prioridade
+                            </span>
+                          </div>
+                        </div>
+                        <Link to={`/projects/${task.project_id}/tasks/${task.id}`}>
+                          <Button variant="secondary" className="text-sm">
+                            Ver
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                  {tasks.length > 10 && (
+                    <div className="text-center pt-4">
+                      <Link to="/tasks">
+                        <Button variant="secondary">
+                          Ver Todas as Tarefas ({tasks.length})
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Tab de Equipe - Mantido simples, pode ser expandido depois */}
+          {/* Tab de Equipe */}
           {activeTab === 'team' && (
             <div>
-              <h2 className="text-lg font-medium text-theme-primary mb-4">Membros da Equipe</h2>
-              <div className="bg-theme p-4 rounded-md text-center">
-                <p className="text-sm text-theme-secondary">
-                  Você tem {stats[3].value} colaboradores em seus projetos.
-                </p>
+              <h2 className="text-lg font-medium text-gray-900 mb-4 sm:mb-6">Equipe</h2>
+              <div className="text-center py-8">
+                <p className="text-theme-secondary">Funcionalidade de equipe em desenvolvimento.</p>
               </div>
             </div>
           )}
 
-          {/* Tab de Perfil - Mantido simples, pode ser expandido depois */}
+          {/* Tab de Perfil */}
           {activeTab === 'profile' && (
             <div>
-              <h2 className="text-lg font-medium text-theme-primary mb-4">Meu Perfil</h2>
-              <div className="bg-theme p-4 rounded-md">
-                <div className="flex items-center mb-4">
-                  <div className="h-12 w-12 rounded-full bg-primary-lighter flex items-center justify-center text-white text-lg font-semibold">
+              <h2 className="text-lg font-medium text-gray-900 mb-4 sm:mb-6">Perfil</h2>
+              <div className="bg-theme border border-theme rounded-lg p-6">
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl font-semibold">
                     {user?.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-theme-primary">{user?.name}</h3>
-                    <p className="text-sm text-theme-secondary">{user?.email}</p>
+                  <div>
+                    <h3 className="text-lg font-semibold text-theme-primary">{user?.name}</h3>
+                    <p className="text-theme-secondary">{user?.email}</p>
+                    {user?.role && (
+                      <div className="flex items-center space-x-2 mt-2">
+                        <span className="text-lg">{getRoleIcon(user.role)}</span>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getRoleColor(user.role)}`}>
+                          {getRoleDisplayName(user.role)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="mt-4">
-                  <p className="text-sm text-theme-secondary">
-                    Você está trabalhando em {projects.length} projetos e tem {tasks.filter(t => t.status !== 'completed').length} tarefas pendentes.
-                  </p>
-                </div>
+                <Link to="/profile">
+                  <Button variant="primary" className="w-full sm:w-auto">
+                    Editar Perfil
+                  </Button>
+                </Link>
               </div>
             </div>
           )}

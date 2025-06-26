@@ -58,4 +58,4 @@ class TaskHistoryController {
     }
 }
 
-module.exports = TaskHistoryController; 
+module.exports = new TaskHistoryController(); 

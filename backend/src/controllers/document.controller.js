@@ -2,6 +2,7 @@ const documentService = require('../services/document.service');
 const { z } = require('zod');
 const path = require('path');
 const logger = require('../utils/logger');
+const { hasPermission } = require('../utils/permissions');
 
 const documentSchema = z.object({
     title: z.string().min(3).max(200)
@@ -10,6 +11,14 @@ const documentSchema = z.object({
 class DocumentController {
     async create(req, res) {
         try {
+            // Verificar permissão para upload de documentos
+            if (!hasPermission(req.user.role, 'documents:upload')) {
+                logger.warn(`DocumentController.create: Usuário ${req.user.id} (${req.user.role}) tentou fazer upload sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para fazer upload de documentos'
+                });
+            }
+            
             // Upload único com título personalizado
             if (req.file) {
                 if (!req.body.title) {
@@ -94,6 +103,15 @@ class DocumentController {
     async delete(req, res) {
         try {
             const { projectId, documentId } = req.params;
+            
+            // Verificar permissão para excluir documentos
+            if (!hasPermission(req.user.role, 'documents:delete')) {
+                logger.warn(`DocumentController.delete: Usuário ${req.user.id} (${req.user.role}) tentou excluir documento ${documentId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para excluir documentos'
+                });
+            }
+            
             await documentService.deleteDocument(documentId, projectId);
             res.status(204).send();
         } catch (error) {
@@ -198,19 +216,26 @@ class DocumentController {
                 res.download(filePath, downloadName, (err) => {
                     if (err) {
                         logger.error('Erro ao enviar arquivo:', err);
-                        // Se já enviou headers, não pode enviar resposta de erro
                         if (!res.headersSent) {
-                            res.status(500).json({ error: 'Error sending file' });
+                            res.status(500).json({ error: 'Erro ao enviar arquivo' });
                         }
                     }
                 });
-            } catch (error) {
-                logger.error('Erro ao obter caminho do arquivo:', error);
-                res.status(500).json({ error: 'File not accessible' });
+            } catch (fileError) {
+                logger.error('Erro ao processar arquivo:', fileError);
+                res.status(500).json({ error: 'Erro ao processar arquivo' });
             }
         } catch (error) {
-            logger.error('Erro geral no download:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            logger.error('Controller downloadVersion: Erro ao fazer download', {
+                error: error.message,
+                stack: error.stack,
+                params: req.params
+            });
+            
+            res.status(500).json({ 
+                error: 'Erro ao fazer download da versão', 
+                details: error.message 
+            });
         }
     }
 }

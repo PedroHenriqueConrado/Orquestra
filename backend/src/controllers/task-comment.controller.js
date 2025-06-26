@@ -1,5 +1,6 @@
 const taskCommentService = require('../services/task-comment.service');
 const { z } = require('zod');
+const { hasPermission, canEditResource } = require('../utils/permissions');
 
 const commentSchema = z.object({
     content: z.string().min(1).max(1000),
@@ -19,6 +20,21 @@ class TaskCommentController {
     async create(req, res) {
         try {
             const validatedData = commentSchema.parse(req.body);
+            
+            // Verificar permissão para criar comentários
+            if (!hasPermission(req.user.role, 'comments:create')) {
+                return res.status(403).json({
+                    message: 'Você não tem permissão para criar comentários'
+                });
+            }
+            
+            // Verificar permissão para avaliar (rating)
+            if (validatedData.rating !== undefined && !hasPermission(req.user.role, 'comments:rate')) {
+                return res.status(403).json({
+                    message: 'Você não tem permissão para avaliar tarefas'
+                });
+            }
+            
             const comment = await this.taskCommentService.createComment(
                 req.params.taskId,
                 req.user.id,
@@ -53,14 +69,44 @@ class TaskCommentController {
 
     async update(req, res) {
         try {
+            const { commentId } = req.params;
+            
+            // Buscar o comentário para verificar permissões
+            const comment = await this.taskCommentService.getCommentById(commentId);
+            if (!comment) {
+                return res.status(404).json({ error: 'Comment not found' });
+            }
+            
+            // Verificar se pode editar este comentário específico
+            const canEdit = canEditResource(
+                req.user.role,
+                comment.user_id,
+                req.user.id,
+                'comments:edit_any'
+            );
+            
+            if (!canEdit) {
+                return res.status(403).json({
+                    message: 'Você não tem permissão para editar este comentário'
+                });
+            }
+            
             const validatedData = commentSchema.parse(req.body);
-            const comment = await this.taskCommentService.updateComment(
-                req.params.commentId,
+            
+            // Verificar permissão para avaliar (rating) se estiver tentando adicionar/modificar
+            if (validatedData.rating !== undefined && !hasPermission(req.user.role, 'comments:rate')) {
+                return res.status(403).json({
+                    message: 'Você não tem permissão para avaliar tarefas'
+                });
+            }
+            
+            const updatedComment = await this.taskCommentService.updateComment(
+                commentId,
                 req.user.id,
                 validatedData.content,
                 validatedData.rating
             );
-            res.json(comment);
+            res.json(updatedComment);
         } catch (error) {
             if (error instanceof z.ZodError) {
                 return res.status(400).json({ errors: error.errors });
@@ -71,8 +117,30 @@ class TaskCommentController {
 
     async delete(req, res) {
         try {
+            const { commentId } = req.params;
+            
+            // Buscar o comentário para verificar permissões
+            const comment = await this.taskCommentService.getCommentById(commentId);
+            if (!comment) {
+                return res.status(404).json({ error: 'Comment not found' });
+            }
+            
+            // Verificar se pode excluir este comentário específico
+            const canDelete = canEditResource(
+                req.user.role,
+                comment.user_id,
+                req.user.id,
+                'comments:delete_any'
+            );
+            
+            if (!canDelete) {
+                return res.status(403).json({
+                    message: 'Você não tem permissão para excluir este comentário'
+                });
+            }
+            
             await this.taskCommentService.deleteComment(
-                req.params.commentId,
+                commentId,
                 req.user.id
             );
             res.status(204).send();
@@ -96,4 +164,4 @@ class TaskCommentController {
     }
 }
 
-module.exports = TaskCommentController; 
+module.exports = new TaskCommentController(); 

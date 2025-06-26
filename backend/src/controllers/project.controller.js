@@ -1,6 +1,7 @@
 const projectService = require('../services/project.service');
 const { z } = require('zod');
 const logger = require('../utils/logger');
+const { hasPermission } = require('../utils/permissions');
 
 const projectSchema = z.object({
     name: z.string()
@@ -36,6 +37,14 @@ class ProjectController {
                 return res.status(401).json({ 
                     message: 'Usuário não autenticado',
                     errors: [{ path: ['auth'], message: 'É necessário estar autenticado para criar um projeto' }]
+                });
+            }
+
+            // Verificar permissão para criar projetos
+            if (!hasPermission(req.user.role, 'projects:create')) {
+                logger.warn(`Controller Project.create: Usuário ${req.user.id} (${req.user.role}) tentou criar projeto sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para criar projetos'
                 });
             }
             
@@ -123,6 +132,14 @@ class ProjectController {
             const { projectId } = req.params;
             logger.debug(`Controller Project.update: Atualizando projeto ${projectId}`, req.body);
             
+            // Verificar permissão para editar projetos
+            if (!hasPermission(req.user.role, 'projects:edit')) {
+                logger.warn(`Controller Project.update: Usuário ${req.user.id} (${req.user.role}) tentou editar projeto ${projectId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para editar projetos'
+                });
+            }
+            
             try {
                 const validatedData = projectSchema.parse(req.body);
                 const project = await projectService.updateProject(projectId, validatedData);
@@ -152,6 +169,14 @@ class ProjectController {
             const { projectId } = req.params;
             logger.debug(`Controller Project.delete: Excluindo projeto ${projectId}`);
             
+            // Verificar permissão para excluir projetos
+            if (!hasPermission(req.user.role, 'projects:delete')) {
+                logger.warn(`Controller Project.delete: Usuário ${req.user.id} (${req.user.role}) tentou excluir projeto ${projectId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para excluir projetos'
+                });
+            }
+            
             await projectService.deleteProject(projectId);
             
             logger.success(`Controller Project.delete: Projeto ${projectId} excluído com sucesso`);
@@ -170,6 +195,14 @@ class ProjectController {
         try {
             const { projectId } = req.params;
             logger.debug(`Controller Project.addMember: Adicionando membro ao projeto ${projectId}`, req.body);
+            
+            // Verificar permissão para adicionar membros
+            if (!hasPermission(req.user.role, 'projects:add_members')) {
+                logger.warn(`Controller Project.addMember: Usuário ${req.user.id} (${req.user.role}) tentou adicionar membro ao projeto ${projectId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para adicionar membros ao projeto'
+                });
+            }
             
             try {
                 const validatedData = memberSchema.parse(req.body);
@@ -207,15 +240,23 @@ class ProjectController {
 
     async removeMember(req, res) {
         try {
-            const { projectId, userId } = req.params;
-            logger.debug(`Controller Project.removeMember: Removendo membro ${userId} do projeto ${projectId}`);
+            const { projectId, memberId } = req.params;
+            logger.debug(`Controller Project.removeMember: Removendo membro ${memberId} do projeto ${projectId}`);
             
-            await projectService.removeMember(projectId, userId);
+            // Verificar permissão para remover membros
+            if (!hasPermission(req.user.role, 'projects:remove_members')) {
+                logger.warn(`Controller Project.removeMember: Usuário ${req.user.id} (${req.user.role}) tentou remover membro ${memberId} do projeto ${projectId} sem permissão`);
+                return res.status(403).json({
+                    message: 'Você não tem permissão para remover membros do projeto'
+                });
+            }
             
-            logger.success(`Controller Project.removeMember: Membro ${userId} removido do projeto ${projectId} com sucesso`);
+            await projectService.removeMember(projectId, memberId);
+            
+            logger.success(`Controller Project.removeMember: Membro ${memberId} removido do projeto ${projectId} com sucesso`);
             res.status(204).send();
         } catch (error) {
-            logger.error(`Controller Project.removeMember: Erro ao remover membro ${req.params.userId} do projeto ${req.params.projectId}`, error);
+            logger.error(`Controller Project.removeMember: Erro ao remover membro ${req.params.memberId} do projeto ${req.params.projectId}`, error);
             
             res.status(500).json({ 
                 message: 'Erro ao remover membro do projeto', 
@@ -231,7 +272,7 @@ class ProjectController {
             
             const members = await projectService.getProjectMembers(projectId);
             
-            logger.info(`Controller Project.getMembers: ${members.length} membros encontrados para o projeto ${projectId}`);
+            logger.success(`Controller Project.getMembers: ${members.length} membros encontrados para o projeto ${projectId}`);
             res.json(members);
         } catch (error) {
             logger.error(`Controller Project.getMembers: Erro ao buscar membros do projeto ${req.params.projectId}`, error);

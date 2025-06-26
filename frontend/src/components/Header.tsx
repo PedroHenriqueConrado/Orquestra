@@ -2,13 +2,16 @@ import React, { Fragment, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermissions } from '../hooks/usePermissions';
 import NotificationIcon from './NotificationIcon';
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from '../contexts/ThemeContext';
 import GlobalSearch from './GlobalSearch';
+import { getRoleDisplayName, getRoleColor, getRoleIcon } from '../utils/roleTranslations';
 
 const Header: React.FC = () => {
   const { user, isLoggedIn, logout } = useAuth();
+  const { permissions } = usePermissions();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,9 +20,6 @@ const Header: React.FC = () => {
   const isActiveRoute = (path: string) => {
     return location.pathname.startsWith(path);
   };
-
-  // Verificar se o usuário tem permissão para acessar o Dashboard Avançado
-  const canAccessAdvancedDashboard = user?.role === 'project_manager';
 
   return (
     <header className="bg-theme-surface shadow-sm border-b border-theme transition-colors duration-200">
@@ -46,7 +46,7 @@ const Header: React.FC = () => {
                 >
                   Dashboard
                 </Link>
-                {canAccessAdvancedDashboard && (
+                {permissions.canAccessAdvancedDashboard && (
                   <Link
                     to="/dashboard/advanced"
                     className={`${
@@ -113,10 +113,19 @@ const Header: React.FC = () => {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-sm border border-theme py-1 bg-theme-surface ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transition-colors duration-200">
-                      <div className="px-4 py-2 border-b border-theme">
+                    <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-sm border border-theme py-1 bg-theme-surface ring-1 ring-black ring-opacity-5 focus:outline-none z-10 transition-colors duration-200">
+                      <div className="px-4 py-3 border-b border-theme">
                         <p className="text-sm font-semibold text-theme-primary">{user?.name}</p>
                         <p className="text-xs text-theme-muted">{user?.email}</p>
+                        {/* Cargo do usuário */}
+                        {user?.role && (
+                          <div className="flex items-center space-x-2 mt-2">
+                            <span className="text-sm">{getRoleIcon(user.role)}</span>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getRoleColor(user.role)}`}>
+                              {getRoleDisplayName(user.role)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <Menu.Item>
                         {({ active }) => (
@@ -197,7 +206,7 @@ const Header: React.FC = () => {
           >
             Dashboard
           </Link>
-          {canAccessAdvancedDashboard && (
+          {permissions.canAccessAdvancedDashboard && (
             <Link
               to="/dashboard/advanced"
               className={`${
@@ -233,14 +242,9 @@ const Header: React.FC = () => {
           >
             Mensagens
           </Link>
-          {/* Adicionar botão de tema no menu mobile */}
-          <div className="flex items-center pl-3 pr-4 py-2">
-            <span className={`${theme === 'dark' ? 'text-dark-text' : 'text-gray-600'} mr-2`}>Alternar tema:</span>
-            <ThemeToggle />
-          </div>
         </div>
         
-        {/* Mobile user profile menu */}
+        {/* Mobile menu user section */}
         {isLoggedIn && (
           <div className="pt-4 pb-3 border-t border-theme">
             <div className="flex items-center px-4">
@@ -252,6 +256,15 @@ const Header: React.FC = () => {
               <div className="ml-3">
                 <div className="text-base font-medium text-theme-primary">{user?.name}</div>
                 <div className="text-sm text-theme-secondary">{user?.email}</div>
+                {/* Cargo do usuário no mobile */}
+                {user?.role && (
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-sm">{getRoleIcon(user.role)}</span>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getRoleColor(user.role)}`}>
+                      {getRoleDisplayName(user.role)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="mt-3 space-y-1">

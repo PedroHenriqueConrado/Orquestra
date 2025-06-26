@@ -14,12 +14,17 @@ import type { Task, TaskStatus } from '../services/task.service';
 import TaskList from '../components/TaskList';
 import MemberSelector from '../components/MemberSelector';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermissions } from '../hooks/usePermissions';
+import { useTheme } from '../contexts/ThemeContext';
+import { useTheme as useThemeContext } from '../contexts/ThemeContext';
 
 const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { user: currentUser } = useAuth();
+  const { permissions } = usePermissions();
+  const { theme } = useThemeContext();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
