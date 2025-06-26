@@ -324,8 +324,14 @@ class TaskController {
     async updateTaskStatusPosition(req, res) {
         try {
             const { projectId, taskId } = req.params;
+            logger.info('updateTaskStatusPosition: chamada recebida', {
+                userId: req.user.id,
+                projectId,
+                taskId,
+                body: req.body,
+                role: req.user.role
+            });
             const validatedData = statusPositionSchema.parse(req.body);
-            
             // Verificar permissão para atualizar status
             if (!hasPermission(req.user.role, 'tasks:update_status')) {
                 logger.warn(`TaskController.updateTaskStatusPosition: Usuário ${req.user.id} (${req.user.role}) tentou atualizar status da tarefa ${taskId} sem permissão`);
@@ -333,19 +339,28 @@ class TaskController {
                     message: 'Você não tem permissão para atualizar status de tarefas'
                 });
             }
-            
             const task = await this.taskService.updateTaskStatusPosition(
                 taskId,
                 projectId,
+                req.user.id,
                 validatedData.status,
                 validatedData.position
             );
             res.json(task);
         } catch (error) {
+            logger.error('updateTaskStatusPosition: erro ao atualizar status/posição', {
+                error: error.message,
+                stack: error.stack,
+                userId: req.user.id,
+                projectId: req.params.projectId,
+                taskId: req.params.taskId,
+                body: req.body,
+                role: req.user.role
+            });
             if (error instanceof z.ZodError) {
                 return res.status(400).json({ errors: error.errors });
             }
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({ error: 'Internal server error', details: error.message });
         }
     }
 }

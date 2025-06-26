@@ -457,11 +457,9 @@ class TaskService {
                     updated_at: new Date()
                 },
                 include: {
-                    assignedUser: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true
+                    assignees: {
+                        include: {
+                            user: { select: { id: true, name: true, email: true, role: true } }
                         }
                     },
                     project: {
