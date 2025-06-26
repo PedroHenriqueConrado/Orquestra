@@ -18,6 +18,9 @@ const Header: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
+  // Verificar se o usuário tem permissão para acessar o Dashboard Avançado
+  const canAccessAdvancedDashboard = user?.role === 'project_manager';
+
   return (
     <header className="bg-theme-surface shadow-sm border-b border-theme transition-colors duration-200">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,16 +35,31 @@ const Header: React.FC = () => {
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                to="/dashboard"
-                className={`${
-                  isActiveRoute('/dashboard')
-                    ? 'border-primary text-theme-primary'
-                    : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
-              >
-                Dashboard
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link
+                  to="/dashboard"
+                  className={`${
+                    isActiveRoute('/dashboard') && !isActiveRoute('/dashboard/advanced')
+                      ? 'border-primary text-theme-primary'
+                      : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
+                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
+                >
+                  Dashboard
+                </Link>
+                {canAccessAdvancedDashboard && (
+                  <Link
+                    to="/dashboard/advanced"
+                    className={`${
+                      isActiveRoute('/dashboard/advanced')
+                        ? 'border-primary text-theme-primary'
+                        : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
+                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
+                  >
+                    <span className="text-xs bg-primary text-white px-1.5 py-0.5 rounded-full mr-1">+</span>
+                    Avançado
+                  </Link>
+                )}
+              </div>
               <Link
                 to="/projects"
                 className={`${
@@ -171,7 +189,7 @@ const Header: React.FC = () => {
           <Link
             to="/dashboard"
             className={`${
-              isActiveRoute('/dashboard')
+              isActiveRoute('/dashboard') && !isActiveRoute('/dashboard/advanced')
                 ? theme === 'dark' ? 'bg-dark-accent text-primary-light border-primary-light' : 'bg-primary-lighter text-primary border-primary'
                 : theme === 'dark' ? 'border-transparent text-dark-muted hover:bg-dark-accent hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
             } block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200`}
@@ -179,6 +197,20 @@ const Header: React.FC = () => {
           >
             Dashboard
           </Link>
+          {canAccessAdvancedDashboard && (
+            <Link
+              to="/dashboard/advanced"
+              className={`${
+                isActiveRoute('/dashboard/advanced')
+                  ? theme === 'dark' ? 'bg-dark-accent text-primary-light border-primary-light' : 'bg-primary-lighter text-primary border-primary'
+                  : theme === 'dark' ? 'border-transparent text-dark-muted hover:bg-dark-accent hover:border-dark-border hover:text-dark-text' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+              } block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-200`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span className="text-xs bg-primary text-white px-1.5 py-0.5 rounded-full mr-2">+</span>
+              Dashboard Avançado
+            </Link>
+          )}
           <Link
             to="/projects"
             className={`${
@@ -209,34 +241,30 @@ const Header: React.FC = () => {
         </div>
         
         {/* Mobile user profile menu */}
-        {isLoggedIn ? (
-          <div className={`pt-4 pb-3 border-t ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'} transition-colors duration-200`}>
+        {isLoggedIn && (
+          <div className="pt-4 pb-3 border-t border-theme">
             <div className="flex items-center px-4">
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-primary-lighter flex items-center justify-center text-white font-semibold">
+                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
                   {user?.name.charAt(0).toUpperCase()}
                 </div>
               </div>
               <div className="ml-3">
-                <div className={`text-base font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-800'} transition-colors duration-200`}>
-                  {user?.name}
-                </div>
-                <div className={`text-sm font-medium ${theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'} transition-colors duration-200`}>
-                  {user?.email}
-                </div>
+                <div className="text-base font-medium text-theme-primary">{user?.name}</div>
+                <div className="text-sm text-theme-secondary">{user?.email}</div>
               </div>
             </div>
             <div className="mt-3 space-y-1">
               <Link
                 to="/profile"
-                className={`block px-4 py-2 text-base font-medium ${theme === 'dark' ? 'text-dark-text hover:bg-dark-accent' : 'text-gray-500 hover:bg-gray-100'} transition-colors duration-200`}
+                className="block px-4 py-2 text-base font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary transition-colors duration-200"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Meu perfil
               </Link>
               <Link
                 to="/settings"
-                className={`block px-4 py-2 text-base font-medium ${theme === 'dark' ? 'text-dark-text hover:bg-dark-accent' : 'text-gray-500 hover:bg-gray-100'} transition-colors duration-200`}
+                className="block px-4 py-2 text-base font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary transition-colors duration-200"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Configurações
@@ -246,29 +274,10 @@ const Header: React.FC = () => {
                   logout();
                   setIsMobileMenuOpen(false);
                 }}
-                className={`block w-full text-left px-4 py-2 text-base font-medium ${theme === 'dark' ? 'text-dark-text hover:bg-dark-accent' : 'text-gray-500 hover:bg-gray-100'} transition-colors duration-200`}
+                className="block w-full text-left px-4 py-2 text-base font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-secondary transition-colors duration-200"
               >
                 Sair
               </button>
-            </div>
-          </div>
-        ) : (
-          <div className={`pt-4 pb-3 border-t ${theme === 'dark' ? 'border-dark-border' : 'border-gray-200'} transition-colors duration-200`}>
-            <div className="flex flex-col items-start px-4 space-y-2">
-              <Link
-                to="/login"
-                className={`block px-4 py-2 text-base font-medium ${theme === 'dark' ? 'text-dark-text' : 'text-gray-500'} hover:bg-gray-100 transition-colors duration-200`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Entrar
-              </Link>
-              <Link
-                to="/register"
-                className={`block px-4 py-2 text-base font-medium ${theme === 'dark' ? 'bg-primary-dark hover:bg-primary-darker' : 'bg-primary hover:bg-primary-dark'} text-white rounded-md transition-colors duration-200`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Cadastrar
-              </Link>
             </div>
           </div>
         )}

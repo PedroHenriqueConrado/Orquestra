@@ -1,78 +1,91 @@
-const Joi = require('joi');
+const { z } = require('zod');
 
-const createEvent = {
-  body: Joi.object().keys({
-    title: Joi.string().required().min(3).max(200)
-      .messages({
-        'string.empty': 'O título do evento é obrigatório',
-        'string.min': 'O título deve ter no mínimo 3 caracteres',
-        'string.max': 'O título deve ter no máximo 200 caracteres',
-        'any.required': 'O título do evento é obrigatório'
-      }),
-    description: Joi.string().allow('').max(1000)
-      .messages({
-        'string.max': 'A descrição deve ter no máximo 1000 caracteres'
-      }),
-    start_time: Joi.date().iso().required()
-      .messages({
-        'date.base': 'A data de início deve ser uma data válida',
-        'any.required': 'A data de início é obrigatória'
-      }),
-    end_time: Joi.date().iso().min(Joi.ref('start_time')).required()
-      .messages({
-        'date.base': 'A data de término deve ser uma data válida',
-        'date.min': 'A data de término deve ser após a data de início',
-        'any.required': 'A data de término é obrigatória'
-      }),
-    all_day: Joi.boolean().default(false),
-    location: Joi.string().allow('').max(200),
-    color: Joi.string().allow('').max(7).pattern(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)
-      .messages({
-        'string.pattern.base': 'A cor deve estar no formato hexadecimal (#FFF ou #FFFFFF)'
-      }),
-    attendees: Joi.array().items(Joi.number().integer().positive()).default([])
+const createEventSchema = z.object({
+  title: z.string()
+    .min(3, 'O título deve ter no mínimo 3 caracteres')
+    .max(200, 'O título deve ter no máximo 200 caracteres'),
+  description: z.string()
+    .max(1000, 'A descrição deve ter no máximo 1000 caracteres')
+    .optional()
+    .default(''),
+  start_time: z.string()
+    .datetime('A data de início deve ser uma data válida'),
+  end_time: z.string()
+    .datetime('A data de término deve ser uma data válida'),
+  all_day: z.boolean()
+    .default(false),
+  location: z.string()
+    .max(200, 'Local deve ter no máximo 200 caracteres')
+    .optional()
+    .default(''),
+  color: z.string()
+    .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'A cor deve estar no formato hexadecimal (#FFF ou #FFFFFF)')
+    .optional()
+    .default(''),
+  attendees: z.array(z.number().int().positive())
+    .default([])
+}).refine((data) => {
+  const startTime = new Date(data.start_time);
+  const endTime = new Date(data.end_time);
+  return endTime > startTime;
+}, {
+  message: 'A data de término deve ser após a data de início',
+  path: ['end_time']
+});
+
+const updateEventSchema = z.object({
+  title: z.string()
+    .min(3, 'O título deve ter no mínimo 3 caracteres')
+    .max(200, 'O título deve ter no máximo 200 caracteres')
+    .optional(),
+  description: z.string()
+    .max(1000, 'A descrição deve ter no máximo 1000 caracteres')
+    .optional(),
+  start_time: z.string()
+    .datetime('A data de início deve ser uma data válida')
+    .optional(),
+  end_time: z.string()
+    .datetime('A data de término deve ser uma data válida')
+    .optional(),
+  all_day: z.boolean()
+    .optional(),
+  location: z.string()
+    .max(200, 'Local deve ter no máximo 200 caracteres')
+    .optional(),
+  color: z.string()
+    .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'A cor deve estar no formato hexadecimal (#FFF ou #FFFFFF)')
+    .optional(),
+  attendees: z.array(z.number().int().positive())
+    .optional()
+}).refine((data) => {
+  if (data.start_time && data.end_time) {
+    const startTime = new Date(data.start_time);
+    const endTime = new Date(data.end_time);
+    return endTime > startTime;
+  }
+  return true;
+}, {
+  message: 'A data de término deve ser após a data de início',
+  path: ['end_time']
+});
+
+const respondToEventSchema = z.object({
+  status: z.enum(['pending', 'accepted', 'declined', 'tentative'], {
+    errorMap: () => ({ message: 'O status deve ser: pending, accepted, declined ou tentative' })
   })
+});
+
+// Estrutura esperada pelo middleware de validação
+const createEvent = {
+  body: createEventSchema
 };
 
 const updateEvent = {
-  body: Joi.object().keys({
-    title: Joi.string().min(3).max(200)
-      .messages({
-        'string.empty': 'O título do evento é obrigatório',
-        'string.min': 'O título deve ter no mínimo 3 caracteres',
-        'string.max': 'O título deve ter no máximo 200 caracteres'
-      }),
-    description: Joi.string().allow('').max(1000)
-      .messages({
-        'string.max': 'A descrição deve ter no máximo 1000 caracteres'
-      }),
-    start_time: Joi.date().iso()
-      .messages({
-        'date.base': 'A data de início deve ser uma data válida'
-      }),
-    end_time: Joi.date().iso().min(Joi.ref('start_time'))
-      .messages({
-        'date.base': 'A data de término deve ser uma data válida',
-        'date.min': 'A data de término deve ser após a data de início'
-      }),
-    all_day: Joi.boolean(),
-    location: Joi.string().allow('').max(200),
-    color: Joi.string().allow('').max(7).pattern(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)
-      .messages({
-        'string.pattern.base': 'A cor deve estar no formato hexadecimal (#FFF ou #FFFFFF)'
-      }),
-    attendees: Joi.array().items(Joi.number().integer().positive())
-  })
+  body: updateEventSchema
 };
 
 const respondToEvent = {
-  body: Joi.object().keys({
-    status: Joi.string().valid('pending', 'accepted', 'declined', 'tentative').required()
-      .messages({
-        'any.only': 'O status deve ser: pending, accepted, declined ou tentative',
-        'any.required': 'O status é obrigatório'
-      })
-  })
+  body: respondToEventSchema
 };
 
 module.exports = {

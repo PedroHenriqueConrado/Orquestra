@@ -11,6 +11,7 @@ import EditProject from './pages/EditProject';
 import NewTask from './pages/NewTask';
 import TaskDetails from './pages/TaskDetails';
 import Dashboard from './pages/Dashboard';
+import AdvancedDashboard from './pages/AdvancedDashboard';
 import DirectMessages from './pages/DirectMessages';
 import ChatDetails from './pages/ChatDetails';
 import Notifications from './pages/Notifications';
@@ -33,6 +34,12 @@ const App: React.FC = () => {
             <Route path="/dashboard" element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/dashboard/advanced" element={
+              <PrivateRoute>
+                <AdvancedDashboard />
               </PrivateRoute>
             } />
             

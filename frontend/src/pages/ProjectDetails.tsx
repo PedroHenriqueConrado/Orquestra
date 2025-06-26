@@ -284,6 +284,9 @@ const ProjectDetails: React.FC = () => {
       }
     };
 
+    // Verificar se o usuário tem permissão para acessar o Dashboard Avançado
+    const canAccessAdvancedDashboard = currentUser?.role === 'project_manager';
+
     return (
       <div className="flex flex-wrap gap-2 mb-6">
         <Link to={`/projects/${id}/edit`}>
@@ -298,12 +301,14 @@ const ProjectDetails: React.FC = () => {
             Nova Tarefa
           </Button>
         </Link>
-        <Link to={`/projects/${id}/dashboard`}>
-          <Button variant="secondary" size="sm">
-            <i className="fas fa-chart-bar mr-2"></i>
-            Dashboard Avançado
-          </Button>
-        </Link>
+        {canAccessAdvancedDashboard && (
+          <Link to={`/projects/${id}/dashboard`}>
+            <Button variant="secondary" size="sm">
+              <i className="fas fa-chart-bar mr-2"></i>
+              Dashboard Avançado
+            </Button>
+          </Link>
+        )}
         <Button 
           variant="outline" 
           size="sm" 
