@@ -12,7 +12,8 @@ class TaskService {
                 creatorId,
                 data
             });
-            
+
+            // Cria a tarefa sem responsáveis
             const task = await prisma.task.create({
                 data: {
                     title: data.title,
@@ -22,68 +23,41 @@ class TaskService {
                     due_date: data.due_date ? new Date(data.due_date) : null,
                     estimated_hours: data.estimated_hours,
                     project_id: Number(projectId),
-                    assigned_to: data.assigned_to ? Number(data.assigned_to) : null,
                     parent_task_id: data.parent_task_id ? Number(data.parent_task_id) : null
-                },
-                include: {
-                    assignedUser: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true
-                        }
-                    },
-                    subTasks: {
-                        include: {
-                            assignedUser: {
-                                select: {
-                                    id: true,
-                                    name: true,
-                                    email: true
-                                }
-                            }
-                        }
-                    },
-                    parentTask: {
-                        select: {
-                            id: true,
-                            title: true
-                        }
-                    },
-                    tags: {
-                        include: {
-                            tag: true
-                        }
-                    },
-                    project: {
-                        select: {
-                            id: true,
-                            name: true
-                        }
-                    }
                 }
             });
 
-            // Notificar o usuário se a tarefa for atribuída a alguém
-            if (task.assigned_to) {
+            // Cria os registros em TaskAssignee
+            const assigneeIds = (data.assignees || []).map(Number);
+            if (!assigneeIds.length) {
+                throw new Error('Pelo menos um responsável deve ser informado.');
+            }
+            await Promise.all(
+                assigneeIds.map(userId =>
+                    prisma.taskAssignee.create({
+                        data: {
+                            task_id: task.id,
+                            user_id: userId
+                        }
+                    })
+                )
+            );
+
+            // Notificar todos os responsáveis
+            for (const userId of assigneeIds) {
                 try {
                     await notificationService.notifyTaskAssignment(
-                        task.assigned_to,
+                        userId,
                         task.id,
                         task.title,
-                        task.project.name
+                        '' // Nome do projeto pode ser buscado se necessário
                     );
-                    logger.debug('TaskService.createTask: Notificação de atribuição de tarefa criada', {
-                        taskId: task.id,
-                        assignedTo: task.assigned_to
-                    });
                 } catch (notifyError) {
-                    // Apenas logamos o erro, mas não interrompemos o fluxo principal
-                    logger.error('TaskService.createTask: Erro ao criar notificação', {
+                    logger.error('TaskService.createTask: Erro ao notificar responsável', {
                         error: notifyError.message,
                         stack: notifyError.stack,
                         taskId: task.id,
-                        assignedTo: task.assigned_to
+                        userId
                     });
                 }
             }
@@ -97,13 +71,29 @@ class TaskService {
             await taskHistoryService.recordChange(task.id, creatorId, {
                 status: { old: null, new: task.status },
                 priority: { old: null, new: task.priority },
-                assigned_to: { old: null, new: task.assigned_to }
+                assignees: { old: null, new: assigneeIds }
             });
 
-            return task;
+            // Retornar a tarefa já com todos os responsáveis
+            const taskWithAssignees = await prisma.task.findUnique({
+                where: { id: task.id },
+                include: {
+                    assignees: {
+                        include: {
+                            user: { select: { id: true, name: true, email: true, role: true } }
+                        }
+                    },
+                    tags: { include: { tag: true } },
+                    project: { select: { id: true, name: true } },
+                    parentTask: { select: { id: true, title: true } },
+                    subTasks: true
+                }
+            });
+
+            return taskWithAssignees;
         } catch (error) {
             logger.error('TaskService.createTask: Erro ao criar tarefa', error);
-            throw error; // Re-throw para ser tratado pelo controlador
+            throw error;
         }
     }
 
@@ -112,7 +102,6 @@ class TaskService {
             project_id: Number(projectId),
             ...(filters.status && { status: filters.status }),
             ...(filters.priority && { priority: filters.priority }),
-            ...(filters.assignedTo && { assigned_to: Number(filters.assignedTo) }),
             ...(filters.parentTaskId && { parent_task_id: Number(filters.parentTaskId) }),
             ...(filters.search && {
                 OR: [
@@ -132,14 +121,20 @@ class TaskService {
             };
         }
 
+        // Filtro para mostrar tarefas em que o usuário é responsável ou criador
+        if (filters.userId) {
+            where.OR = [
+                { assignees: { some: { user_id: Number(filters.userId) } } },
+                { created_by: Number(filters.userId) }
+            ];
+        }
+
         return await prisma.task.findMany({
             where,
             include: {
-                assignedUser: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
+                assignees: {
+                    include: {
+                        user: { select: { id: true, name: true, email: true, role: true } }
                     }
                 },
                 tags: {
@@ -165,11 +160,9 @@ class TaskService {
                 project_id: Number(projectId)
             },
             include: {
-                assignedUser: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
+                assignees: {
+                    include: {
+                        user: { select: { id: true, name: true, email: true, role: true } }
                     }
                 },
                 tags: {
@@ -177,49 +170,18 @@ class TaskService {
                         tag: true
                     }
                 },
-                subTasks: {
-                    include: {
-                        assignedUser: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true
-                            }
-                        },
-                        tags: {
-                            include: {
-                                tag: true
-                            }
-                        }
-                    }
-                },
+                subTasks: true,
                 parentTask: {
                     select: {
                         id: true,
                         title: true,
                         status: true,
-                        priority: true
                     }
                 },
-                comments: {
-                    take: 5,
-                    orderBy: {
-                        created_at: 'desc'
-                    },
-                    include: {
-                        user: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true
-                            }
-                        }
-                    }
-                },
-                _count: {
+                project: {
                     select: {
-                        comments: true,
-                        history: true
+                        id: true,
+                        name: true
                     }
                 }
             }
@@ -231,26 +193,18 @@ class TaskService {
         const currentTask = await prisma.task.findUnique({
             where: { id: Number(taskId) },
             include: {
-                project: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                }
+                assignees: true,
+                project: { select: { id: true, name: true } }
             }
         });
 
         const changes = {};
-        
-        // Track changes for history
+
         if (data.status && data.status !== currentTask.status) {
             changes.status = { old: currentTask.status, new: data.status };
         }
         if (data.priority && data.priority !== currentTask.priority) {
             changes.priority = { old: currentTask.priority, new: data.priority };
-        }
-        if (data.assignedTo && data.assignedTo !== currentTask.assigned_to) {
-            changes.assigned_to = { old: currentTask.assigned_to, new: data.assignedTo };
         }
         if (data.estimatedHours && data.estimatedHours !== currentTask.estimated_hours) {
             changes.estimated_hours = { old: currentTask.estimated_hours, new: data.estimatedHours };
@@ -259,6 +213,7 @@ class TaskService {
             changes.actual_hours = { old: currentTask.actual_hours, new: data.actualHours };
         }
 
+        // Atualizar dados básicos da tarefa
         const task = await prisma.task.update({
             where: {
                 id: Number(taskId),
@@ -272,64 +227,49 @@ class TaskService {
                 due_date: data.dueDate ? new Date(data.dueDate) : undefined,
                 estimated_hours: data.estimatedHours,
                 actual_hours: data.actualHours,
-                assigned_to: data.assignedTo ? Number(data.assignedTo) : undefined,
                 updated_at: new Date()
-            },
-            include: {
-                assignedUser: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
-                    }
-                },
-                tags: {
-                    include: {
-                        tag: true
-                    }
-                },
-                subTasks: {
-                    include: {
-                        assignedUser: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true
-                            }
-                        }
-                    }
-                },
-                project: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                }
             }
         });
 
-        // Notificar sobre atribuição de tarefa se ela foi atribuída a alguém
-        if (changes.assigned_to && task.assigned_to) {
-            try {
-                await notificationService.notifyTaskAssignment(
-                    task.assigned_to,
-                    task.id,
-                    task.title,
-                    task.project.name
-                );
-                logger.debug('TaskService.updateTask: Notificação de atribuição de tarefa criada', {
-                    taskId: task.id,
-                    assignedTo: task.assigned_to
-                });
-            } catch (notifyError) {
-                // Apenas logamos o erro, mas não interrompemos o fluxo principal
-                logger.error('TaskService.updateTask: Erro ao criar notificação', {
-                    error: notifyError.message,
-                    stack: notifyError.stack,
-                    taskId: task.id,
-                    assignedTo: task.assigned_to
-                });
+        // Sincronizar responsáveis (TaskAssignee)
+        if (data.assignees) {
+            const newAssignees = data.assignees.map(Number);
+            if (!newAssignees.length) {
+                throw new Error('Pelo menos um responsável deve ser informado.');
             }
+            const currentAssignees = currentTask.assignees.map(a => a.user_id);
+            // Remover responsáveis antigos que não estão mais na lista
+            await prisma.taskAssignee.deleteMany({
+                where: {
+                    task_id: task.id,
+                    user_id: { notIn: newAssignees }
+                }
+            });
+            // Adicionar novos responsáveis
+            for (const userId of newAssignees) {
+                if (!currentAssignees.includes(userId)) {
+                    await prisma.taskAssignee.create({
+                        data: { task_id: task.id, user_id: userId }
+                    });
+                    // Notificar novo responsável
+                    try {
+                        await notificationService.notifyTaskAssignment(
+                            userId,
+                            task.id,
+                            task.title,
+                            currentTask.project.name
+                        );
+                    } catch (notifyError) {
+                        logger.error('TaskService.updateTask: Erro ao notificar novo responsável', {
+                            error: notifyError.message,
+                            stack: notifyError.stack,
+                            taskId: task.id,
+                            userId
+                        });
+                    }
+                }
+            }
+            changes.assignees = { old: currentAssignees, new: newAssignees };
         }
 
         // Record changes in history if any changes were made
@@ -337,7 +277,23 @@ class TaskService {
             await taskHistoryService.recordChange(taskId, userId, changes);
         }
 
-        return task;
+        // Retornar a tarefa já com todos os responsáveis
+        const taskWithAssignees = await prisma.task.findUnique({
+            where: { id: task.id },
+            include: {
+                assignees: {
+                    include: {
+                        user: { select: { id: true, name: true, email: true, role: true } }
+                    }
+                },
+                tags: { include: { tag: true } },
+                project: { select: { id: true, name: true } },
+                parentTask: { select: { id: true, title: true } },
+                subTasks: true
+            }
+        });
+
+        return taskWithAssignees;
     }
 
     async deleteTask(taskId, projectId) {

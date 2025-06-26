@@ -6,6 +6,8 @@ import Button from '../components/ui/Button';
 import Dialog from '../components/ui/Dialog';
 import FormField from '../components/ui/FormField';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermissionRestriction } from '../hooks/usePermissionRestriction';
+import PermissionRestrictionModal from '../components/ui/PermissionRestrictionModal';
 
 const Templates: React.FC = () => {
   const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
@@ -29,6 +31,7 @@ const Templates: React.FC = () => {
 
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
 
   useEffect(() => {
     loadTemplates();
@@ -113,6 +116,23 @@ const Templates: React.FC = () => {
     }
   };
 
+  const handleCreateTemplateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!handleRestrictedAction('create_template')) {
+      return;
+    }
+    // Se tem permissão, abre o modal de criação
+    setShowCreateModal(true);
+  };
+
+  const handleDeleteTemplateClick = (templateId: number) => {
+    if (!handleRestrictedAction('manage_templates')) {
+      return;
+    }
+    // Se tem permissão, executa a exclusão
+    handleDeleteTemplate(templateId);
+  };
+
   if (loading) {
     return (
       <div className="bg-theme-primary min-h-screen">
@@ -146,16 +166,45 @@ const Templates: React.FC = () => {
           </div>
         </div>
 
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-semibold text-theme-primary mb-3 sm:mb-0">Templates</h1>
+          <div className="flex flex-col sm:flex-row gap-3 sm:space-x-3">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Buscar templates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full sm:w-64 pl-10 pr-4 py-2 border border-theme rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-theme-surface text-theme-primary"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-theme-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+            <button onClick={handleCreateTemplateClick}>
+              <Button variant="primary" className="w-full sm:w-auto">
+                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Criar Template
+              </Button>
+            </button>
+          </div>
+        </div>
+
         {/* Filtros */}
-        <div className="bg-theme-surface rounded-lg shadow-sm p-6 mb-6 border border-theme">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-theme-secondary mb-2">
+        <div className="bg-theme-surface rounded-lg shadow-sm border border-theme p-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <label htmlFor="category-filter" className="block text-sm font-medium text-theme-primary mb-2">
                 Categoria
               </label>
               <select
+                id="category-filter"
                 value={selectedCategory}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedCategory(e.target.value)}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-theme rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-theme-surface text-theme-primary"
               >
                 <option value="">Todas as categorias</option>
@@ -166,18 +215,6 @@ const Templates: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-theme-secondary mb-2">
-                Buscar
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                placeholder="Buscar templates..."
-                className="w-full px-3 py-2 border border-theme rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-theme-surface text-theme-primary"
-              />
-            </div>
           </div>
         </div>
 
@@ -186,85 +223,90 @@ const Templates: React.FC = () => {
           {templates.map((template) => (
             <div
               key={template.id}
-              className="bg-theme-surface rounded-lg shadow-sm border border-theme overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-theme-surface rounded-lg shadow-sm border border-theme p-6 hover:shadow-md transition-shadow"
             >
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-theme-primary mb-1">
-                      {template.name}
-                    </h3>
-                    {template.category && (
-                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                        {template.category}
-                      </span>
-                    )}
-                  </div>
-                  {template.is_public && (
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-lg font-semibold text-theme-primary truncate flex-1 mr-2">
+                  {template.name}
+                </h3>
+                <div className="flex items-center space-x-2">
+                  {template.category && (
+                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      {template.category}
+                    </span>
+                  )}
+                  {template.is_public ? (
                     <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                       Público
                     </span>
+                  ) : (
+                    <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                      Privado
+                    </span>
                   )}
                 </div>
+              </div>
 
-                {template.description && (
-                  <p className="text-theme-secondary text-sm mb-4 line-clamp-2">
-                    {template.description}
-                  </p>
-                )}
+              {template.description && (
+                <p className="text-theme-secondary text-sm mb-4 line-clamp-2">
+                  {template.description}
+                </p>
+              )}
 
-                <div className="flex items-center justify-between text-sm text-theme-secondary mb-4">
-                  <span>Criado por {template.creator.name}</span>
-                  <span>{new Date(template.created_at).toLocaleDateString('pt-BR')}</span>
-                </div>
+              <div className="flex items-center justify-between text-sm text-theme-secondary mb-4">
+                <span>Criado por {template.creator.name}</span>
+                <span>{new Date(template.created_at).toLocaleDateString('pt-BR')}</span>
+              </div>
 
-                <div className="flex items-center justify-between text-sm text-theme-secondary mb-4">
-                  <span>{template._count.tasks} tarefas</span>
-                  <span>{template._count.members} membros</span>
-                </div>
+              <div className="flex items-center justify-between text-sm text-theme-secondary mb-4">
+                <span>{template._count.tasks} tarefas</span>
+                <span>{template._count.members} membros</span>
+              </div>
 
-                {/* Tarefas do template */}
-                {template.tasks.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-theme-primary mb-2">
-                      Tarefas incluídas:
-                    </h4>
-                    <div className="space-y-1">
-                      {template.tasks.slice(0, 3).map((task) => (
-                        <div key={task.id} className="flex items-center justify-between text-xs">
-                          <span className="text-theme-secondary truncate">
-                            {task.title}
-                          </span>
-                          <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
-                            {task.priority}
-                          </span>
-                        </div>
-                      ))}
-                      {template.tasks.length > 3 && (
-                        <span className="text-xs text-theme-secondary">
-                          +{template.tasks.length - 3} mais tarefas
+              {/* Tarefas do template */}
+              {template.tasks.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-theme-primary mb-2">
+                    Tarefas incluídas:
+                  </h4>
+                  <div className="space-y-1">
+                    {template.tasks.slice(0, 3).map((task) => (
+                      <div key={task.id} className="flex items-center justify-between text-xs">
+                        <span className="text-theme-secondary truncate">
+                          {task.title}
                         </span>
-                      )}
-                    </div>
+                        <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
+                          {task.priority}
+                        </span>
+                      </div>
+                    ))}
+                    {template.tasks.length > 3 && (
+                      <span className="text-xs text-theme-secondary">
+                        +{template.tasks.length - 3} mais tarefas
+                      </span>
+                    )}
                   </div>
-                )}
-
-                <div className="flex space-x-2">
-                  <Button
-                    onClick={() => openUseModal(template)}
-                    className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm"
-                  >
-                    Usar Template
-                  </Button>
-                  {template.created_by === user?.id && (
-                    <Button
-                      onClick={() => handleDeleteTemplate(template.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white text-sm px-3"
-                    >
-                      Deletar
-                    </Button>
-                  )}
                 </div>
+              )}
+
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => openUseModal(template)}
+                  className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm"
+                >
+                  Usar Template
+                </Button>
+                {template.created_by === user?.id && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDeleteTemplateClick(template.id);
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors"
+                  >
+                    Deletar
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -395,6 +437,17 @@ const Templates: React.FC = () => {
             </Button>
           </div>
         </Dialog>
+
+        {/* Modal de restrição de permissão */}
+        {isModalOpen && currentRestriction && user && (
+          <PermissionRestrictionModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            action={currentRestriction.action}
+            requiredRoles={currentRestriction.requiredRoles}
+            currentRole={user.role}
+          />
+        )}
       </main>
     </div>
   );

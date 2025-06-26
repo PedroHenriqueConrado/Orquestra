@@ -20,6 +20,9 @@ import Templates from './pages/Templates';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import PrivateRoute from './components/PrivateRoute';
+import { useAuth } from './contexts/AuthContext';
+import { usePermissionRestriction } from './hooks/usePermissionRestriction';
+import PermissionRestrictionModal from './components/ui/PermissionRestrictionModal';
 
 const App: React.FC = () => {
   return (
@@ -39,7 +42,7 @@ const App: React.FC = () => {
             
             <Route path="/dashboard/advanced" element={
               <PrivateRoute>
-                <AdvancedDashboard />
+                <AdvancedDashboardRoute />
               </PrivateRoute>
             } />
             
@@ -121,6 +124,35 @@ const App: React.FC = () => {
       </ThemeProvider>
     </Router>
   );
+};
+
+// Componente para proteger o dashboard avançado
+const AdvancedDashboardRoute: React.FC = () => {
+  const { user } = useAuth();
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
+  
+  // Verificar se pode acessar o dashboard avançado
+  if (!handleRestrictedAction('advanced_dashboard')) {
+    return (
+      <>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h1>
+            <p className="text-gray-600">Você não tem permissão para acessar esta página.</p>
+          </div>
+        </div>
+        <PermissionRestrictionModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          action={currentRestriction?.action || ''}
+          requiredRoles={currentRestriction?.requiredRoles || []}
+          currentRole={user?.role || ''}
+        />
+      </>
+    );
+  }
+  
+  return <AdvancedDashboard />;
 };
 
 export default App;

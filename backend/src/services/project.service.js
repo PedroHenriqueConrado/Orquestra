@@ -23,7 +23,8 @@ class ProjectService {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true
                             }
                         }
                     }
@@ -54,7 +55,8 @@ class ProjectService {
                                     select: {
                                         id: true,
                                         name: true,
-                                        email: true
+                                        email: true,
+                                        role: true
                                     }
                                 }
                             },
@@ -87,7 +89,8 @@ class ProjectService {
                                 select: {
                                     id: true,
                                     name: true,
-                                    email: true
+                                    email: true,
+                                    role: true
                                 }
                             }
                         },
@@ -131,7 +134,8 @@ class ProjectService {
                                 select: {
                                     id: true,
                                     name: true,
-                                    email: true
+                                    email: true,
+                                    role: true
                                 }
                             }
                         },
@@ -172,7 +176,8 @@ class ProjectService {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true
                             }
                         }
                     },
@@ -210,7 +215,8 @@ class ProjectService {
                             select: {
                                 id: true,
                                 name: true,
-                                email: true
+                                email: true,
+                                role: true
                             }
                         }
                     }
@@ -350,7 +356,8 @@ class ProjectService {
                                 select: {
                                     id: true,
                                     name: true,
-                                    email: true
+                                    email: true,
+                                    role: true
                                 }
                             }
                         }
@@ -372,7 +379,8 @@ class ProjectService {
                         select: {
                             id: true,
                             name: true,
-                            email: true
+                            email: true,
+                            role: true
                         }
                     },
                     project: {
@@ -459,7 +467,8 @@ class ProjectService {
                         select: {
                             id: true,
                             name: true,
-                            email: true
+                            email: true,
+                            role: true
                         }
                     }
                 }

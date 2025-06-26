@@ -9,6 +9,8 @@ import progressService from '../services/progress.service';
 import { getRoleDisplayName, getRoleColor, getRoleIcon } from '../utils/roleTranslations';
 import type { Project } from '../services/project.service';
 import type { Task } from '../services/task.service';
+import { usePermissionRestriction } from '../hooks/usePermissionRestriction';
+import PermissionRestrictionModal from '../components/ui/PermissionRestrictionModal';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -26,6 +28,8 @@ const Dashboard: React.FC = () => {
     { id: 3, name: 'Tarefas Concluídas', value: '0' },
     { id: 4, name: 'Colaboradores', value: '0' }
   ]);
+
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
 
   // Carregar projetos do banco de dados
   useEffect(() => {
@@ -86,10 +90,18 @@ const Dashboard: React.FC = () => {
     fetchAllTasks();
   }, [projects]);
 
+  // Após carregar todas as tarefas:
+  const userTasks = tasks.filter(task =>
+    task.assignees && task.assignees.some(a => a.user.id === user?.id)
+  );
+
   // Função para calcular as estatísticas
   const updateStats = (projectsData: Project[], tasksData: Task[]) => {
-    const pendingTasks = tasksData.filter(task => task.status === 'pending').length;
-    const completedTasks = tasksData.filter(task => task.status === 'completed').length;
+    const userTasks = tasksData.filter(task =>
+      task.assignees && task.assignees.some(a => a.user.id === user?.id)
+    );
+    const pendingTasks = userTasks.filter(task => task.status === 'pending').length;
+    const completedTasks = userTasks.filter(task => task.status === 'completed').length;
     
     // Contar membros únicos em todos os projetos
     const allMembersIds = new Set<number>();
@@ -117,6 +129,15 @@ const Dashboard: React.FC = () => {
   const getProjectStatus = (projectId: number): string => {
     const progress = calculateProjectProgress(projectId);
     return progressService.getProjectStatus(progress);
+  };
+
+  const handleCreateProjectClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!handleRestrictedAction('create_project')) {
+      return;
+    }
+    // Se tem permissão, navega para a página de criação
+    window.location.href = '/projects/new';
   };
 
   return (
@@ -159,15 +180,15 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Tabs para navegação */}
-        <div className="mb-4 sm:mb-6 border-b border-theme">
-          <nav className="-mb-px flex overflow-x-auto hide-scrollbar">
+        <div className="bg-theme-surface shadow-sm border border-theme rounded-lg mb-6">
+          <nav className="flex overflow-x-auto">
             <button
               onClick={() => setActiveTab('projects')}
               className={`${
                 activeTab === 'projects'
                   ? 'border-primary text-primary'
                   : 'border-transparent text-theme-secondary hover:border-theme hover:text-theme-primary'
-              } whitespace-nowrap py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 m-2 transition-colors duration-200`}
+              } whitespace-nowrap m-2 py-3 sm:py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0 transition-colors duration-200`}
             >
               Projetos
             </button>
@@ -211,14 +232,14 @@ const Dashboard: React.FC = () => {
             <div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
                 <h2 className="text-lg font-medium text-gray-900">Meus Projetos</h2>
-                <Link to="/projects/new">
+                <button onClick={handleCreateProjectClick}>
                   <Button variant="primary" className="w-full sm:w-auto hover:border-white">
                     <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
                     Novo Projeto
                   </Button>
-                </Link>
+                </button>
               </div>
               
               {loadingProjects ? (
@@ -236,9 +257,9 @@ const Dashboard: React.FC = () => {
               ) : projects.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-theme-secondary mb-4">Nenhum projeto encontrado.</p>
-                  <Link to="/projects/new">
+                  <button onClick={handleCreateProjectClick}>
                     <Button variant="primary">Criar Primeiro Projeto</Button>
-                  </Link>
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -289,13 +310,13 @@ const Dashboard: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                   <p className="mt-2 text-theme-secondary">Carregando tarefas...</p>
                 </div>
-              ) : tasks.length === 0 ? (
+              ) : userTasks.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-theme-secondary mb-4">Nenhuma tarefa encontrada.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {tasks.slice(0, 10).map((task) => (
+                  {userTasks.slice(0, 10).map((task) => (
                     <div key={task.id} className="bg-theme border border-theme rounded-lg p-4">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
@@ -324,11 +345,11 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   ))}
-                  {tasks.length > 10 && (
+                  {userTasks.length > 10 && (
                     <div className="text-center pt-4">
                       <Link to="/tasks">
                         <Button variant="secondary">
-                          Ver Todas as Tarefas ({tasks.length})
+                          Ver Todas as Tarefas ({userTasks.length})
                         </Button>
                       </Link>
                     </div>
@@ -379,6 +400,17 @@ const Dashboard: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Modal de restrição de permissão */}
+        {isModalOpen && currentRestriction && user && (
+          <PermissionRestrictionModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            action={currentRestriction.action}
+            requiredRoles={currentRestriction.requiredRoles}
+            currentRole={user.role}
+          />
+        )}
       </main>
     </div>
   );

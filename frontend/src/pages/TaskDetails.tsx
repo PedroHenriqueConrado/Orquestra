@@ -6,16 +6,21 @@ import TaskDocuments from '../components/TaskDocuments';
 import TaskComments from '../components/TaskComments';
 import taskService from '../services/task.service';
 import projectService from '../services/project.service';
-import type { Task, TaskStatus, TaskPriority } from '../services/task.service';
+import type { Task, TaskStatus, TaskPriority, TaskData } from '../services/task.service';
 import type { Project } from '../services/project.service';
 import toast from 'react-hot-toast';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { usePermissionRestriction } from '../hooks/usePermissionRestriction';
+import PermissionRestrictionModal from '../components/ui/PermissionRestrictionModal';
 
 const TaskDetails: React.FC = () => {
   const { projectId, taskId } = useParams<{ projectId: string; taskId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useTheme();
+  const { user } = useAuth();
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
   
   const [project, setProject] = useState<Project | null>(null);
   const [task, setTask] = useState<Task | null>(null);
@@ -23,7 +28,7 @@ const TaskDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTask, setEditedTask] = useState<Partial<Task>>({});
+  const [editedTaskData, setEditedTaskData] = useState<Partial<TaskData>>({});
   const [isDeleting, setIsDeleting] = useState(false);
   
   // Carregar os dados da tarefa e do projeto
@@ -40,7 +45,17 @@ const TaskDetails: React.FC = () => {
         // Então carregar a tarefa
         const taskData = await taskService.getTaskById(Number(projectId), Number(taskId));
         setTask(taskData);
-        setEditedTask(taskData);
+        setEditedTaskData({
+          title: taskData.title,
+          description: taskData.description,
+          status: taskData.status,
+          priority: taskData.priority,
+          due_date: taskData.due_date,
+          estimated_hours: taskData.estimated_hours,
+          actual_hours: taskData.actual_hours,
+          parent_task_id: taskData.parent_task_id,
+          assignees: taskData.assignees ? taskData.assignees.map(a => a.user.id) : []
+        });
         
         setLoading(false);
       } catch (err: any) {
@@ -57,7 +72,7 @@ const TaskDetails: React.FC = () => {
   
   // Função para atualizar uma tarefa
   const handleUpdateTask = async () => {
-    if (!task || !editedTask || !projectId || !taskId) return;
+    if (!task || !editedTaskData || !projectId || !taskId) return;
     
     try {
       setIsSaving(true);
@@ -67,7 +82,7 @@ const TaskDetails: React.FC = () => {
       const updatedTask = await taskService.updateTask(
         Number(projectId),
         Number(taskId),
-        editedTask
+        editedTaskData
       );
       
       setTask(updatedTask);
@@ -83,6 +98,11 @@ const TaskDetails: React.FC = () => {
   // Função para atualizar apenas o status da tarefa
   const handleStatusChange = async (newStatus: TaskStatus) => {
     if (!task || !projectId || !taskId) return;
+    
+    // Verificar se pode atualizar status de tarefas
+    if (!handleRestrictedAction('update_task_status')) {
+      return;
+    }
     
     try {
       setIsSaving(true);
@@ -108,12 +128,12 @@ const TaskDetails: React.FC = () => {
     const { name, value, type } = e.target;
     
     if (type === 'number') {
-      setEditedTask(prev => ({
+      setEditedTaskData(prev => ({
         ...prev,
         [name]: value ? parseFloat(value) : undefined
       }));
     } else {
-      setEditedTask(prev => ({
+      setEditedTaskData(prev => ({
         ...prev,
         [name]: value
       }));
@@ -265,7 +285,17 @@ const TaskDetails: React.FC = () => {
                     className="w-full sm:w-auto"
                     onClick={() => {
                       setIsEditing(false);
-                      setEditedTask(task || {});
+                      setEditedTaskData(task ? {
+                        title: task.title,
+                        description: task.description,
+                        status: task.status,
+                        priority: task.priority,
+                        due_date: task.due_date,
+                        estimated_hours: task.estimated_hours,
+                        actual_hours: task.actual_hours,
+                        parent_task_id: task.parent_task_id,
+                        assignees: task.assignees ? task.assignees.map(a => a.user.id) : []
+                      } : {});
                     }}
                   >
                     Cancelar
@@ -369,14 +399,15 @@ const TaskDetails: React.FC = () => {
                 <h2 className={theme === 'dark' ? 'text-lg font-medium text-dark-text' : 'text-lg font-medium text-gray-900'}>Detalhes</h2>
                 <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-4 sm:gap-y-6 sm:grid-cols-2">
                   <div>
-                    <h3 className={theme === 'dark' ? 'text-sm font-medium text-dark-muted' : 'text-sm font-medium text-gray-500'}>Responsável</h3>
+                    <h3 className={theme === 'dark' ? 'text-sm font-medium text-dark-muted' : 'text-sm font-medium text-gray-500'}>Responsáveis</h3>
                     <div className="mt-1">
-                      {task.assignedUser ? (
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 rounded-full bg-primary-lighter flex items-center justify-center text-white">
-                            {task.assignedUser.name.charAt(0).toUpperCase()}
-                          </div>
-                          <span className={theme === 'dark' ? 'ml-2 text-sm text-dark-text truncate' : 'ml-2 text-sm text-gray-900 truncate'}>{task.assignedUser.name}</span>
+                      {task.assignees && task.assignees.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {task.assignees.map(a => (
+                            <span key={a.user.id} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-lighter text-primary">
+                              {a.user.name}
+                            </span>
+                          ))}
                         </div>
                       ) : (
                         <span className={theme === 'dark' ? 'text-sm text-dark-muted' : 'text-sm text-gray-500'}>Não atribuído</span>
@@ -446,7 +477,7 @@ const TaskDetails: React.FC = () => {
                   type="text"
                   id="title"
                   name="title"
-                  value={editedTask.title || ''}
+                  value={editedTaskData.title || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   placeholder="Título da tarefa"
@@ -461,7 +492,7 @@ const TaskDetails: React.FC = () => {
                 <textarea
                   id="description"
                   name="description"
-                  value={editedTask.description || ''}
+                  value={editedTaskData.description || ''}
                   onChange={handleChange}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
@@ -477,7 +508,7 @@ const TaskDetails: React.FC = () => {
                   <select
                     id="status"
                     name="status"
-                    value={editedTask.status || 'pending'}
+                    value={editedTaskData.status || 'pending'}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   >
@@ -494,7 +525,7 @@ const TaskDetails: React.FC = () => {
                   <select
                     id="priority"
                     name="priority"
-                    value={editedTask.priority || 'medium'}
+                    value={editedTaskData.priority || 'medium'}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   >
@@ -515,7 +546,7 @@ const TaskDetails: React.FC = () => {
                     type="date"
                     id="due_date"
                     name="due_date"
-                    value={editedTask.due_date ? new Date(editedTask.due_date).toISOString().split('T')[0] : ''}
+                    value={editedTaskData.due_date ? new Date(editedTaskData.due_date).toISOString().split('T')[0] : ''}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                   />
@@ -529,7 +560,7 @@ const TaskDetails: React.FC = () => {
                     type="number"
                     id="estimated_hours"
                     name="estimated_hours"
-                    value={editedTask.estimated_hours || ''}
+                    value={editedTaskData.estimated_hours || ''}
                     onChange={handleChange}
                     min="0"
                     step="0.5"
@@ -540,17 +571,21 @@ const TaskDetails: React.FC = () => {
               </div>
               
               <div>
-                <label htmlFor="assigned_to" className="block text-sm font-medium text-gray-700 mb-1">
-                  Atribuir Para
+                <label htmlFor="assignees" className="block text-sm font-medium text-gray-700 mb-1">
+                  Responsáveis <span className="text-red-500">*</span>
                 </label>
                 <select
-                  id="assigned_to"
-                  name="assigned_to"
-                  value={editedTask.assigned_to || ''}
-                  onChange={handleChange}
+                  id="assignees"
+                  name="assignees"
+                  multiple
+                  value={(editedTaskData.assignees as number[] || []).map(String)}
+                  onChange={e => {
+                    const selected = Array.from(e.target.selectedOptions, option => Number(option.value));
+                    setEditedTaskData(prev => ({ ...prev, assignees: selected }));
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                  required
                 >
-                  <option value="">Não atribuído</option>
                   {project.members.map(member => (
                     <option key={member.user.id} value={member.user.id}>
                       {member.user.name}
@@ -567,7 +602,7 @@ const TaskDetails: React.FC = () => {
                   type="number"
                   id="actual_hours"
                   name="actual_hours"
-                  value={editedTask.actual_hours || ''}
+                  value={editedTaskData.actual_hours || ''}
                   onChange={handleChange}
                   min="0"
                   step="0.5"
@@ -579,6 +614,15 @@ const TaskDetails: React.FC = () => {
           )}
         </div>
       </main>
+      
+      {/* Modal de Restrição de Permissões */}
+      <PermissionRestrictionModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        action={currentRestriction?.action || ''}
+        requiredRoles={currentRestriction?.requiredRoles || []}
+        currentRole={user?.role || ''}
+      />
     </div>
   );
 };

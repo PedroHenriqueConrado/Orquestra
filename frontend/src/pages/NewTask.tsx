@@ -25,8 +25,8 @@ const NewTask: React.FC = () => {
     status: 'pending',
     priority: 'medium',
     due_date: '',
-    assigned_to: undefined,
-    estimated_hours: undefined
+    estimated_hours: undefined,
+    assignees: []
   });
   
   // Carregar dados do projeto
@@ -261,26 +261,6 @@ const NewTask: React.FC = () => {
                   placeholder="Ex: 4.5"
                 />
               </div>
-            </div>
-            
-            <div>
-              <label htmlFor="assigned_to" className={theme === 'dark' ? 'block text-sm font-medium text-dark-text mb-1' : 'block text-sm font-medium text-gray-700 mb-1'}>
-                Atribuir Para
-              </label>
-              <select
-                id="assigned_to"
-                name="assigned_to"
-                value={task.assigned_to || ''}
-                onChange={handleChange}
-                className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary'}
-              >
-                <option value="">Não atribuído</option>
-                {project.members.map(member => (
-                  <option key={member.user.id} value={member.user.id}>
-                    {member.user.name}
-                  </option>
-                ))}
-              </select>
             </div>
             
             <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4">

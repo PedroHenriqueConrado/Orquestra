@@ -3,28 +3,34 @@ import api from './api.service';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
+export interface TaskAssignee {
+  id: number;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+  };
+}
+
 export interface TaskData {
   title: string;
   description?: string;
   status?: TaskStatus;
   priority?: TaskPriority;
-  assigned_to?: number;
-  due_date?: string; // Formato ISO: YYYY-MM-DD
+  assignees: number[]; // IDs dos responsáveis
+  due_date?: string;
   estimated_hours?: number;
   actual_hours?: number;
   parent_task_id?: number;
 }
 
-export interface Task extends TaskData {
+export interface Task extends Omit<TaskData, 'assignees'> {
   id: number;
   project_id: number;
   created_at: string;
   updated_at: string;
-  assignedUser?: {
-    id: number;
-    name: string;
-    email: string;
-  };
+  assignees: TaskAssignee[];
 }
 
 class TaskService {
@@ -33,19 +39,16 @@ class TaskService {
    */
   async createTask(projectId: number, taskData: TaskData): Promise<Task> {
     try {
-      // Converte o formato dos dados para o esperado pelo backend
       const backendTaskData = {
         title: taskData.title,
         description: taskData.description,
         status: taskData.status,
         priority: taskData.priority,
-        // Campos com nomes diferentes no backend:
         dueDate: taskData.due_date,
-        assignedTo: taskData.assigned_to,
         estimatedHours: taskData.estimated_hours,
-        parentTaskId: taskData.parent_task_id
+        parentTaskId: taskData.parent_task_id,
+        assignees: taskData.assignees
       };
-      
       const response = await api.post<Task>(`/projects/${projectId}/tasks`, backendTaskData);
       return response.data;
     } catch (error: any) {
@@ -98,22 +101,16 @@ class TaskService {
    */
   async updateTask(projectId: number, taskId: number, taskData: Partial<TaskData>): Promise<Task> {
     try {
-      // Converte o formato dos dados para o esperado pelo backend
       const backendTaskData: Record<string, any> = {};
-      
-      // Copia campos com nomes idênticos
       if (taskData.title !== undefined) backendTaskData.title = taskData.title;
       if (taskData.description !== undefined) backendTaskData.description = taskData.description;
       if (taskData.status !== undefined) backendTaskData.status = taskData.status;
       if (taskData.priority !== undefined) backendTaskData.priority = taskData.priority;
-      
-      // Campos com nomes diferentes no backend
       if (taskData.due_date !== undefined) backendTaskData.dueDate = taskData.due_date;
-      if (taskData.assigned_to !== undefined) backendTaskData.assignedTo = taskData.assigned_to;
       if (taskData.estimated_hours !== undefined) backendTaskData.estimatedHours = taskData.estimated_hours;
       if (taskData.actual_hours !== undefined) backendTaskData.actualHours = taskData.actual_hours;
       if (taskData.parent_task_id !== undefined) backendTaskData.parentTaskId = taskData.parent_task_id;
-      
+      if (taskData.assignees !== undefined) backendTaskData.assignees = taskData.assignees;
       const response = await api.put<Task>(`/projects/${projectId}/tasks/${taskId}`, backendTaskData);
       return response.data;
     } catch (error: any) {

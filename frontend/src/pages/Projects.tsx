@@ -8,6 +8,8 @@ import projectService from '../services/project.service';
 import type { Project } from '../services/project.service';
 import { useAuth } from '../contexts/AuthContext';
 import progressService from '../services/progress.service';
+import { usePermissionRestriction } from '../hooks/usePermissionRestriction';
+import PermissionRestrictionModal from '../components/ui/PermissionRestrictionModal';
 
 type LocationState = {
   message?: string;
@@ -34,6 +36,8 @@ const Projects: React.FC = () => {
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const { user } = useAuth();
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
 
   useEffect(() => {
     // Verifica se há uma mensagem na navegação (ex: após criar um projeto)
@@ -141,6 +145,35 @@ const Projects: React.FC = () => {
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleCreateProjectClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!handleRestrictedAction('create_project')) {
+      return;
+    }
+    // Se tem permissão, navega para a página de criação
+    window.location.href = '/projects/new';
+  };
+
+  const handleEditProjectClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!handleRestrictedAction('edit_project')) {
+      return;
+    }
+    // Se tem permissão, permite a navegação
+    const target = e.currentTarget as HTMLAnchorElement;
+    if (target.href) {
+      window.location.href = target.href;
+    }
+  };
+
+  const handleDeleteProjectClick = (project: Project) => {
+    if (!handleRestrictedAction('delete_project')) {
+      return;
+    }
+    // Se tem permissão, executa a exclusão
+    handleDeleteProject(project);
+  };
+
   // Componente para quando não há projetos
   const EmptyProjectsCard = () => (
     <div className="bg-theme-surface rounded-lg shadow-sm border border-theme p-8 text-center">
@@ -156,14 +189,14 @@ const Projects: React.FC = () => {
           <br />
           Crie seu primeiro projeto para começar a organizar suas tarefas.
         </p>
-        <Link to="/projects/new">
+        <button onClick={handleCreateProjectClick}>
           <Button variant="primary">
             <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
             Criar primeiro projeto
           </Button>
-        </Link>
+        </button>
       </div>
     </div>
   );
@@ -238,14 +271,14 @@ const Projects: React.FC = () => {
                 </svg>
               </div>
             </div>
-            <Link to="/projects/new">
+            <button onClick={handleCreateProjectClick}>
               <Button variant="primary" className="w-full sm:w-auto">
                 <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
                 Novo Projeto
               </Button>
-            </Link>
+            </button>
             <Link to="/templates">
               <Button variant="secondary" className="w-full sm:w-auto">
                 <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -291,14 +324,14 @@ const Projects: React.FC = () => {
                 >
                   Limpar busca
                 </button>
-                <Link to="/projects/new">
+                <button onClick={handleCreateProjectClick}>
                   <Button variant="primary">
                     <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
                     Criar projeto
                   </Button>
-                </Link>
+                </button>
               </div>
             </div>
           </div>
@@ -314,15 +347,13 @@ const Projects: React.FC = () => {
                       {project.name}
                     </h3>
                     <div className="flex space-x-2">
-                      <Link to={`/projects/${project.id}/edit`}>
-                        <button className="text-theme-muted hover:text-theme-secondary transition-colors">
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                      </Link>
+                      <button onClick={handleEditProjectClick} data-href={`/projects/${project.id}/edit`}>
+                        <svg className="h-5 w-5 text-theme-muted hover:text-theme-secondary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
                       <button 
-                        onClick={() => handleDeleteProject(project)}
+                        onClick={() => handleDeleteProjectClick(project)}
                         className="text-theme-muted hover:text-red-600 transition-colors"
                       >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -391,20 +422,31 @@ const Projects: React.FC = () => {
       </main>
       
       {/* Modal de Confirmação de Exclusão */}
-      <ConfirmationDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false);
-          setProjectToDelete(null);
-        }}
-        onConfirm={confirmDeleteProject}
-        title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir o projeto "${projectToDelete?.name}"? Esta ação não pode ser desfeita.`}
-        confirmText="Excluir Projeto"
-        cancelText="Cancelar"
-        variant="danger"
-        loading={deleteLoading}
-      />
+      {showDeleteConfirm && projectToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Confirmar exclusão</h3>
+            <p className="text-gray-600 mb-6">
+              Tem certeza que deseja excluir o projeto "{projectToDelete.name}"? 
+              Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteProject}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Modal de Erro */}
       <AlertDialog
@@ -414,6 +456,17 @@ const Projects: React.FC = () => {
         message={errorMessage}
         variant="error"
       />
+
+      {/* Modal de restrição de permissão */}
+      {isModalOpen && currentRestriction && user && (
+        <PermissionRestrictionModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          action={currentRestriction.action}
+          requiredRoles={currentRestriction.requiredRoles}
+          currentRole={user.role}
+        />
+      )}
     </div>
   );
 };

@@ -25,8 +25,6 @@ export interface ProjectTemplate {
   name: string;
   description?: string;
   category?: string;
-  created_by: number;
-  is_public: boolean;
   created_at: string;
   updated_at: string;
   creator: {

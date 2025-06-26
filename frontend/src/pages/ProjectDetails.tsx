@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Button from '../components/ui/Button';
@@ -17,6 +17,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTheme as useThemeContext } from '../contexts/ThemeContext';
+import { usePermissionRestriction } from '../hooks/usePermissionRestriction';
+import PermissionRestrictionModal from '../components/ui/PermissionRestrictionModal';
+import { getRoleDisplayName, getRoleIcon, getRoleColor } from '../utils/roleTranslations';
 
 const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +28,7 @@ const ProjectDetails: React.FC = () => {
   const { user: currentUser } = useAuth();
   const { permissions } = usePermissions();
   const { theme } = useThemeContext();
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +51,14 @@ const ProjectDetails: React.FC = () => {
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showAddMembersModal, setShowAddMembersModal] = useState(false);
+  const [showRemoveMemberModal, setShowRemoveMemberModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [newMembers, setNewMembers] = useState<string[]>([]);
+  const [memberSearchTerm, setMemberSearchTerm] = useState('');
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Verifica se há um parâmetro de consulta 'tab' na URL
   const queryParams = new URLSearchParams(location.search);
@@ -56,6 +68,8 @@ const ProjectDetails: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'tasks' | 'chat'>(
     (tabParam === 'tasks' || tabParam === 'members' || tabParam === 'chat') ? tabParam as any : 'overview'
   );
+
+  const memberSearchRef = useRef<HTMLDivElement>(null);
 
   // Função para lidar com a exclusão do projeto
   const handleDeleteProject = async () => {
@@ -264,6 +278,72 @@ const ProjectDetails: React.FC = () => {
     }
   };
 
+  const handleEditProjectClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!handleRestrictedAction('edit_project')) {
+      return;
+    }
+    // Se tem permissão, navega para a página de edição
+    window.location.href = `/projects/${id}/edit`;
+  };
+
+  const handleDeleteProjectClick = () => {
+    if (!handleRestrictedAction('delete_project')) {
+      return;
+    }
+    // Se tem permissão, executa a exclusão
+    handleDeleteProject();
+  };
+
+  const handleAddMembersClick = () => {
+    if (!handleRestrictedAction('add_members')) {
+      return;
+    }
+    // Se tem permissão, abre o modal de adicionar membros
+    setShowAddMembersModal(true);
+  };
+
+  const handleRemoveMemberClick = (member: any) => {
+    if (!handleRestrictedAction('remove_members')) {
+      return;
+    }
+    // Se tem permissão, executa a remoção
+    setSelectedMember(member);
+    setShowRemoveMemberModal(true);
+  };
+
+  const handleCreateTemplateClick = () => {
+    if (!handleRestrictedAction('create_template')) {
+      return;
+    }
+    // Se tem permissão, executa a criação do template
+    handleCreateTemplate();
+  };
+
+  const handleCreateTemplate = async () => {
+    if (!project) return;
+    
+    const templateName = prompt('Digite o nome do template:');
+    if (!templateName) return;
+    
+    const templateDescription = prompt('Digite uma descrição para o template (opcional):');
+    const templateCategory = prompt('Digite uma categoria para o template (opcional):');
+    const isPublic = confirm('Deseja tornar este template público?');
+    
+    try {
+      await templateService.createFromProject(project.id, {
+        name: templateName,
+        description: templateDescription || undefined,
+        category: templateCategory || undefined,
+        is_public: isPublic
+      });
+      alert('Template criado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao criar template:', error);
+      alert('Erro ao criar template. Tente novamente.');
+    }
+  };
+
   const renderProjectActions = () => {
     const handleCreateTemplate = async () => {
       if (!project) return;
@@ -290,16 +370,16 @@ const ProjectDetails: React.FC = () => {
     };
 
     // Verificar se o usuário tem permissão para acessar o Dashboard Avançado
-    const canAccessAdvancedDashboard = currentUser?.role === 'project_manager';
+    const canAccessAdvancedDashboard = currentUser && currentUser.role === 'project_manager';
 
     return (
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Link to={`/projects/${id}/edit`}>
+      <div className="flex flex-wrap justify-end items-center gap-3">
+        <button onClick={handleEditProjectClick}>
           <Button variant="outline" size="sm">
             <i className="fas fa-edit mr-2"></i>
             Editar Projeto
           </Button>
-        </Link>
+        </button>
         <Link to={`/projects/${id}/tasks/new`}>
           <Button variant="primary" size="sm">
             <i className="fas fa-plus-circle mr-2"></i>
@@ -310,23 +390,32 @@ const ProjectDetails: React.FC = () => {
           <Link to={`/projects/${id}/dashboard`}>
             <Button variant="secondary" size="sm">
               <i className="fas fa-chart-bar mr-2"></i>
-              Dashboard Avançado
+              Dashboard
             </Button>
           </Link>
         )}
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleCreateTemplate}
-          title="Criar template a partir deste projeto"
-        >
-          <i className="fas fa-copy mr-2"></i>
-          Criar Template
-        </Button>
-        <Button variant="danger" size="sm" onClick={handleDeleteProject}>
-          <i className="fas fa-trash-alt mr-2"></i>
-          Excluir Projeto
-        </Button>
+        <Link to={`/projects/${id}/dashboard`}>
+          <Button variant="secondary" size="sm">
+            <i className="fas fa-chart-bar mr-2"></i>
+            Dashboard (Gantt)
+          </Button>
+        </Link>
+        <button onClick={handleCreateTemplateClick}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            title="Criar template a partir deste projeto"
+          >
+            <i className="fas fa-copy mr-2"></i>
+            Criar Template
+          </Button>
+        </button>
+        <button onClick={handleDeleteProjectClick}>
+          <Button variant="danger" size="sm">
+            <i className="fas fa-trash-alt mr-2"></i>
+            Excluir Projeto
+          </Button>
+        </button>
       </div>
     );
   };
@@ -373,14 +462,53 @@ const ProjectDetails: React.FC = () => {
         {/* Cabeçalho do projeto */}
         <div className="bg-theme-surface shadow rounded-lg mb-4 sm:mb-6 border border-theme">
           <div className="px-4 py-4 sm:px-6 sm:py-5">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
               <div>
                 <h1 className="text-xl sm:text-2xl font-semibold text-theme-primary">{project.name}</h1>
                 <p className="mt-1 text-sm text-theme-secondary">
                   Criado em {new Date(project.created_at).toLocaleDateString('pt-BR')}
                 </p>
               </div>
-              {renderProjectActions()}
+              <div className="flex flex-wrap justify-end items-center gap-3">
+                <button onClick={handleEditProjectClick}>
+                  <Button variant="outline" size="sm">
+                    <i className="fas fa-edit mr-2"></i>
+                    Editar Projeto
+                  </Button>
+                </button>
+                <Link to={`/projects/${id}/tasks/new`}>
+                  <Button variant="primary" size="sm">
+                    <i className="fas fa-plus-circle mr-2"></i>
+                    Nova Tarefa
+                  </Button>
+                </Link>
+                {currentUser && currentUser.role === 'project_manager' && (
+                  <Link to={`/projects/${id}/dashboard`}>
+                    <Button variant="secondary" size="sm">
+                      <i className="fas fa-chart-bar mr-2"></i>
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+                <Link to={`/projects/${id}/dashboard`}>
+                  <Button variant="secondary" size="sm">
+                    <i className="fas fa-chart-bar mr-2"></i>
+                    Dashboard (Gantt)
+                  </Button>
+                </Link>
+                <button onClick={handleCreateTemplateClick}>
+                  <Button variant="outline" size="sm" title="Criar template a partir deste projeto">
+                    <i className="fas fa-copy mr-2"></i>
+                    Criar Template
+                  </Button>
+                </button>
+                <button onClick={handleDeleteProjectClick}>
+                  <Button variant="danger" size="sm">
+                    <i className="fas fa-trash-alt mr-2"></i>
+                    Excluir Projeto
+                  </Button>
+                </button>
+              </div>
             </div>
             
             {/* Progresso do projeto */}
@@ -482,7 +610,7 @@ const ProjectDetails: React.FC = () => {
                       <div>
                         <dt className="text-sm font-medium text-theme-secondary">Gerente do Projeto</dt>
                         <dd className="mt-1 text-sm text-theme-primary">
-                          {project.members.find(m => m.role === 'project_manager')?.user.name || 'Não definido'}
+                          {project.members.find(m => m.role === 'project_manager')?.user?.name || 'Não definido'}
                         </dd>
                       </div>
                     </dl>
@@ -533,29 +661,26 @@ const ProjectDetails: React.FC = () => {
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
                                   <div className="h-8 w-8 rounded-full bg-primary-lighter flex items-center justify-center text-white">
-                                    {member.user.name.charAt(0).toUpperCase()}
+                                    {member.user?.name?.charAt(0).toUpperCase()}
                                   </div>
                                   <div className="ml-3">
-                                    <div className="text-sm font-medium text-theme-primary">{member.user.name}</div>
-                                    <div className="text-sm text-theme-secondary hidden sm:block">{member.user.email}</div>
+                                    <div className="text-sm font-medium text-theme-primary">{member.user?.name}</div>
+                                    <div className="text-sm text-theme-secondary hidden sm:block">{member.user?.email}</div>
                                   </div>
                                 </div>
                               </td>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                  {member.role === 'project_manager' ? 'Gerente' : 
-                                   member.role === 'developer' ? 'Dev' : 
-                                   member.role === 'team_leader' ? 'Líder' : 
-                                   member.role}
+                                  {getRoleDisplayName(member.user?.role)}
                                 </span>
                               </td>
                               <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
                                 {new Date(member.joined_at).toLocaleDateString('pt-BR')}
                               </td>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                {member.user.id !== currentUser?.id && (
+                                {member.user?.id !== currentUser?.id && (
                                   <button
-                                    onClick={() => setMemberToRemove({ id: member.user.id, name: member.user.name })}
+                                    onClick={() => handleRemoveMemberClick(member)}
                                     className="text-red-600 hover:text-red-900"
                                   >
                                     Remover
@@ -660,6 +785,23 @@ const ProjectDetails: React.FC = () => {
                     error={taskError}
                     onStatusChange={handleTaskStatusChange}
                     onRefresh={fetchTasks}
+                    onTaskUpdate={async (task: Task) => {
+                      try {
+                        await taskService.updateTask(Number(id), task.id, task);
+                        await fetchTasks();
+                      } catch (error) {
+                        console.error('Erro ao atualizar tarefa:', error);
+                      }
+                    }}
+                    onTaskDelete={async (taskId: number) => {
+                      try {
+                        await taskService.deleteTask(Number(id), taskId);
+                        await fetchTasks();
+                      } catch (error) {
+                        console.error('Erro ao deletar tarefa:', error);
+                      }
+                    }}
+                    projectId={Number(id)}
                   />
                 </div>
               </div>
@@ -756,20 +898,46 @@ const ProjectDetails: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Modal de confirmação de exclusão */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <h3 className="text-lg font-semibold mb-4">Confirmar exclusão</h3>
+              <p className="text-gray-600 mb-6">
+                Tem certeza que deseja excluir o projeto "{project?.name}"? 
+                Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmDeleteProject}
+                  disabled={deleteLoading}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {deleteLoading ? 'Excluindo...' : 'Excluir'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de restrição de permissão */}
+        {isModalOpen && currentRestriction && currentUser && (
+          <PermissionRestrictionModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            action={currentRestriction.action}
+            requiredRoles={currentRestriction.requiredRoles}
+            currentRole={currentUser.role}
+          />
+        )}
       </main>
-      
-      {/* Modal de Confirmação de Exclusão */}
-      <ConfirmationDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={confirmDeleteProject}
-        title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir o projeto "${project?.name}"? Esta ação não pode ser desfeita.`}
-        confirmText="Excluir Projeto"
-        cancelText="Cancelar"
-        variant="danger"
-        loading={deleteLoading}
-      />
       
       {/* Modal de Erro */}
       <AlertDialog

@@ -33,12 +33,10 @@ const taskSchema = z.object({
         z.string().regex(/^\d+(\.\d+)?$/).transform(val => parseFloat(val)),
         z.literal('').transform(() => undefined)
     ]).optional(),
-    // Aceita número ou string numérica e converte para número, ou string vazia para null
-    assignedTo: z.union([
+    assignees: z.array(z.union([
         z.number().int().positive(),
-        z.string().regex(/^\d+$/).transform(val => parseInt(val, 10)),
-        z.literal('').transform(() => undefined)
-    ]).optional(),
+        z.string().regex(/^\d+$/).transform(val => parseInt(val, 10))
+    ])).min(1, 'Selecione pelo menos um responsável.'),
     // Aceita número ou string numérica e converte para número, ou string vazia para null
     parentTaskId: z.union([
         z.number().int().positive(),
@@ -107,7 +105,7 @@ class TaskController {
                     due_date: validatedData.dueDate,
                     estimated_hours: validatedData.estimatedHours,
                     actual_hours: validatedData.actualHours,
-                    assigned_to: validatedData.assignedTo,
+                    assignees: validatedData.assignees,
                     parent_task_id: validatedData.parentTaskId
                 };
                 
@@ -115,7 +113,6 @@ class TaskController {
                 if ('dueDate' in validatedData) delete normalizedData.dueDate;
                 if ('estimatedHours' in validatedData) delete normalizedData.estimatedHours;
                 if ('actualHours' in validatedData) delete normalizedData.actualHours;
-                if ('assignedTo' in validatedData) delete normalizedData.assignedTo;
                 if ('parentTaskId' in validatedData) delete normalizedData.parentTaskId;
                 
                 logger.debug('TaskController.create: Dados normalizados', normalizedData);
@@ -163,6 +160,12 @@ class TaskController {
                 return res.status(404).json({ error: 'Task not found' });
             }
             
+            const isAssignee = task.assignees && task.assignees.some(a => a.user_id === req.user.id);
+            const canView = isAssignee || req.user.role === 'admin' || req.user.role === 'project_manager';
+            if (!canView) {
+                return res.status(403).json({ error: 'Você não tem permissão para acessar esta tarefa' });
+            }
+            
             res.json(task);
         } catch (error) {
             res.status(500).json({ error: 'Internal server error' });
@@ -179,14 +182,8 @@ class TaskController {
                 return res.status(404).json({ error: 'Task not found' });
             }
             
-            // Verificar se pode editar esta tarefa específica
-            const canEdit = canEditResource(
-                req.user.role,
-                task.assigned_to || task.created_by,
-                req.user.id,
-                'tasks:edit_any'
-            );
-            
+            const isAssignee = task.assignees && task.assignees.some(a => a.user_id === req.user.id);
+            const canEdit = isAssignee || req.user.role === 'admin' || req.user.role === 'project_manager';
             if (!canEdit) {
                 logger.warn(`TaskController.update: Usuário ${req.user.id} (${req.user.role}) tentou editar tarefa ${taskId} sem permissão`);
                 return res.status(403).json({

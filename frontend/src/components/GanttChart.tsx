@@ -11,7 +11,7 @@ interface ProjectTask {
   description?: string;
   status: 'pending' | 'in_progress' | 'completed';
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  assigned_to?: number;
+  assignees?: number[];
   due_date?: string;
   estimated_hours?: number;
   actual_hours?: number;

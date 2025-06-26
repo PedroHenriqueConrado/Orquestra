@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Button from './ui/Button';
 import Rating from './ui/Rating';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermissionRestriction } from '../hooks/usePermissionRestriction';
+import PermissionRestrictionModal from './ui/PermissionRestrictionModal';
 import taskCommentService from '../services/task-comment.service';
 import type { TaskComment, CreateCommentData } from '../services/task-comment.service';
 import toast from 'react-hot-toast';
@@ -14,6 +16,7 @@ interface TaskCommentsProps {
 
 const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
   const { user } = useAuth();
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
   const [comments, setComments] = useState<TaskComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -60,6 +63,11 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
+    // Verificar se pode avaliar tarefas
+    if (newRating !== undefined && !handleRestrictedAction('rate_task')) {
+      return;
+    }
+
     try {
       setSubmitting(true);
       const data: CreateCommentData = { 
@@ -82,6 +90,11 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
 
   // Iniciar edição de comentário
   const handleStartEdit = (comment: TaskComment) => {
+    // Verificar se pode editar comentários de outros usuários
+    if (comment.user_id !== user?.id && !handleRestrictedAction('edit_any_comment')) {
+      return;
+    }
+
     setEditingComment(comment.id);
     setEditContent(comment.content);
     setEditRating(comment.rating);
@@ -97,6 +110,11 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
   // Salvar edição
   const handleSaveEdit = async (commentId: number) => {
     if (!editContent.trim()) return;
+
+    // Verificar se pode avaliar tarefas
+    if (editRating !== undefined && !handleRestrictedAction('rate_task')) {
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -130,6 +148,12 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
 
   // Excluir comentário
   const handleDeleteComment = async (commentId: number) => {
+    // Verificar se pode deletar comentários de outros usuários
+    const comment = comments.find(c => c.id === commentId);
+    if (comment && comment.user_id !== user?.id && !handleRestrictedAction('delete_any_comment')) {
+      return;
+    }
+
     if (!confirm('Tem certeza que deseja excluir este comentário?')) return;
 
     try {
@@ -402,6 +426,17 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
           </>
         )}
       </div>
+
+      {/* Modal de restrição de permissão */}
+      {isModalOpen && currentRestriction && user && (
+        <PermissionRestrictionModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          action={currentRestriction.action}
+          requiredRoles={currentRestriction.requiredRoles}
+          currentRole={user.role}
+        />
+      )}
     </div>
   );
 };

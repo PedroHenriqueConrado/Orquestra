@@ -21,7 +21,7 @@ model User {
   documents        Document[]        @relation("CreatedDocuments")
   notifications    Notification[]
   projects         ProjectMember[]
-  tasks            Task[]            @relation("AssignedTasks")
+  taskAssignees    TaskAssignee[]
   taskComments     TaskComment[]
   taskHistory      TaskHistory[]
   taskDocuments    TaskDocument[]    // Relação com documentos de tarefas
@@ -72,13 +72,11 @@ model Task {
   description    String?      @db.Text
   status         TaskStatus   @default(pending)
   priority       TaskPriority @default(medium)
-  assigned_to    Int?
   due_date       DateTime?    @db.Date
   estimated_hours Float?      @db.Float
   actual_hours    Float?      @db.Float
   created_at     DateTime     @default(now()) @db.DateTime(0)
   updated_at     DateTime     @default(now()) @updatedAt @db.DateTime(0)
-  assignedUser   User?        @relation("AssignedTasks", fields: [assigned_to], references: [id], map: "fk_tasks_assigned")
   parentTask     Task?        @relation("SubTasks", fields: [parent_task_id], references: [id], map: "fk_tasks_parent")
   subTasks       Task[]       @relation("SubTasks")
   project        Project      @relation(fields: [project_id], references: [id], onDelete: Cascade, map: "fk_tasks_project")
@@ -86,11 +84,24 @@ model Task {
   history        TaskHistory[]
   tags           TaskToTag[]
   documents      TaskDocument[] // Relação com documentos
+  assignees      TaskAssignee[]
 
   @@index([project_id], map: "idx_tasks_project")
   @@index([parent_task_id], map: "idx_tasks_parent")
-  @@index([assigned_to], map: "idx_tasks_assigned")
   @@map("tasks")
+}
+
+model TaskAssignee {
+  id      Int   @id @default(autoincrement())
+  task    Task  @relation(fields: [task_id], references: [id], onDelete: Cascade)
+  task_id Int
+  user    User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id Int
+
+  @@unique([task_id, user_id], name: "uq_task_user")
+  @@index([task_id])
+  @@index([user_id])
+  @@map("task_assignees")
 }
 
 model Document {

@@ -12,7 +12,6 @@ export interface TaskItem {
   description?: string;
   status: 'pending' | 'in_progress' | 'completed';
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  assigned_to?: number;
   assignedUser?: {
     id: number;
     name: string;

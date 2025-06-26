@@ -69,7 +69,7 @@ class ProjectService {
               priority: taskData.priority,
               // Conversão de nomes:
               dueDate: taskData.due_date,  // backend espera dueDate, frontend usa due_date
-              assignedTo: taskData.assigned_to,  // backend espera assignedTo, frontend usa assigned_to
+              assignees: taskData.assignees,  // backend espera assignees, frontend usa assignees
               estimatedHours: taskData.estimated_hours,  // backend espera estimatedHours
               parentTaskId: taskData.parent_task_id  // backend espera parentTaskId
             };

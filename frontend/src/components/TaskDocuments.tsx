@@ -9,6 +9,9 @@ import Dialog from './ui/Dialog';
 import formatFileSize from '../utils/formatFileSize';
 import formatDate from '../utils/formatDate';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { usePermissionRestriction } from '../hooks/usePermissionRestriction';
+import PermissionRestrictionModal from './ui/PermissionRestrictionModal';
 
 interface TaskDocumentsProps {
   taskId: number;
@@ -32,6 +35,8 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { theme } = useTheme();
+  const { user } = useAuth();
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
   
   // Efeito para carregar documentos da tarefa
   useEffect(() => {
@@ -147,6 +152,11 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
   
   // Função para remover associação de documento
   const handleRemoveDocument = async (documentId: number) => {
+    // Verificar se pode deletar documentos
+    if (!handleRestrictedAction('delete_document')) {
+      return;
+    }
+
     if (!confirm('Tem certeza que deseja remover este documento da tarefa?')) {
       return;
     }
@@ -238,6 +248,42 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
       toast.error('Erro ao adicionar nova versão: ' + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    // Verificar se pode fazer upload de documentos
+    if (!handleRestrictedAction('upload_document')) {
+      return;
+    }
+
+    const file = files[0];
+    
+    // Validar tipo de arquivo
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'image/jpeg',
+      'image/png',
+      'image/gif'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Tipo de arquivo não suportado. Use PDF, Word, Excel, texto ou imagens.');
+      return;
+    }
+    
+    // Validar tamanho (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Arquivo muito grande. Tamanho máximo: 5MB');
+      return;
     }
   };
   
@@ -400,7 +446,7 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
                   id="documentFile"
                   ref={fileInputRef}
                   className="hidden"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  onChange={handleFileUpload}
                 />
                 <Button
                   variant="secondary"
@@ -509,7 +555,7 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
                   id="versionFile"
                   ref={fileInputRef}
                   className="hidden"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  onChange={handleFileUpload}
                 />
                 <Button
                   variant="secondary"
@@ -535,6 +581,17 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
           </div>
         )}
       </Dialog>
+
+      {/* Modal de restrição de permissão */}
+      {isModalOpen && currentRestriction && user && (
+        <PermissionRestrictionModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          action={currentRestriction.action}
+          requiredRoles={currentRestriction.requiredRoles}
+          currentRole={user.role}
+        />
+      )}
     </div>
   );
 };

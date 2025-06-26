@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import type { Task, TaskStatus, TaskPriority } from '../services/task.service';
 import { useAuth } from '../contexts/AuthContext';
-import { usePermissions } from '../hooks/usePermissions';
+import { usePermissionRestriction } from '../hooks/usePermissionRestriction';
+import PermissionRestrictionModal from '../components/ui/PermissionRestrictionModal';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface TaskListProps {
@@ -18,7 +19,7 @@ interface TaskListProps {
 
 const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChange, onRefresh, onTaskUpdate, onTaskDelete, projectId }) => {
   const { user } = useAuth();
-  const { permissions, canEditResource } = usePermissions();
+  const { handleRestrictedAction, isModalOpen, currentRestriction, closeModal } = usePermissionRestriction();
   const { theme } = useTheme();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -61,6 +62,10 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
   };
 
   const handleEditTask = (task: Task) => {
+    if (!canEditTask(task)) {
+      handleRestrictedAction('edit_task');
+      return;
+    }
     setEditingTask(task.id);
     setEditForm({
       title: task.title,
@@ -93,6 +98,10 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
   };
 
   const handleDeleteTask = async (taskId: number) => {
+    if (!canDeleteTask(tasks.find(t => t.id === taskId) || {} as Task)) {
+      return;
+    }
+    
     if (!confirm('Tem certeza que deseja excluir esta tarefa?')) return;
     
     try {
@@ -103,12 +112,16 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
   };
 
   const canEditTask = (task: Task) => {
-    const taskUserId = task.assigned_to || 0;
-    return canEditResource(taskUserId, 'tasks:edit_any');
+    if (!user) return false;
+    // Permite editar se usuário for responsável ou admin
+    const isAssignee = task.assignees && task.assignees.some(a => a.user.id === user.id);
+    return isAssignee || user.role === 'admin';
   };
 
-  const canDeleteTask = () => {
-    return permissions.canDeleteTasks;
+  const canDeleteTask = (task: Task) => {
+    if (!user) return false;
+    const isAssignee = task.assignees && task.assignees.some(a => a.user.id === user.id);
+    return isAssignee || user.role === 'admin';
   };
 
   if (loading) {
@@ -137,15 +150,22 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
     return (
       <div className="text-center py-8">
         <p className="text-theme-secondary mb-4">Nenhuma tarefa encontrada</p>
-        <Link 
-          to="tasks/new"
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            if (!handleRestrictedAction('create_task')) {
+              return;
+            }
+            // Se tem permissão, navega para a página de criação
+            window.location.href = 'tasks/new';
+          }}
           className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Criar Nova Tarefa
-        </Link>
+        </button>
       </div>
     );
   }
@@ -158,130 +178,78 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, loading, error, onStatusChan
         </div>
       ) : (
         tasks.map((task) => (
-          <div key={task.id} className="bg-theme-surface border border-theme rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
-            {editingTask === task.id ? (
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  value={editForm.title}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-theme rounded-md bg-theme-surface text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Título da tarefa"
-                />
-                <textarea
-                  value={editForm.description}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-theme rounded-md bg-theme-surface text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Descrição da tarefa"
-                />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <select
-                    value={editForm.status}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value as TaskStatus }))}
-                    className="px-3 py-2 border border-theme rounded-md bg-theme-surface text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="pending">Pendente</option>
-                    <option value="in_progress">Em Progresso</option>
-                    <option value="completed">Concluída</option>
-                  </select>
-                  <select
-                    value={editForm.priority}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, priority: e.target.value as TaskPriority }))}
-                    className="px-3 py-2 border border-theme rounded-md bg-theme-surface text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="low">Baixa</option>
-                    <option value="medium">Média</option>
-                    <option value="high">Alta</option>
-                    <option value="urgent">Urgente</option>
-                  </select>
-                  <input
-                    type="date"
-                    value={editForm.due_date}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, due_date: e.target.value }))}
-                    className="px-3 py-2 border border-theme rounded-md bg-theme-surface text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+          <Link to={`/projects/${projectId}/tasks/${task.id}`} key={task.id} className="block bg-theme-surface border border-theme rounded-lg p-4 hover:shadow-md transition-shadow duration-200 hover:bg-theme-secondary/10 focus:outline-none focus:ring-2 focus:ring-primary">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-theme-primary mb-2">{task.title}</h3>
+                <p className="text-theme-secondary mb-3">{task.description}</p>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(task.status || 'pending')}`}>
+                    {task.status === 'pending' && 'Pendente'}
+                    {task.status === 'in_progress' && 'Em Progresso'}
+                    {task.status === 'completed' && 'Concluída'}
+                  </span>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(task.priority || 'medium')}`}>
+                    {task.priority === 'low' && 'Baixa'}
+                    {task.priority === 'medium' && 'Média'}
+                    {task.priority === 'high' && 'Alta'}
+                    {task.priority === 'urgent' && 'Urgente'}
+                  </span>
                 </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleSaveTask(task.id)}
-                    className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                  >
-                    Salvar
-                  </button>
-                  <button
-                    onClick={() => setEditingTask(null)}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                  >
-                    Cancelar
-                  </button>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-theme-secondary">
+                  <div>
+                    <span className="font-medium">Responsáveis:</span> {task.assignees && task.assignees.length > 0
+                      ? task.assignees.map(a => a.user.name).join(', ')
+                      : 'Não atribuído'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Criado em:</span> {new Date(task.created_at).toLocaleDateString('pt-BR')}
+                  </div>
+                  {task.due_date && (
+                    <div>
+                      <span className="font-medium">Prazo:</span> {new Date(task.due_date).toLocaleDateString('pt-BR')}
+                    </div>
+                  )}
                 </div>
               </div>
-            ) : (
-              <div>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-theme-primary mb-2">{task.title}</h3>
-                    <p className="text-theme-secondary mb-3">{task.description}</p>
-                    
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(task.status || 'pending')}`}>
-                        {task.status === 'pending' && 'Pendente'}
-                        {task.status === 'in_progress' && 'Em Progresso'}
-                        {task.status === 'completed' && 'Concluída'}
-                      </span>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(task.priority || 'medium')}`}>
-                        {task.priority === 'low' && 'Baixa'}
-                        {task.priority === 'medium' && 'Média'}
-                        {task.priority === 'high' && 'Alta'}
-                        {task.priority === 'urgent' && 'Urgente'}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-theme-secondary">
-                      <div>
-                        <span className="font-medium">Responsável:</span> {task.assignedUser?.name || 'Não atribuído'}
-                      </div>
-                      <div>
-                        <span className="font-medium">Criado em:</span> {new Date(task.created_at).toLocaleDateString('pt-BR')}
-                      </div>
-                      {task.due_date && (
-                        <div>
-                          <span className="font-medium">Prazo:</span> {new Date(task.due_date).toLocaleDateString('pt-BR')}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex space-x-2 ml-4">
-                    {canEditTask(task) && (
-                      <button
-                        onClick={() => handleEditTask(task)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                        title="Editar tarefa"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                    )}
-                    {canDeleteTask() && (
-                      <button
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                        title="Excluir tarefa"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                </div>
+              
+              <div className="flex flex-col justify-center items-center space-y-2 ml-4">
+                <button
+                  onClick={e => { e.preventDefault(); handleEditTask(task); }}
+                  className="text-blue-600 hover:text-blue-800 transition-colors duration-200 cursor-pointer"
+                  title="Editar tarefa"
+                  disabled={!canEditTask(task)}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={e => { e.preventDefault(); handleDeleteTask(task.id); }}
+                  className="text-red-600 hover:text-red-800 transition-colors duration-200 cursor-pointer"
+                  title="Excluir tarefa"
+                  disabled={!canDeleteTask(task)}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
-            )}
-          </div>
+            </div>
+          </Link>
         ))
+      )}
+
+      {isModalOpen && currentRestriction && user && (
+        <PermissionRestrictionModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          action={currentRestriction.action}
+          requiredRoles={currentRestriction.requiredRoles}
+          currentRole={user.role}
+        />
       )}
     </div>
   );

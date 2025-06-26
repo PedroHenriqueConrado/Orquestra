@@ -15,7 +15,8 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
     description: '',
     priority: 'medium',
     status: 'pending',
-    due_date: ''
+    due_date: '',
+    assignees: []
   });
   
   // Estado para controlar se estamos editando uma tarefa existente
@@ -54,6 +55,11 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
       return;
     }
     
+    if (!currentTask.assignees || currentTask.assignees.length === 0) {
+      setValidationError('Selecione pelo menos um responsável para a tarefa');
+      return;
+    }
+    
     let updatedTasks: TaskData[];
     
     if (editingIndex !== null) {
@@ -74,7 +80,8 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
       description: '',
       priority: 'medium',
       status: 'pending',
-      due_date: ''
+      due_date: '',
+      assignees: []
     });
     
     // Sai do modo de edição
@@ -100,7 +107,8 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
         description: '',
         priority: 'medium',
         status: 'pending',
-        due_date: ''
+        due_date: '',
+        assignees: []
       });
       setEditingIndex(null);
     }
@@ -113,7 +121,8 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
       description: '',
       priority: 'medium',
       status: 'pending',
-      due_date: ''
+      due_date: '',
+      assignees: []
     });
     setEditingIndex(null);
     setValidationError(null);
@@ -219,26 +228,31 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
             </div>
           </div>
           
-          {/* Atribuição a membro (se houver membros disponíveis) */}
+          {/* Responsáveis (multi-select) */}
           {availableMembers.length > 0 && (
             <div>
-              <label htmlFor="assigned_to" className="block text-sm font-medium text-white mb-1">
-                Atribuir Para
+              <label htmlFor="assignees" className="block text-sm font-medium text-white mb-1">
+                Responsáveis <span className="text-red-500">*</span>
               </label>
               <select
-                id="assigned_to"
-                name="assigned_to"
-                value={currentTask.assigned_to?.toString() || ''}
-                onChange={handleTaskChange}
+                id="assignees"
+                name="assignees"
+                multiple
+                value={currentTask.assignees?.map(String) || []}
+                onChange={e => {
+                  const selected = Array.from(e.target.selectedOptions).map(opt => Number(opt.value));
+                  setCurrentTask(prev => ({ ...prev, assignees: selected }));
+                  setValidationError(null);
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
               >
-                <option value="">Não atribuído</option>
                 {availableMembers.map(member => (
                   <option key={member.id} value={member.id}>
                     {member.name}
                   </option>
                 ))}
               </select>
+              <span className="text-xs text-gray-300">Segure Ctrl ou Shift para selecionar mais de um.</span>
             </div>
           )}
           
@@ -312,9 +326,9 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
                       )}
                       
                       {/* Atribuição */}
-                      {task.assigned_to && (
+                      {task.assignees && task.assignees.length > 0 && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          Atribuída: {availableMembers?.find(m => m.id === task.assigned_to)?.name || `Usuário ${task.assigned_to}`}
+                          Atribuída: {task.assignees.map(id => availableMembers?.find(m => m.id === id)?.name || `Usuário ${id}`).join(', ')}
                         </span>
                       )}
                     </div>
