@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import userService from '../services/user.service';
 import type { User } from '../services/user.service';
+import { getRoleDisplayName } from '../utils/roleTranslations';
 
 interface MemberSelectorProps {
   selectedMembers: number[];
   onChange: (selectedIds: number[]) => void;
   currentUserId?: number;
 }
+
+const ALL_ROLES = [
+  'developer',
+  'supervisor',
+  'tutor',
+  'team_leader',
+  'project_manager',
+  'admin'
+];
 
 const MemberSelector: React.FC<MemberSelectorProps> = ({ 
   selectedMembers, 
@@ -16,6 +26,8 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [roleFilters, setRoleFilters] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
 
   // Busca os usuários ao montar o componente
   useEffect(() => {
@@ -24,12 +36,10 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
         setIsLoading(true);
         setError(null);
         const allUsers = await userService.getAllUsers();
-        
         // Filtra o usuário atual (o criador do projeto) se for necessário
         const filteredUsers = currentUserId 
           ? allUsers.filter(user => user.id !== currentUserId)
           : allUsers;
-          
         setUsers(filteredUsers);
       } catch (err: any) {
         console.error('Erro ao buscar usuários:', err);
@@ -38,27 +48,78 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
         setIsLoading(false);
       }
     };
-
     fetchUsers();
   }, [currentUserId]);
 
   // Função para alternar a seleção de um usuário
   const toggleUserSelection = (userId: number) => {
     if (selectedMembers.includes(userId)) {
-      // Se já estiver selecionado, remove
       onChange(selectedMembers.filter(id => id !== userId));
     } else {
-      // Se não estiver selecionado, adiciona
       onChange([...selectedMembers, userId]);
     }
   };
+
+  // Função para alternar filtro de cargo
+  const toggleRoleFilter = (role: string) => {
+    setRoleFilters(prev =>
+      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    );
+  };
+
+  // Filtragem dos usuários
+  const filteredUsers = useMemo(() => {
+    let filtered = users;
+    if (roleFilters.length > 0) {
+      filtered = filtered.filter(user => roleFilters.includes(user.role));
+    }
+    if (search.trim()) {
+      const s = search.trim().toLowerCase();
+      filtered = filtered.filter(user =>
+        user.name.toLowerCase().includes(s) || user.email.toLowerCase().includes(s)
+      );
+    }
+    return filtered;
+  }, [users, roleFilters, search]);
 
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium text-theme-primary">
         Adicionar membros ao projeto
       </label>
-      
+
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:space-x-6 gap-2">
+        {/* Filtro de cargos */}
+        <div>
+          <span className="block text-xs font-semibold text-theme-secondary mb-1">Filtrar por função:</span>
+          <div className="flex flex-wrap gap-2">
+            {ALL_ROLES.map(role => (
+              <label key={role} className="flex items-center space-x-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={roleFilters.includes(role)}
+                  onChange={() => toggleRoleFilter(role)}
+                  className="h-4 w-4 text-primary border-theme rounded"
+                />
+                <span className="text-xs text-theme-secondary">{getRoleDisplayName(role)}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        {/* Filtro de nome/email */}
+        <div className="flex-1">
+          <span className="block text-xs font-semibold text-theme-secondary mb-1">Buscar por nome ou email:</span>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Digite o nome ou email..."
+            className="w-full px-3 py-2 border border-theme rounded-md bg-theme-surface text-theme-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+      </div>
+
       {isLoading && (
         <div className="flex justify-center items-center p-4">
           <svg className="animate-spin h-5 w-5 text-theme-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -74,15 +135,15 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
         </div>
       )}
 
-      {!isLoading && !error && users.length === 0 && (
+      {!isLoading && !error && filteredUsers.length === 0 && (
         <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-md text-sm">
-          Não há outros usuários disponíveis para adicionar ao projeto.
+          Nenhum usuário encontrado com os filtros selecionados.
         </div>
       )}
 
-      {!isLoading && !error && users.length > 0 && (
+      {!isLoading && !error && filteredUsers.length > 0 && (
         <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto p-2 border border-theme rounded-md bg-theme-surface">
-          {users.map(user => (
+          {filteredUsers.map(user => (
             <div 
               key={user.id} 
               className={`p-2 rounded-md cursor-pointer flex items-center ${
@@ -98,6 +159,7 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
               <div className="ml-3">
                 <p className="text-sm font-medium text-theme-primary">{user.name}</p>
                 <p className="text-xs text-theme-secondary">{user.email}</p>
+                <p className="text-xs text-theme-secondary mt-0.5">{getRoleDisplayName(user.role)}</p>
               </div>
               <div className="ml-auto">
                 <input 
