@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import taskCommentService from '../services/task-comment.service';
 import type { TaskComment, CreateCommentData } from '../services/task-comment.service';
 import toast from 'react-hot-toast';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface TaskCommentsProps {
   projectId: number;
@@ -24,6 +25,7 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const { theme } = useTheme();
 
   // Carregar comentários
   const loadComments = async (page: number = 1, append: boolean = false) => {
@@ -187,23 +189,23 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h2 className="text-lg font-medium text-gray-900">Comentários</h2>
+          <h2 className={theme === 'dark' ? 'text-lg font-medium text-dark-text' : 'text-lg font-medium text-gray-900'}>Comentários</h2>
           {averageRating && (
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Média:</span>
+              <span className={theme === 'dark' ? 'text-sm text-dark-muted' : 'text-sm text-gray-600'}>Média:</span>
               <Rating
                 value={Math.round(averageRating)}
                 readonly={true}
                 size="sm"
                 showValue={true}
               />
-              <span className="text-xs text-gray-500">
+              <span className={theme === 'dark' ? 'text-xs text-dark-muted' : 'text-xs text-gray-500'}>
                 ({comments.filter(c => c.rating && c.rating > 0).length} avaliações)
               </span>
             </div>
           )}
         </div>
-        <span className="text-sm text-gray-500">{comments.length} comentário{comments.length !== 1 ? 's' : ''}</span>
+        <span className={theme === 'dark' ? 'text-sm text-dark-muted' : 'text-sm text-gray-500'}>{comments.length} comentário{comments.length !== 1 ? 's' : ''}</span>
       </div>
 
       {/* Formulário para novo comentário */}
@@ -214,14 +216,14 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Adicione um comentário..."
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary resize-none"
+            className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary resize-none' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary resize-none'}
             disabled={submitting}
           />
         </div>
         
         {/* Rating para novo comentário */}
         <div className="flex items-center space-x-3">
-          <span className="text-sm font-medium text-gray-700">Avaliação:</span>
+          <span className={theme === 'dark' ? 'text-sm font-medium text-dark-text' : 'text-sm font-medium text-gray-700'}>Avaliação:</span>
           <Rating
             value={newRating || 0}
             onChange={setNewRating}
@@ -232,7 +234,7 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
             <button
               type="button"
               onClick={() => setNewRating(undefined)}
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className={theme === 'dark' ? 'text-sm text-dark-muted hover:text-dark-text' : 'text-sm text-gray-500 hover:text-gray-700'}
             >
               Limpar
             </button>
@@ -257,24 +259,24 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
         {loading && comments.length === 0 ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-sm text-gray-500">Carregando comentários...</p>
+            <p className={theme === 'dark' ? 'mt-2 text-sm text-dark-muted' : 'mt-2 text-sm text-gray-500'}>Carregando comentários...</p>
           </div>
         ) : comments.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+            <p className={theme === 'dark' ? 'text-dark-muted' : 'text-gray-500'}>Nenhum comentário ainda. Seja o primeiro a comentar!</p>
           </div>
         ) : (
           <>
             {comments.map((comment) => (
-              <div key={comment.id} className="bg-gray-50 rounded-lg p-4">
+              <div key={comment.id} className={theme === 'dark' ? 'bg-dark-secondary rounded-lg p-4' : 'bg-gray-50 rounded-lg p-4'}>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-medium">
                       {comment.user.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{comment.user.name}</p>
-                      <p className="text-xs text-gray-500">{formatDate(comment.created_at)}</p>
+                      <p className={theme === 'dark' ? 'text-sm font-medium text-dark-text' : 'text-sm font-medium text-gray-900'}>{comment.user.name}</p>
+                      <p className={theme === 'dark' ? 'text-xs text-dark-muted' : 'text-xs text-gray-500'}>{formatDate(comment.created_at)}</p>
                     </div>
                   </div>
                   
@@ -329,7 +331,7 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
                 {/* Rating do comentário */}
                 {comment.rating && comment.rating > 0 && (
                   <div className="mt-2 flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Avaliação:</span>
+                    <span className={theme === 'dark' ? 'text-sm text-dark-muted' : 'text-sm text-gray-600'}>Avaliação:</span>
                     <Rating
                       value={comment.rating}
                       readonly={true}
@@ -346,11 +348,11 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary resize-none"
+                        className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary resize-none' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary resize-none'}
                         disabled={submitting}
                       />
                       <div className="flex items-center space-x-3">
-                        <span className="text-sm font-medium text-gray-700">Avaliação:</span>
+                        <span className={theme === 'dark' ? 'text-sm font-medium text-dark-text' : 'text-sm font-medium text-gray-700'}>Avaliação:</span>
                         <Rating
                           value={editRating || 0}
                           onChange={setEditRating}
@@ -361,7 +363,7 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
                           <button
                             type="button"
                             onClick={() => setEditRating(undefined)}
-                            className="text-sm text-gray-500 hover:text-gray-700"
+                            className={theme === 'dark' ? 'text-sm text-dark-muted hover:text-dark-text' : 'text-sm text-gray-500 hover:text-gray-700'}
                           >
                             Limpar
                           </button>
@@ -369,14 +371,14 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                    <p className={theme === 'dark' ? 'text-sm text-dark-text whitespace-pre-wrap break-words' : 'text-sm text-gray-700 whitespace-pre-wrap break-words'}>
                       {comment.content}
                     </p>
                   )}
                 </div>
                 
                 {comment.updated_at !== comment.created_at && (
-                  <p className="mt-2 text-xs text-gray-400">
+                  <p className={theme === 'dark' ? 'mt-2 text-xs text-dark-muted' : 'mt-2 text-xs text-gray-400'}>
                     Editado em {formatDate(comment.updated_at)}
                   </p>
                 )}

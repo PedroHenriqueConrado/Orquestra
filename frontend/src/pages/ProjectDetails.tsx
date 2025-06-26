@@ -54,7 +54,7 @@ const ProjectDetails: React.FC = () => {
 
   // Função para lidar com a exclusão do projeto
   const handleDeleteProject = async () => {
-    if (!id || !project) return;
+    if (!id) return;
     
     setShowDeleteConfirm(true);
   };
@@ -72,9 +72,12 @@ const ProjectDetails: React.FC = () => {
         } 
       });
     } catch (err: any) {
-      // Verificar se é erro de permissão (403)
+      // Sempre mostrar mensagem amigável para 403
       if (err.response?.status === 403) {
         setErrorMessage('Você não pode excluir este projeto pois não foi você quem o criou. Apenas o criador do projeto pode excluí-lo.');
+        setShowErrorAlert(true);
+      } else if (err.response?.data?.details) {
+        setErrorMessage(err.response.data.details);
         setShowErrorAlert(true);
       } else {
         setErrorMessage(err.message || 'Erro ao excluir projeto');

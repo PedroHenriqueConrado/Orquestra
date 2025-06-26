@@ -6,10 +6,12 @@ import taskService from '../services/task.service';
 import projectService from '../services/project.service';
 import type { TaskData, TaskStatus, TaskPriority } from '../services/task.service';
 import type { Project } from '../services/project.service';
+import { useTheme } from '../contexts/ThemeContext';
 
 const NewTask: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(false);
@@ -102,10 +104,10 @@ const NewTask: React.FC = () => {
   
   if (loading) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className={theme === 'dark' ? 'bg-dark-background min-h-screen' : 'bg-gray-50 min-h-screen'}>
         <Header />
         <main className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white shadow rounded-lg p-6 flex justify-center">
+          <div className={theme === 'dark' ? 'bg-dark-secondary shadow rounded-lg p-6 flex justify-center' : 'bg-white shadow rounded-lg p-6 flex justify-center'}>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </main>
@@ -115,11 +117,11 @@ const NewTask: React.FC = () => {
   
   if (error || !project) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className={theme === 'dark' ? 'bg-dark-background min-h-screen' : 'bg-gray-50 min-h-screen'}>
         <Header />
         <main className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="text-red-500 text-center">
+          <div className={theme === 'dark' ? 'bg-dark-secondary shadow rounded-lg p-6' : 'bg-white shadow rounded-lg p-6'}>
+            <div className={theme === 'dark' ? 'text-red-400 text-center' : 'text-red-500 text-center'}>
               <p>{error || 'Projeto não encontrado'}</p>
               <Button 
                 variant="primary" 
@@ -136,32 +138,32 @@ const NewTask: React.FC = () => {
   }
   
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className={theme === 'dark' ? 'bg-dark-background min-h-screen' : 'bg-gray-50 min-h-screen'}>
       <Header />
       <main className="max-w-3xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Nova Tarefa</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className={theme === 'dark' ? 'text-xl sm:text-2xl font-semibold text-dark-text' : 'text-xl sm:text-2xl font-semibold text-gray-900'}>Nova Tarefa</h1>
+          <p className={theme === 'dark' ? 'mt-1 text-sm text-dark-muted' : 'mt-1 text-sm text-gray-500'}>
             Projeto: {project.name}
           </p>
         </div>
         
         {formError && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-200">
+          <div className={theme === 'dark' ? 'mb-4 p-3 bg-red-900/20 text-red-400 rounded-md text-sm border border-red-800' : 'mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-200'}>
             {formError}
           </div>
         )}
         
         {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-200">
+          <div className={theme === 'dark' ? 'mb-4 p-3 bg-red-900/20 text-red-400 rounded-md text-sm border border-red-800' : 'mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-200'}>
             {error}
           </div>
         )}
         
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className={theme === 'dark' ? 'bg-dark-secondary shadow rounded-lg overflow-hidden' : 'bg-white shadow rounded-lg overflow-hidden'}>
           <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="title" className={theme === 'dark' ? 'block text-sm font-medium text-dark-text mb-1' : 'block text-sm font-medium text-gray-700 mb-1'}>
                 Título <span className="text-red-500">*</span>
               </label>
               <input
@@ -170,14 +172,14 @@ const NewTask: React.FC = () => {
                 name="title"
                 value={task.title}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary'}
                 placeholder="Título da tarefa"
                 required
               />
             </div>
             
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="description" className={theme === 'dark' ? 'block text-sm font-medium text-dark-text mb-1' : 'block text-sm font-medium text-gray-700 mb-1'}>
                 Descrição
               </label>
               <textarea
@@ -186,14 +188,14 @@ const NewTask: React.FC = () => {
                 value={task.description || ''}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary'}
                 placeholder="Descrição detalhada da tarefa"
               />
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="status" className={theme === 'dark' ? 'block text-sm font-medium text-dark-text mb-1' : 'block text-sm font-medium text-gray-700 mb-1'}>
                   Status
                 </label>
                 <select
@@ -201,7 +203,7 @@ const NewTask: React.FC = () => {
                   name="status"
                   value={task.status}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                  className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary'}
                 >
                   <option value="pending">Pendente</option>
                   <option value="in_progress">Em Progresso</option>
@@ -210,7 +212,7 @@ const NewTask: React.FC = () => {
               </div>
               
               <div>
-                <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="priority" className={theme === 'dark' ? 'block text-sm font-medium text-dark-text mb-1' : 'block text-sm font-medium text-gray-700 mb-1'}>
                   Prioridade
                 </label>
                 <select
@@ -218,7 +220,7 @@ const NewTask: React.FC = () => {
                   name="priority"
                   value={task.priority}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                  className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary'}
                 >
                   <option value="low">Baixa</option>
                   <option value="medium">Média</option>
@@ -230,7 +232,7 @@ const NewTask: React.FC = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label htmlFor="due_date" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="due_date" className={theme === 'dark' ? 'block text-sm font-medium text-dark-text mb-1' : 'block text-sm font-medium text-gray-700 mb-1'}>
                   Data de Entrega
                 </label>
                 <input
@@ -239,12 +241,12 @@ const NewTask: React.FC = () => {
                   name="due_date"
                   value={task.due_date || ''}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                  className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary'}
                 />
               </div>
               
               <div>
-                <label htmlFor="estimated_hours" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="estimated_hours" className={theme === 'dark' ? 'block text-sm font-medium text-dark-text mb-1' : 'block text-sm font-medium text-gray-700 mb-1'}>
                   Horas Estimadas
                 </label>
                 <input
@@ -255,14 +257,14 @@ const NewTask: React.FC = () => {
                   onChange={handleChange}
                   min="0"
                   step="0.5"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                  className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary'}
                   placeholder="Ex: 4.5"
                 />
               </div>
             </div>
             
             <div>
-              <label htmlFor="assigned_to" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="assigned_to" className={theme === 'dark' ? 'block text-sm font-medium text-dark-text mb-1' : 'block text-sm font-medium text-gray-700 mb-1'}>
                 Atribuir Para
               </label>
               <select
@@ -270,7 +272,7 @@ const NewTask: React.FC = () => {
                 name="assigned_to"
                 value={task.assigned_to || ''}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                className={theme === 'dark' ? 'w-full px-3 py-2 border border-dark-border rounded-md shadow-sm bg-dark-accent text-dark-text focus:outline-none focus:ring-primary focus:border-primary' : 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-primary focus:border-primary'}
               >
                 <option value="">Não atribuído</option>
                 {project.members.map(member => (
