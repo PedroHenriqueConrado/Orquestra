@@ -386,18 +386,10 @@ const ProjectDetails: React.FC = () => {
             Nova Tarefa
           </Button>
         </Link>
-        {canAccessAdvancedDashboard && (
-          <Link to={`/projects/${id}/dashboard`}>
-            <Button variant="secondary" size="sm">
-              <i className="fas fa-chart-bar mr-2"></i>
-              Dashboard
-            </Button>
-          </Link>
-        )}
         <Link to={`/projects/${id}/dashboard`}>
           <Button variant="secondary" size="sm">
             <i className="fas fa-chart-bar mr-2"></i>
-            Dashboard (Gantt)
+            Dashboard
           </Button>
         </Link>
         <button onClick={handleCreateTemplateClick}>
@@ -482,18 +474,10 @@ const ProjectDetails: React.FC = () => {
                     Nova Tarefa
                   </Button>
                 </Link>
-                {currentUser && currentUser.role === 'project_manager' && (
-                  <Link to={`/projects/${id}/dashboard`}>
-                    <Button variant="secondary" size="sm">
-                      <i className="fas fa-chart-bar mr-2"></i>
-                      Dashboard
-                    </Button>
-                  </Link>
-                )}
                 <Link to={`/projects/${id}/dashboard`}>
                   <Button variant="secondary" size="sm">
                     <i className="fas fa-chart-bar mr-2"></i>
-                    Dashboard (Gantt)
+                    Dashboard
                   </Button>
                 </Link>
                 <button onClick={handleCreateTemplateClick}>
@@ -671,7 +655,7 @@ const ProjectDetails: React.FC = () => {
                               </td>
                               <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                  {getRoleDisplayName(member.user?.role)}
+                                  {getRoleDisplayName(member.role)}
                                 </span>
                               </td>
                               <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-theme-secondary">
@@ -787,7 +771,17 @@ const ProjectDetails: React.FC = () => {
                     onRefresh={fetchTasks}
                     onTaskUpdate={async (task: Task) => {
                       try {
-                        await taskService.updateTask(Number(id), task.id, task);
+                        await taskService.updateTask(Number(id), task.id, {
+                          title: task.title,
+                          description: task.description,
+                          status: task.status,
+                          priority: task.priority,
+                          due_date: task.due_date,
+                          estimated_hours: task.estimated_hours,
+                          actual_hours: task.actual_hours,
+                          parent_task_id: (task as any).parent_task_id,
+                          assignees: task.assignees.map(a => a.user.id),
+                        });
                         await fetchTasks();
                       } catch (error) {
                         console.error('Erro ao atualizar tarefa:', error);

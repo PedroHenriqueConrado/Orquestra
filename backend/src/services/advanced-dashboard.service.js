@@ -353,15 +353,9 @@ class AdvancedDashboardService {
             include: {
                 user: {
                     include: {
-                        tasks: {
-                            where: {
-                                project_id: Number(projectId),
-                                created_at: { gte: startDate }
-                            },
-                            select: {
-                                status: true,
-                                created_at: true,
-                                due_date: true
+                        taskAssignees: {
+                            include: {
+                                task: true
                             }
                         }
                     }
@@ -370,7 +364,10 @@ class AdvancedDashboardService {
         });
 
         return members.map(member => {
-            const tasks = member.user.tasks;
+            // Extrai as tarefas do usuário via taskAssignees
+            const tasks = member.user.taskAssignees
+                .map(a => a.task)
+                .filter(t => t && t.project_id === Number(projectId) && t.created_at >= startDate);
             const total = tasks.length;
             const completed = tasks.filter(t => t.status === 'completed').length;
             const overdue = tasks.filter(t => {

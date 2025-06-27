@@ -194,7 +194,7 @@ const AdvancedDashboard: React.FC = () => {
                 <h2 className="text-xl font-semibold text-theme-primary mb-4">
                   Análises Detalhadas
                 </h2>
-                <DetailedAnalytics filters={filters} />
+                <DetailedAnalytics filters={filters} onFiltersChange={handleFilterChange} />
               </div>
             )}
 

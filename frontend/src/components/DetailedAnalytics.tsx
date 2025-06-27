@@ -72,9 +72,10 @@ interface ProjectAnalytics {
 
 interface DetailedAnalyticsProps {
   filters: DashboardFilters;
+  onFiltersChange?: (filters: Partial<DashboardFilters>) => void;
 }
 
-const DetailedAnalytics: React.FC<DetailedAnalyticsProps> = ({ filters }) => {
+const DetailedAnalytics: React.FC<DetailedAnalyticsProps> = ({ filters, onFiltersChange }) => {
   const { theme } = useTheme();
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
@@ -98,6 +99,13 @@ const DetailedAnalytics: React.FC<DetailedAnalyticsProps> = ({ filters }) => {
 
     loadProjects();
   }, []);
+
+  // Sincronizar selectedProject com filters.projects
+  useEffect(() => {
+    if (filters.projects && filters.projects.length > 0) {
+      setSelectedProject(filters.projects[0]);
+    }
+  }, [filters.projects]);
 
   // Carregar análises do projeto selecionado
   useEffect(() => {
@@ -405,7 +413,13 @@ const DetailedAnalytics: React.FC<DetailedAnalyticsProps> = ({ filters }) => {
         <h3 className="text-lg font-medium text-theme-primary mb-4">Selecionar Projeto</h3>
         <select
           value={selectedProject || ''}
-          onChange={(e) => setSelectedProject(Number(e.target.value))}
+          onChange={(e) => {
+            const projectId = Number(e.target.value);
+            setSelectedProject(projectId);
+            if (onFiltersChange) {
+              onFiltersChange({ projects: [projectId] });
+            }
+          }}
           className={`px-4 py-2 border rounded-md transition-colors duration-200 ${
             theme === 'dark'
               ? 'bg-dark-accent border-dark-border text-dark-text'
