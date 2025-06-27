@@ -374,14 +374,12 @@ const ProjectDetails: React.FC = () => {
 
     return (
       <div className="flex flex-wrap justify-end items-center gap-3">
-        <button onClick={handleEditProjectClick}>
-          <Button variant="outline" size="sm">
-            <i className="fas fa-edit mr-2"></i>
-            Editar Projeto
-          </Button>
-        </button>
+        <Button variant="outline" size="sm" onClick={handleEditProjectClick}>
+          <i className="fas fa-edit mr-2"></i>
+          Editar Projeto
+        </Button>
         <Link to={`/projects/${id}/tasks/new`}>
-          <Button variant="primary" size="sm">
+          <Button variant="create" size="sm">
             <i className="fas fa-plus-circle mr-2"></i>
             Nova Tarefa
           </Button>
@@ -392,22 +390,14 @@ const ProjectDetails: React.FC = () => {
             Dashboard
           </Button>
         </Link>
-        <button onClick={handleCreateTemplateClick}>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            title="Criar template a partir deste projeto"
-          >
-            <i className="fas fa-copy mr-2"></i>
-            Criar Template
-          </Button>
-        </button>
-        <button onClick={handleDeleteProjectClick}>
-          <Button variant="danger" size="sm">
-            <i className="fas fa-trash-alt mr-2"></i>
-            Excluir Projeto
-          </Button>
-        </button>
+        <Button variant="create" size="sm" title="Criar template a partir deste projeto" onClick={handleCreateTemplateClick}>
+          <i className="fas fa-copy mr-2"></i>
+          Criar Template
+        </Button>
+        <Button variant="delete" size="sm" onClick={handleDeleteProjectClick}>
+          <i className="fas fa-trash-alt mr-2"></i>
+          Excluir Projeto
+        </Button>
       </div>
     );
   };
@@ -462,14 +452,12 @@ const ProjectDetails: React.FC = () => {
                 </p>
               </div>
               <div className="flex flex-wrap justify-end items-center gap-3">
-                <button onClick={handleEditProjectClick}>
-                  <Button variant="outline" size="sm">
-                    <i className="fas fa-edit mr-2"></i>
-                    Editar Projeto
-                  </Button>
-                </button>
+                <Button variant="outline" size="sm" onClick={handleEditProjectClick}>
+                  <i className="fas fa-edit mr-2"></i>
+                  Editar Projeto
+                </Button>
                 <Link to={`/projects/${id}/tasks/new`}>
-                  <Button variant="primary" size="sm">
+                  <Button variant="create" size="sm">
                     <i className="fas fa-plus-circle mr-2"></i>
                     Nova Tarefa
                   </Button>
@@ -480,18 +468,14 @@ const ProjectDetails: React.FC = () => {
                     Dashboard
                   </Button>
                 </Link>
-                <button onClick={handleCreateTemplateClick}>
-                  <Button variant="outline" size="sm" title="Criar template a partir deste projeto">
-                    <i className="fas fa-copy mr-2"></i>
-                    Criar Template
-                  </Button>
-                </button>
-                <button onClick={handleDeleteProjectClick}>
-                  <Button variant="danger" size="sm">
-                    <i className="fas fa-trash-alt mr-2"></i>
-                    Excluir Projeto
-                  </Button>
-                </button>
+                <Button variant="create" size="sm" title="Criar template a partir deste projeto" onClick={handleCreateTemplateClick}>
+                  <i className="fas fa-copy mr-2"></i>
+                  Criar Template
+                </Button>
+                <Button variant="delete" size="sm" onClick={handleDeleteProjectClick}>
+                  <i className="fas fa-trash-alt mr-2"></i>
+                  Excluir Projeto
+                </Button>
               </div>
             </div>
             
@@ -872,7 +856,7 @@ const ProjectDetails: React.FC = () => {
               </div>
               <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                 <Button
-                  variant="danger"
+                  variant="delete"
                   onClick={handleRemoveMember}
                   disabled={isRemovingMember}
                   isLoading={isRemovingMember}

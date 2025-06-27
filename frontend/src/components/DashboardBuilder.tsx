@@ -488,7 +488,7 @@ const DashboardBuilder: React.FC<DashboardBuilderProps> = ({ filters }) => {
           <button 
             onClick={saveReport}
             disabled={widgets.length === 0}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-md text-sm font-medium transition-colors duration-200"
+            className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-md text-sm font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
           >
             Salvar Relatório
           </button>

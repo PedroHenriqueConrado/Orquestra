@@ -259,7 +259,7 @@ const TaskDetails: React.FC = () => {
                     Editar
                   </Button>
                   <Button 
-                    variant="danger"
+                    variant="delete"
                     size="sm"
                     className="w-full sm:w-auto"
                     onClick={handleDeleteTask}
@@ -301,7 +301,7 @@ const TaskDetails: React.FC = () => {
                     Cancelar
                   </Button>
                   <Button 
-                    variant="primary"
+                    variant="save"
                     size="sm"
                     className="w-full sm:w-auto"
                     onClick={handleUpdateTask}

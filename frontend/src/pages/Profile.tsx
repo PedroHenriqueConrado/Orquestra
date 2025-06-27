@@ -297,7 +297,7 @@ const Profile: React.FC = () => {
           <div className="flex justify-center">
             <Button
               type="submit"
-              variant="primary"
+              variant="save"
               disabled={loading}
             >
               {loading ? 'Salvando...' : 'Salvar Alterações'}
@@ -307,7 +307,7 @@ const Profile: React.FC = () => {
         <div className="mt-8 pt-6 border-t border-theme flex justify-center">
           <Button
             type="button"
-            variant="danger"
+            variant="delete"
             onClick={() => setShowDeleteModal(true)}
             disabled={loading}
           >
@@ -335,7 +335,7 @@ const Profile: React.FC = () => {
             </Button>
             <Button
               type="button"
-              variant="danger"
+              variant="delete"
               onClick={handleDeleteAccount}
               disabled={deleteLoading}
             >

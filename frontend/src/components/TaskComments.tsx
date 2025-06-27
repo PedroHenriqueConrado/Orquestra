@@ -310,7 +310,7 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
                       {editingComment === comment.id ? (
                         <>
                           <Button
-                            variant="outline"
+                            variant="save"
                             size="xs"
                             onClick={() => handleSaveEdit(comment.id)}
                             disabled={submitting}
@@ -338,7 +338,7 @@ const TaskComments: React.FC<TaskCommentsProps> = ({ projectId, taskId }) => {
                             Editar
                           </Button>
                           <Button
-                            variant="danger"
+                            variant="delete"
                             size="xs"
                             onClick={() => handleDeleteComment(comment.id)}
                             disabled={submitting}

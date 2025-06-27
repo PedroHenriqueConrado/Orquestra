@@ -274,7 +274,7 @@ const NewTask: React.FC = () => {
               </Button>
               <Button
                 type="submit"
-                variant="primary"
+                variant="create"
                 className="w-full sm:w-auto"
                 disabled={submitting}
               >

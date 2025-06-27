@@ -261,7 +261,6 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
     }
 
     const file = files[0];
-    
     // Validar tipo de arquivo
     const allowedTypes = [
       'application/pdf',
@@ -274,17 +273,16 @@ const TaskDocuments: React.FC<TaskDocumentsProps> = ({ taskId, projectId }) => {
       'image/png',
       'image/gif'
     ];
-    
     if (!allowedTypes.includes(file.type)) {
       toast.error('Tipo de arquivo não suportado. Use PDF, Word, Excel, texto ou imagens.');
       return;
     }
-    
     // Validar tamanho (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Arquivo muito grande. Tamanho máximo: 5MB');
       return;
     }
+    setSelectedFile(file); // <-- Correção: salvar o arquivo selecionado no estado
   };
   
   return (

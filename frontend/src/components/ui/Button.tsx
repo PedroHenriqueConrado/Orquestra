@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success' | 'create' | 'save' | 'delete';
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -34,7 +34,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   // Base classes for all button variants
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary';
+  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform hover:scale-105 active:scale-95';
   
   // Size variations
   const sizeClasses = {
@@ -44,18 +44,21 @@ const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-base'
   };
   
-  // Variant classes
+  // Variant classes with enhanced hover effects
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-primary-dark border border-transparent focus:ring-primary shadow-sm',
-    secondary: 'bg-theme-secondary text-theme-primary hover:bg-theme-surface border border-theme focus:ring-primary shadow-sm',
-    outline: 'bg-theme-surface text-theme-secondary hover:bg-theme-secondary border border-theme focus:ring-primary shadow-sm',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
-    success: 'bg-green-600 text-white hover:bg-green-700 border border-transparent focus:ring-green-500 shadow-sm'
+    primary: 'bg-primary text-white hover:bg-primary-dark border border-transparent focus:ring-primary shadow-sm hover:shadow-md',
+    secondary: 'bg-theme-secondary text-theme-primary hover:bg-theme-surface border border-theme focus:ring-primary shadow-sm hover:shadow-md',
+    outline: 'bg-theme-surface text-theme-secondary hover:bg-theme-secondary border border-theme focus:ring-primary shadow-sm hover:shadow-md',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm hover:shadow-md',
+    success: 'bg-green-600 text-white hover:bg-green-700 border border-transparent focus:ring-green-500 shadow-sm hover:shadow-md',
+    create: 'bg-yellow-500 text-white hover:bg-yellow-600 border border-transparent focus:ring-yellow-500 shadow-sm hover:shadow-md',
+    save: 'bg-green-500 text-white hover:bg-green-600 border border-transparent focus:ring-green-500 shadow-sm hover:shadow-md',
+    delete: 'bg-red-500 text-white hover:bg-red-600 border border-transparent focus:ring-red-500 shadow-sm hover:shadow-md'
   };
 
   // Additional classes
   const widthClass = fullWidth ? 'w-full' : '';
-  const disabledClass = disabled || isLoading ? 'opacity-60 cursor-not-allowed' : '';
+  const disabledClass = disabled || isLoading ? 'opacity-60 cursor-not-allowed transform-none hover:scale-100' : '';
   const roundedClass = rounded ? 'rounded-full' : '';
   
   // Combine all classes

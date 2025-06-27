@@ -190,7 +190,7 @@ const Projects: React.FC = () => {
           Crie seu primeiro projeto para começar a organizar suas tarefas.
         </p>
         <button onClick={handleCreateProjectClick}>
-          <Button variant="primary">
+          <Button variant="create">
             <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
@@ -272,7 +272,7 @@ const Projects: React.FC = () => {
               </div>
             </div>
             <button onClick={handleCreateProjectClick}>
-              <Button variant="primary" className="w-full sm:w-auto">
+              <Button variant="create" className="w-full sm:w-auto">
                 <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
@@ -325,7 +325,7 @@ const Projects: React.FC = () => {
                   Limpar busca
                 </button>
                 <button onClick={handleCreateProjectClick}>
-                  <Button variant="primary">
+                  <Button variant="create">
                     <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>

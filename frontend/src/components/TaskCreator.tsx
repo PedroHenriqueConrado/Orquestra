@@ -8,6 +8,81 @@ interface TaskCreatorProps {
   availableMembers?: Array<{id: number, name: string}>; // Opcional: usuários disponíveis para atribuição
 }
 
+// Novo componente UserMultiSelect
+interface UserMultiSelectProps {
+  users: Array<{ id: number; name: string }>;
+  value: number[];
+  onChange: (ids: number[]) => void;
+  label?: string;
+  required?: boolean;
+}
+
+const UserMultiSelect: React.FC<UserMultiSelectProps> = ({ users, value, onChange, label, required }) => {
+  const [search, setSearch] = useState('');
+  const filteredUsers = users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div>
+      {label && (
+        <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+          {label} {required && <span className="text-red-500 dark:text-red-400">*</span>}
+        </label>
+      )}
+      {/* Chips dos selecionados */}
+      <div className="flex flex-wrap gap-2 mb-2">
+        {value.map(id => {
+          const user = users.find(u => u.id === id);
+          if (!user) return null;
+          return (
+            <span key={id} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-lighter dark:bg-dark-accent text-primary dark:text-dark-text border border-primary dark:border-dark-border">
+              {user.name}
+              <button
+                type="button"
+                className="ml-1 text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 focus:outline-none"
+                onClick={() => onChange(value.filter(v => v !== id))}
+                aria-label={`Remover ${user.name}`}
+              >
+                ×
+              </button>
+            </span>
+          );
+        })}
+      </div>
+      {/* Campo de busca */}
+      <input
+        type="text"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder="Buscar usuário..."
+        className="w-full px-3 py-2 mb-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900 placeholder:text-gray-400 dark:placeholder:text-dark-muted"
+      />
+      {/* Lista de usuários com checkbox */}
+      <div className="max-h-40 overflow-y-auto rounded-md border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-accent divide-y divide-gray-100 dark:divide-dark-border">
+        {filteredUsers.length === 0 && (
+          <div className="p-2 text-sm text-gray-500 dark:text-gray-400">Nenhum usuário encontrado</div>
+        )}
+        {filteredUsers.map(user => (
+          <label key={user.id} className="flex items-center px-3 py-2 cursor-pointer hover:bg-primary-lighter dark:hover:bg-dark-secondary transition-colors">
+            <input
+              type="checkbox"
+              checked={value.includes(user.id)}
+              onChange={e => {
+                if (e.target.checked) {
+                  onChange([...value, user.id]);
+                } else {
+                  onChange(value.filter(v => v !== user.id));
+                }
+              }}
+              className="form-checkbox h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-dark-border rounded mr-2"
+            />
+            <span className="text-sm text-gray-900 dark:text-dark-text">{user.name}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMembers = [] }) => {
   // Estado para a tarefa sendo editada atualmente
   const [currentTask, setCurrentTask] = useState<TaskData>({
@@ -130,13 +205,13 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
 
   return (
     <div className="space-y-6">
-      <div className="border border-gray-200 rounded-md p-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">
+      <div className="border border-gray-200 dark:border-dark-border rounded-md p-4 bg-white dark:bg-dark-secondary">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           {editingIndex !== null ? 'Editar Tarefa' : 'Nova Tarefa'}
         </h3>
         
         {validationError && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md text-sm border border-red-200 dark:border-red-800">
             {validationError}
           </div>
         )}
@@ -144,8 +219,8 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
         <div className="space-y-4">
           {/* Título da tarefa */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-white mb-1">
-              Título <span className="text-red-500">*</span>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+              Título <span className="text-red-500 dark:text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -153,14 +228,14 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
               name="title"
               value={currentTask.title}
               onChange={handleTaskChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900 placeholder:text-gray-400 dark:placeholder:text-dark-muted"
               placeholder="Título da tarefa"
             />
           </div>
           
           {/* Descrição da tarefa */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-white mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
               Descrição
             </label>
             <textarea
@@ -169,7 +244,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
               value={currentTask.description || ''}
               onChange={handleTaskChange}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900 placeholder:text-gray-400 dark:placeholder:text-dark-muted"
               placeholder="Descrição da tarefa"
             />
           </div>
@@ -177,7 +252,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Prioridade */}
             <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-white mb-1">
+              <label htmlFor="priority" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
                 Prioridade
               </label>
               <select
@@ -185,7 +260,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
                 name="priority"
                 value={currentTask.priority || 'medium'}
                 onChange={handleTaskChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900"
               >
                 <option value="low">Baixa</option>
                 <option value="medium">Média</option>
@@ -196,7 +271,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
             
             {/* Status inicial */}
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-white mb-1">
+              <label htmlFor="status" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
                 Status Inicial
               </label>
               <select
@@ -204,7 +279,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
                 name="status"
                 value={currentTask.status || 'pending'}
                 onChange={handleTaskChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900"
               >
                 <option value="pending">Pendente</option>
                 <option value="in_progress">Em Progresso</option>
@@ -214,7 +289,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
             
             {/* Data de vencimento */}
             <div>
-              <label htmlFor="due_date" className="block text-sm font-medium text-white mb-1">
+              <label htmlFor="due_date" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
                 Data de Entrega
               </label>
               <input
@@ -223,7 +298,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
                 name="due_date"
                 value={currentTask.due_date || ''}
                 onChange={handleTaskChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900"
               />
             </div>
           </div>
@@ -231,28 +306,17 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
           {/* Responsáveis (multi-select) */}
           {availableMembers.length > 0 && (
             <div>
-              <label htmlFor="assignees" className="block text-sm font-medium text-white mb-1">
-                Responsáveis <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="assignees"
-                name="assignees"
-                multiple
-                value={currentTask.assignees?.map(String) || []}
-                onChange={e => {
-                  const selected = Array.from(e.target.selectedOptions).map(opt => Number(opt.value));
-                  setCurrentTask(prev => ({ ...prev, assignees: selected }));
+              <UserMultiSelect
+                users={availableMembers}
+                value={currentTask.assignees || []}
+                onChange={ids => {
+                  setCurrentTask(prev => ({ ...prev, assignees: ids }));
                   setValidationError(null);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-              >
-                {availableMembers.map(member => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))}
-              </select>
-              <span className="text-xs text-gray-300">Segure Ctrl ou Shift para selecionar mais de um.</span>
+                label="Responsáveis"
+                required
+              />
+              {/* <span className="text-xs text-gray-500 dark:text-gray-300">Segure Ctrl ou Shift para selecionar mais de um.</span> */}
             </div>
           )}
           
@@ -269,7 +333,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
             )}
             <Button
               type="button"
-              variant="primary"
+              variant="create"
               onClick={handleAddOrUpdateTask}
             >
               {editingIndex !== null ? 'Atualizar Tarefa' : 'Adicionar Tarefa'}

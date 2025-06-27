@@ -368,7 +368,11 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, event,
                     </button>
                     <button
                       type="button"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                      className={`px-4 py-2 text-white rounded-md text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md ${
+                        mode === 'create' 
+                          ? 'bg-yellow-500 hover:bg-yellow-600' 
+                          : 'bg-green-500 hover:bg-green-600'
+                      }`}
                       onClick={handleSubmit}
                       disabled={loading}
                     >

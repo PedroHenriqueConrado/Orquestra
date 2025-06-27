@@ -176,7 +176,7 @@ const EditProject: React.FC = () => {
               </Button>
               <Button
                 type="submit"
-                variant="primary"
+                variant="save"
                 isLoading={isLoading}
               >
                 Salvar Alterações

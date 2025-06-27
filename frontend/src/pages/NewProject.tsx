@@ -433,7 +433,7 @@ const NewProject: React.FC = () => {
       {currentStep === 3 && (
         <Button
           type="submit"
-          variant="primary"
+          variant="create"
           isLoading={isLoading}
           disabled={isLoading}
         >

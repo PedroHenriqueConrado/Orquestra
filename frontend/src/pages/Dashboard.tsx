@@ -233,7 +233,7 @@ const Dashboard: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
                 <h2 className="text-lg font-medium text-gray-900">Meus Projetos</h2>
                 <button onClick={handleCreateProjectClick}>
-                  <Button variant="primary" className="w-full sm:w-auto hover:border-white">
+                  <Button variant="create" className="w-full sm:w-auto hover:border-white">
                     <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
@@ -258,7 +258,7 @@ const Dashboard: React.FC = () => {
                 <div className="text-center py-8">
                   <p className="text-theme-secondary mb-4">Nenhum projeto encontrado.</p>
                   <button onClick={handleCreateProjectClick}>
-                    <Button variant="primary">Criar Primeiro Projeto</Button>
+                    <Button variant="create">Criar Primeiro Projeto</Button>
                   </button>
                 </div>
               ) : (

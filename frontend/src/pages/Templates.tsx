@@ -302,7 +302,7 @@ const Templates: React.FC = () => {
                       e.preventDefault();
                       handleDeleteTemplateClick(template.id);
                     }}
-                    className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-2 rounded-md transition-colors"
+                    className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-2 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
                   >
                     Deletar
                   </button>
@@ -385,7 +385,7 @@ const Templates: React.FC = () => {
             <Button
               onClick={handleCreateTemplate}
               disabled={!createFormData.name}
-              className="bg-primary hover:bg-primary-dark text-white"
+              variant="create"
             >
               Criar Template
             </Button>
@@ -431,7 +431,7 @@ const Templates: React.FC = () => {
             <Button
               onClick={handleUseTemplate}
               disabled={!useFormData.name}
-              className="bg-primary hover:bg-primary-dark text-white"
+              variant="create"
             >
               Criar Projeto
             </Button>
