@@ -785,8 +785,20 @@ const ProjectDetails: React.FC = () => {
               </div>
             )}
 
-            {activeTab === 'chat' && id && (
+            {activeTab === 'chat' && id && !isNaN(Number(id)) && Number(id) > 0 ? (
               <ProjectChat projectId={Number(id)} />
+            ) : activeTab === 'chat' && (
+              <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-md text-red-500 text-center mt-6">
+                <p>ID de projeto inválido</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => window.history.back()}
+                >
+                  Voltar
+                </Button>
+              </div>
             )}
           </div>
         </div>

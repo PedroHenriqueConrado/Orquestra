@@ -91,6 +91,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
     priority: 'medium',
     status: 'pending',
     due_date: '',
+    estimated_hours: undefined,
     assignees: []
   });
   
@@ -156,6 +157,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
       priority: 'medium',
       status: 'pending',
       due_date: '',
+      estimated_hours: undefined,
       assignees: []
     });
     
@@ -166,7 +168,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
 
   // Função para editar uma tarefa existente
   const handleEditTask = (index: number) => {
-    setCurrentTask(tasks[index]);
+    setCurrentTask({ ...tasks[index] });
     setEditingIndex(index);
   };
 
@@ -183,6 +185,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
         priority: 'medium',
         status: 'pending',
         due_date: '',
+        estimated_hours: undefined,
         assignees: []
       });
       setEditingIndex(null);
@@ -197,6 +200,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
       priority: 'medium',
       status: 'pending',
       due_date: '',
+      estimated_hours: undefined,
       assignees: []
     });
     setEditingIndex(null);
@@ -287,19 +291,40 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ tasks, onChange, availableMem
               </select>
             </div>
             
-            {/* Data de vencimento */}
-            <div>
-              <label htmlFor="due_date" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
-                Data de Entrega
-              </label>
-              <input
-                type="date"
-                id="due_date"
-                name="due_date"
-                value={currentTask.due_date || ''}
-                onChange={handleTaskChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900"
-              />
+            {/* Data de vencimento e Horas Estimadas */}
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label htmlFor="due_date" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+                  Data de Entrega
+                </label>
+                <input
+                  type="date"
+                  id="due_date"
+                  name="due_date"
+                  value={currentTask.due_date || ''}
+                  onChange={handleTaskChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900"
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="estimated_hours" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+                  Horas Estimadas
+                </label>
+                <input
+                  type="number"
+                  id="estimated_hours"
+                  name="estimated_hours"
+                  value={currentTask.estimated_hours ?? ''}
+                  onChange={e => {
+                    const value = e.target.value;
+                    setCurrentTask(prev => ({ ...prev, estimated_hours: value === '' ? undefined : Number(value) }));
+                  }}
+                  min="0"
+                  step="0.5"
+                  placeholder="Ex: 4.5"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-dark-accent dark:text-dark-text bg-white text-gray-900"
+                />
+              </div>
             </div>
           </div>
           

@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const chatController = require('../controllers/chat.controller');
 const authenticate = require('../middlewares/auth.middleware');
 const { isProjectMember } = require('../middlewares/projectMember.middleware');
